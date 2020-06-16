@@ -1,0 +1,9 @@
+.env
+generated
+
+# Pycharm
+.idea
+
+node_modules
+
+.vscode

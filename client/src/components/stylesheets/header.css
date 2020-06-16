@@ -1,0 +1,19 @@
+#header {
+  display: grid;
+  grid-template-columns: 20% 80%;
+  background-color: royalblue;
+  /* border-bottom: 10%; */
+}
+
+#title {
+  text-align: start;
+  margin-left: 10px;
+  font-size: large;
+  color: white;
+}
+
+#logout {
+  text-align: end;
+  height: 100%;
+  margin-right: 10px;
+}

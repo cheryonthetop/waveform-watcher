@@ -1,0 +1,8 @@
+.env
+generated
+
+# Pycharm
+.idea
+node_modules
+
+flask-server
