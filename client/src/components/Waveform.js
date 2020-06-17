@@ -7,22 +7,24 @@ import { embed } from "@bokeh/bokehjs";
 
 class Waveform extends Component {
   state = {
+    user: "cheryonthetop",
     run_id: "170204_1710",
     bokeh_json: null,
     build_low_level: true,
-    tag: "",
+    tag: "default tag",
     comments: "",
   };
   componentDidMount() {}
 
   componentDidUpdate() {
     if (
-      this.state.bokeh_json !== this.props.bokeh_json &&
-      this.props.bokeh_json !== null
+      this.state.bokeh_model !== this.props.bokeh_model &&
+      this.props.bokeh_model !== null &&
+      this.props.bokeh_model !== undefined
     ) {
       this.deleteWaveform();
       this.loadWaveform();
-      this.state.bokeh_json = this.props.bokeh_json;
+      this.state.bokeh_model = this.props.bokeh_model;
     }
   }
 
@@ -33,12 +35,12 @@ class Waveform extends Component {
   }
 
   loadWaveform() {
-    embed.embed_item(this.props.bokeh_json, "graph");
+    embed.embed_item(this.props.bokeh_model, "graph");
   }
 
-  handleGetWaveform = (run_id, build_low_level) => {
-    console.log(run_id, build_low_level);
-    this.props.dispatch(getWaveform(run_id, build_low_level));
+  handleGetWaveform = (user, run_id, build_low_level) => {
+    console.log(user, run_id, build_low_level);
+    this.props.dispatch(getWaveform(user, run_id, build_low_level));
   };
 
   render() {
@@ -77,6 +79,7 @@ class Waveform extends Component {
               <button
                 onClick={() =>
                   this.handleGetWaveform(
+                    this.state.user,
                     this.state.run_id,
                     this.state.build_low_level
                   )
@@ -95,7 +98,6 @@ class Waveform extends Component {
             <select
               type="text"
               style={{ width: "83%" }}
-              value={true}
               onChange={(event) =>
                 this.setState({
                   tag: event.target.value,
@@ -121,7 +123,7 @@ class Waveform extends Component {
             {/* <input className="ct"></input> */}
             <CreatableSingle />
             <textarea className="ct" style={{ lineHeight: "100%" }}></textarea>
-            <button>Save Comments and Tags</button>
+            <button>Save Waveform under tag {this.state.tag}</button>
           </div>
         </div>
       </div>
@@ -130,9 +132,10 @@ class Waveform extends Component {
 }
 
 const mapStateToProps = (state) => ({
+  user: state.auth.user,
   isAuthenticated: state.auth.isAuthenticated,
   run_id: state.waveform.run_id,
-  bokeh_json: state.waveform.bokeh_json,
+  bokeh_model: state.waveform.bokeh_model,
   // tags_comments: {},
   // tags_run_id: {},
 });

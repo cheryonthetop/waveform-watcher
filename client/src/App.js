@@ -8,6 +8,7 @@ import Routes from "./components/Routes";
 
 class App extends Component {
   componentDidMount() {
+    // remember me
     store.dispatch(authenticate());
   }
   render() {

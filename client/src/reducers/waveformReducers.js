@@ -4,7 +4,7 @@ const initialState = {
   user: "",
   run_id: null,
   build_low_level: null,
-  bokeh_json: null,
+  bokeh_model: null,
   tags_data: {},
 };
 
@@ -21,7 +21,7 @@ export default function (state = initialState, action) {
         user: action.payload.user,
         run_id: action.payload.run_id,
         build_low_level: action.payload.build_low_level,
-        bokeh_json: action.payload.bokeh_json,
+        bokeh_model: action.payload.bokeh_model,
         tags_data: action.payload.tags_data,
       };
     case GET_WAVEFORM:
@@ -29,7 +29,7 @@ export default function (state = initialState, action) {
         ...state,
         run_id: action.payload.run_id,
         build_low_level: action.payload.build_low_level,
-        bokeh_json: action.payload.bokeh_json,
+        bokeh_model: action.payload.bokeh_model,
       };
     default:
       return state;

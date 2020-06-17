@@ -53,6 +53,7 @@ export default class CreatableAdvanced extends Component {
         onCreateOption={this.handleCreate}
         options={options}
         value={value}
+        defaultInputValue="default tag"
       />
     );
   }

@@ -1,13 +1,10 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { authenticate } from "../actions/userActions";
 import "./stylesheets/login.css";
 import { Redirect } from "react-router-dom";
 
 class Login extends Component {
   componentDidMount() {
-    // attempts to authenticate (maybe remembers me)
-    this.props.dispatch(authenticate());
     console.log("lifecycle method called");
   }
 

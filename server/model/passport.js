@@ -75,10 +75,10 @@ passport.use(
             console.log(items);
             if (items.length === 0) return done(null, false);
             console.log("username is: ", profile.username);
-            const doc = await model.findOneAndUpdate(
+            const doc = await model.findOrCreate(
               { id: profile.id },
-              { username: profile.username },
-              { new: true } // return new doc after update to be saved
+              { username: profile.username }
+              // { new: true } // return new doc after update to be saved
             );
             console.log("after update:", doc.username);
             return done(null, profile);

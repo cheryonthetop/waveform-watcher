@@ -1,7 +1,7 @@
 import { GET_WAVEFORM, LOAD_SUCCESS, LOAD_FAILURE } from "./types";
 import axios from "axios";
 
-export const getWaveform = (run_id, build_low_level) => (dispatch) => {
+export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
   console.log(run_id);
   // Headers
   const config = {
@@ -13,6 +13,7 @@ export const getWaveform = (run_id, build_low_level) => (dispatch) => {
 
   // Request body
   const body = JSON.stringify({
+    user: user,
     run_id: run_id,
     build_low_level: build_low_level,
   });
@@ -26,7 +27,7 @@ export const getWaveform = (run_id, build_low_level) => (dispatch) => {
         payload: {
           run_id: run_id,
           build_low_level: build_low_level,
-          bokeh_json: response.data,
+          bokeh_model: response.data,
         },
       });
       return response.data;
