@@ -2,9 +2,9 @@ import { GET_WAVEFORM, LOAD_SUCCESS } from "../actions/types";
 
 const initialState = {
   user: "",
-  run_id: null,
+  run_id: "",
   build_low_level: null,
-  bokeh_model: null,
+  bokeh_model: undefined,
   tags_data: {},
 };
 

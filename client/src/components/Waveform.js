@@ -7,11 +7,12 @@ import { embed } from "@bokeh/bokehjs";
 
 class Waveform extends Component {
   state = {
-    user: "cheryonthetop",
-    run_id: "170204_1710",
-    bokeh_json: null,
-    build_low_level: true,
-    tag: "default tag",
+    run_id_input: this.props.run_id,
+    run_id_output: this.props.run_id,
+    bokeh_model: this.props.bokeh_model,
+    build_low_level_input: this.props.build_low_level,
+    build_low_level_ouput: this.props.build_low_level,
+    tag: "",
     comments: "",
   };
   componentDidMount() {}
@@ -43,6 +44,22 @@ class Waveform extends Component {
     this.props.dispatch(getWaveform(user, run_id, build_low_level));
   };
 
+  handleStateChangeTag = (value) => {
+    this.setState({ tag: value });
+  };
+
+  handleSave = () => {
+    this.props.dispatch(
+      saveWaveform(
+        this.state.run_id_output,
+        this.state.build_low_level_ouput,
+        this.state.bokeh_model,
+        this.state.tag,
+        this.state.comments
+      )
+    );
+  };
+
   render() {
     return (
       <div id="graph-container">
@@ -52,10 +69,10 @@ class Waveform extends Component {
             <strong>Run ID: </strong>
             {/* <select type="text" style={{ width: "74%" }} /> */}
             <input
-              defaultValue={this.state.run_id}
+              defaultValue={this.state.run_id_input}
               onChange={(event) =>
                 this.setState({
-                  run_id: event.target.value,
+                  run_id_input: event.target.value,
                 })
               }
             ></input>
@@ -67,7 +84,7 @@ class Waveform extends Component {
               defaultValue={true}
               onChange={(event) =>
                 this.setState({
-                  build_low_level: event.target.value,
+                  build_low_level_input: event.target.value,
                 })
               }
             >
@@ -79,9 +96,9 @@ class Waveform extends Component {
               <button
                 onClick={() =>
                   this.handleGetWaveform(
-                    this.state.user,
-                    this.state.run_id,
-                    this.state.build_low_level
+                    this.props.user,
+                    this.state.run_id_input,
+                    this.state.build_low_level_input
                   )
                 }
               >
@@ -121,9 +138,19 @@ class Waveform extends Component {
             <strong> Comments & Tags </strong>
             <br></br>
             {/* <input className="ct"></input> */}
-            <CreatableSingle />
-            <textarea className="ct" style={{ lineHeight: "100%" }}></textarea>
-            <button>Save Waveform under tag {this.state.tag}</button>
+            <CreatableSingle handleStateChangeTag={this.handleStateChangeTag} />
+            <textarea
+              className="ct"
+              style={{ lineHeight: "100%" }}
+              onChange={(event) =>
+                this.setState({
+                  comments: event.target.value,
+                })
+              }
+            ></textarea>
+            <button onClick={this.handleSave}>
+              Save Waveform under tag {this.state.tag}
+            </button>
           </div>
         </div>
       </div>
