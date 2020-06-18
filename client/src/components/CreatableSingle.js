@@ -25,7 +25,7 @@ export default class CreatableAdvanced extends Component {
     console.log(`action: ${actionMeta.action}`);
     console.groupEnd();
     this.setState({ value: newValue });
-    this.props.handleStateChangeTag(value);
+    this.props.handleStateChangeTag(newValue.value);
   };
   handleCreate = (inputValue) => {
     this.setState({ isLoading: true });

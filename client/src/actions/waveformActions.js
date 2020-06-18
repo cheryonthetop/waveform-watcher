@@ -47,13 +47,7 @@ export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
     });
 };
 
-export const saveWaveform = (
-  run_id,
-  build_low_level,
-  bokeh_model,
-  tag,
-  comments
-) => (dispatch) => {
+export const saveWaveform = (user, tag, comments) => (dispatch) => {
   console.log("save waveform action called");
   // Headers
   const config = {
@@ -65,31 +59,26 @@ export const saveWaveform = (
 
   // Request body
   const body = JSON.stringify({
-    run_id: run_id,
-    build_low_level: build_low_level,
-    bokeh_model: bokeh_model,
+    user: user,
     tag: tag,
     comments: comments,
   });
 
   axios
-    .post("http://localhost:4000/api/gw", body, config)
+    .post("http://localhost:4000/api/sw", body, config)
     .then(function (response) {
       console.log(response.data);
-      dispatch({
-        type: GET_WAVEFORM_SUCCESS,
-        payload: {
-          run_id: run_id,
-          build_low_level: build_low_level,
-          bokeh_model: response.data,
-        },
-      });
+      response.data.status === 200
+        ? dispatch({
+            type: SAVE_WAVEFORM_SUCCESS,
+          })
+        : dispatch({ type: SAVE_WAVEFORM_FAILURE });
       return response.data;
     })
     .catch((err) => {
       console.log(err);
       dispatch({
-        type: GET_WAVEFORM_FAILURE,
+        type: SAVE_WAVEFORM_FAILURE,
       });
     });
 };

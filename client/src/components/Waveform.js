@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./stylesheets/waveform.css";
-import { getWaveform } from "../actions/waveformActions";
+import { getWaveform, saveWaveform } from "../actions/waveformActions";
 import { connect } from "react-redux";
 import CreatableSingle from "./CreatableSingle";
 import { embed } from "@bokeh/bokehjs";
@@ -50,13 +50,7 @@ class Waveform extends Component {
 
   handleSave = () => {
     this.props.dispatch(
-      saveWaveform(
-        this.state.run_id_output,
-        this.state.build_low_level_ouput,
-        this.state.bokeh_model,
-        this.state.tag,
-        this.state.comments
-      )
+      saveWaveform(this.props.user, this.state.tag, this.state.comments)
     );
   };
 
