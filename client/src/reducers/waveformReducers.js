@@ -5,7 +5,7 @@ const initialState = {
   run_id: "",
   build_low_level: null,
   bokeh_model: undefined,
-  tags_data: {},
+  tags_data: [],
 };
 
 export default function (state = initialState, action) {

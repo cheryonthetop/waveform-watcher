@@ -68,12 +68,14 @@ export const saveWaveform = (user, tag, comments) => (dispatch) => {
     .post("http://localhost:4000/api/sw", body, config)
     .then(function (response) {
       console.log(response.data);
-      response.data.status === 200
-        ? dispatch({
-            type: SAVE_WAVEFORM_SUCCESS,
-          })
-        : dispatch({ type: SAVE_WAVEFORM_FAILURE });
-      return response.data;
+      if (response.status === 200) {
+        dispatch({
+          type: SAVE_WAVEFORM_SUCCESS,
+        });
+        dispatch(loadAppData(user));
+      } else {
+        dispatch({ type: SAVE_WAVEFORM_FAILURE });
+      }
     })
     .catch((err) => {
       console.log(err);

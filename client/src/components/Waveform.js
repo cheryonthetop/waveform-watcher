@@ -2,16 +2,14 @@ import React, { Component } from "react";
 import "./stylesheets/waveform.css";
 import { getWaveform, saveWaveform } from "../actions/waveformActions";
 import { connect } from "react-redux";
-import CreatableSingle from "./CreatableSingle";
+import Tags from "./Tags";
 import { embed } from "@bokeh/bokehjs";
 
 class Waveform extends Component {
   state = {
-    run_id_input: this.props.run_id,
-    run_id_output: this.props.run_id,
+    run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
-    build_low_level_input: this.props.build_low_level,
-    build_low_level_ouput: this.props.build_low_level,
+    build_low_level: this.props.build_low_level,
     tag: "",
     comments: "",
   };
@@ -63,10 +61,10 @@ class Waveform extends Component {
             <strong>Run ID: </strong>
             {/* <select type="text" style={{ width: "74%" }} /> */}
             <input
-              defaultValue={this.state.run_id_input}
+              defaultValue={this.state.run_id}
               onChange={(event) =>
                 this.setState({
-                  run_id_input: event.target.value,
+                  run_id: event.target.value,
                 })
               }
             ></input>
@@ -78,7 +76,7 @@ class Waveform extends Component {
               defaultValue={true}
               onChange={(event) =>
                 this.setState({
-                  build_low_level_input: event.target.value,
+                  build_low_level: event.target.value,
                 })
               }
             >
@@ -91,8 +89,8 @@ class Waveform extends Component {
                 onClick={() =>
                   this.handleGetWaveform(
                     this.props.user,
-                    this.state.run_id_input,
-                    this.state.build_low_level_input
+                    this.state.run_id,
+                    this.state.build_low_level
                   )
                 }
               >
@@ -132,7 +130,7 @@ class Waveform extends Component {
             <strong> Comments & Tags </strong>
             <br></br>
             {/* <input className="ct"></input> */}
-            <CreatableSingle handleStateChangeTag={this.handleStateChangeTag} />
+            <Tags handleStateChangeTag={this.handleStateChangeTag} />
             <textarea
               className="ct"
               style={{ lineHeight: "100%" }}
@@ -157,8 +155,7 @@ const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
   run_id: state.waveform.run_id,
   bokeh_model: state.waveform.bokeh_model,
-  // tags_comments: {},
-  // tags_run_id: {},
+  tags_data: state.waveform.tags_data,
 });
 
 export default connect(mapStateToProps, null)(Waveform);
