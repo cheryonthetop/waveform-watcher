@@ -9,7 +9,7 @@ class Waveform extends Component {
   state = {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
-    build_low_level: this.props.build_low_level,
+    build_low_level: true,
     tag: "",
     comments: "",
   };
@@ -57,7 +57,7 @@ class Waveform extends Component {
       <div id="graph-container">
         <div id="param-box">
           <div id="param">
-            <h3> Parameters </h3>
+            <h3> Control </h3>
             <strong>Run ID: </strong>
             {/* <select type="text" style={{ width: "74%" }} /> */}
             <input
@@ -99,51 +99,37 @@ class Waveform extends Component {
             </div>
 
             <br></br>
-            <div style={{ textAlign: "center", width: "100%" }}>
+            {/* <div style={{ textAlign: "center", width: "100%" }}>
               <strong> ********OR********</strong>
-            </div>
+            </div> */}
 
-            <strong>Tag: </strong>
-            <select
-              type="text"
-              style={{ width: "83%" }}
-              onChange={(event) =>
-                this.setState({
-                  tag: event.target.value,
-                })
-              }
-            >
-              <option value={1}>One</option>
-              <option value={2}>Two</option>
-              <option value={3}>Three</option>
-            </select>
-            <div id="gw-div-new">
-              <button>Get Saved Waveform</button>
+            <div id="comment-box">
+              <strong> Comments & Tags </strong>
+              <br></br>
+              {/* <input className="ct"></input> */}
+              <Tags handleStateChangeTag={this.handleStateChangeTag} />
+              <textarea
+                className="ct"
+                style={{ lineHeight: "100%", height: "200px" }}
+                onChange={(event) =>
+                  this.setState({
+                    comments: event.target.value,
+                  })
+                }
+              ></textarea>
+              <button onClick={this.handleSave}>
+                Save Waveform under tag {this.state.tag}
+              </button>
             </div>
+            {/* <div id="gw-div-new">
+              <button>Get Saved Waveform</button>
+            </div> */}
           </div>
         </div>
 
         <div id="graph-box">
-          <h3> Waveform </h3>
+          {/* <h3> Waveform </h3> */}
           <div id="graph"></div>
-          <div id="comment-box">
-            <strong> Comments & Tags </strong>
-            <br></br>
-            {/* <input className="ct"></input> */}
-            <Tags handleStateChangeTag={this.handleStateChangeTag} />
-            <textarea
-              className="ct"
-              style={{ lineHeight: "100%" }}
-              onChange={(event) =>
-                this.setState({
-                  comments: event.target.value,
-                })
-              }
-            ></textarea>
-            <button onClick={this.handleSave}>
-              Save Waveform under tag {this.state.tag}
-            </button>
-          </div>
         </div>
       </div>
     );

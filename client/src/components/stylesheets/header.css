@@ -1,7 +1,7 @@
 #header {
   display: grid;
   grid-template-columns: 20% 80%;
-  background-color: royalblue;
+  background-color: gray;
   /* border-bottom: 10%; */
 }
 

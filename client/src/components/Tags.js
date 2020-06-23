@@ -26,6 +26,7 @@ class Tags extends Component {
   }
   loadOptions = () => {
     this.setState((state) => {
+      console.log("tags data are: ", this.props.tags_data);
       const newOptions = this.props.tags_data.map((tag_data) =>
         Object.entries(tag_data).map(([tag, data]) => {
           createOption(tag, data.comments);
