@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import "./stylesheets/waveform.css";
-import { getWaveform } from "../actions/waveformActions";
 import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
-import { Button, Modal } from "react-bootstrap";
 import Tags from "./Tags";
 import Runs from "./Runs";
+import GetNewWaveform from "./GetNewWaveform";
+import Param from "./Param";
 
 class Waveform extends Component {
   state = {
@@ -14,7 +14,6 @@ class Waveform extends Component {
     bokeh_model: this.props.bokeh_model,
     build_low_level: true,
     isLoading: true,
-    show: false,
   };
 
   componentDidUpdate() {
@@ -42,30 +41,16 @@ class Waveform extends Component {
       embed.embed_item(this.props.bokeh_model, "graph");
   }
 
-  handleGetWaveform = (user, run_id, build_low_level) => {
-    if (run_id && build_low_level) {
-      this.deleteWaveform();
-      this.setState({ isLoading: true });
-      console.log(user, run_id, build_low_level);
-      this.props.dispatch(getWaveform(user, run_id, build_low_level));
-    } else {
-      this.handleShow();
-    }
-  };
-
   handleStateChangeRunID = (value) => {
-    this.setState({ run_id: value });
+    this.setState({ run_id: value.label });
   };
 
   handleStateChangeBuildLevel = (value) => {
-    this.setState({ build_low_level: value });
+    this.setState({ build_low_level: value.label });
   };
 
-  handleClose = () => this.setState({ show: false });
-
-  handleShow = () => this.setState({ show: true });
-
   render() {
+    const { run_id, build_low_level, isLoading } = this.state;
     return (
       <div id="graph-container">
         <div id="control-box">
@@ -75,55 +60,22 @@ class Waveform extends Component {
               handleStateChangeRunID={this.handleStateChangeRunID}
               handleStateChangeBuildLevel={this.handleStateChangeBuildLevel}
             />
-            <div id="gw-div-old" style={{ marginTop: "10px" }}>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() =>
-                  this.handleGetWaveform(
-                    this.props.user,
-                    this.state.run_id,
-                    this.state.build_low_level
-                  )
-                }
-                active
-              >
-                Get New Waveform
-              </Button>
-              <Modal show={this.state.show} onHide={this.handleClose}>
-                <Modal.Header closeButton>
-                  <Modal.Title>Get Waveform error</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  You need to enter a run id and specify a build level to get a
-                  waveform!
-                </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={this.handleClose}>
-                    Close
-                  </Button>
-                </Modal.Footer>
-              </Modal>
-            </div>
-            <br></br>
-            <div id="comment-box">
-              <Tags />
-            </div>
+            <GetNewWaveform
+              run_id={run_id}
+              build_low_level={build_low_level}
+              user={this.props.user}
+            />
+            <Tags />
           </div>
         </div>
 
         <div id="graph-box">
-          <Loading isLoading={this.state.isLoading}>
-            <div id="param" style={{ paddingTop: "20px" }}>
-              <strong>Run ID: </strong>
-              <input value={this.props.run_id} contentEditable={false}></input>
-              <strong style={{ marginLeft: "10px" }}>Build Low Level: </strong>
-              <input
-                value={this.props.build_low_level}
-                contentEditable={false}
-              ></input>
-            </div>
-            <div id="graph"></div>
+          <Loading isLoading={isLoading}>
+            <Param
+              run_id={this.props.run_id}
+              build_low_level={this.props.build_low_level}
+            ></Param>
+            <div id="graph" />
           </Loading>
         </div>
       </div>

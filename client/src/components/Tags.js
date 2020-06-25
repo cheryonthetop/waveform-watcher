@@ -61,20 +61,24 @@ class Tags extends Component {
 
   handleChangeTextArea = (event) => {
     const { value, options } = this.state;
-    const newComments = event.target.value;
-    const data = value.data;
-    this.setState({
-      comments: newComments,
-      value: value
-        ? { ...value, data: { ...data, comments: newComments } }
-        : value,
-      options: options.map((option) =>
-        value && option.label === value.label
-          ? { ...option, data: { ...data, comments: newComments } }
-          : option
-      ),
-    });
-    console.log("onchange comments");
+    if (value) {
+      const newComments = event.target.value;
+      const data = value.data;
+      this.setState({
+        comments: newComments,
+        value: value
+          ? { ...value, data: { ...data, comments: newComments } }
+          : value,
+        options: options.map((option) =>
+          value && option.label === value.label
+            ? { ...option, data: { ...data, comments: newComments } }
+            : option
+        ),
+      });
+      console.log("onchange comments");
+    } else {
+      this.setState({ comments: event.target.value });
+    }
   };
 
   handleCreateOption = (inputValue) => {
@@ -116,7 +120,7 @@ class Tags extends Component {
   render() {
     const { isLoading, options, value, comments, show } = this.state;
     return (
-      <div>
+      <div id="comment-box">
         <strong> Tags & Comments </strong>
         <br></br>
         <CreatableSelect
