@@ -22,12 +22,34 @@ class Runs extends Component {
     }
   }
 
+  handleStateChangeRunID = (value, { action, removedValue }) => {
+    switch (action) {
+      case "select-option":
+        this.props.handleStateChangeRunID(value);
+    }
+  };
+
+  handleStateChangeBuildLevel = (value, { action, removedValue }) => {
+    switch (action) {
+      case "select-option":
+        this.props.handleStateChangeBuildLevel(value);
+    }
+  };
+
   render() {
     return (
       <div>
         <strong>Run ID: </strong>
-        <Select options={this.state.options} />
+        <Select
+          options={this.state.options}
+          onChange={this.handleStateChangeRunID}
+        />
         <br></br>
+        <strong>Build low-level: </strong>
+        <Select
+          options={[{ label: "true" }, { label: "false" }]}
+          onChange={this.handleStateChangeBuildLevel}
+        />
       </div>
     );
   }

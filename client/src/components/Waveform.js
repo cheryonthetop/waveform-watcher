@@ -4,7 +4,6 @@ import { getWaveform } from "../actions/waveformActions";
 import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
-import Select from "react-select";
 import { Button, Modal } from "react-bootstrap";
 import Tags from "./Tags";
 import Runs from "./Runs";
@@ -54,6 +53,14 @@ class Waveform extends Component {
     }
   };
 
+  handleStateChangeRunID = (value) => {
+    this.setState({ run_id: value });
+  };
+
+  handleStateChangeBuildLevel = (value) => {
+    this.setState({ build_low_level: value });
+  };
+
   handleClose = () => this.setState({ show: false });
 
   handleShow = () => this.setState({ show: true });
@@ -64,18 +71,10 @@ class Waveform extends Component {
         <div id="control-box">
           <div id="control">
             <h3> Control </h3>
-            <Runs />
-            <strong>Build low-level: </strong>
-            <Select
-              options={[{ label: "true" }, { label: "false" }]}
-              onChange={(value, { action, removedValue }) => {
-                switch (action) {
-                  case "select-option":
-                    this.setState({ value: value });
-                }
-              }}
+            <Runs
+              handleStateChangeRunID={this.handleStateChangeRunID}
+              handleStateChangeBuildLevel={this.handleStateChangeBuildLevel}
             />
-
             <div id="gw-div-old" style={{ marginTop: "10px" }}>
               <Button
                 variant="secondary"
@@ -115,7 +114,7 @@ class Waveform extends Component {
 
         <div id="graph-box">
           <Loading isLoading={this.state.isLoading}>
-            <div id="param">
+            <div id="param" style={{ paddingTop: "20px" }}>
               <strong>Run ID: </strong>
               <input value={this.props.run_id} contentEditable={false}></input>
               <strong style={{ marginLeft: "10px" }}>Build Low Level: </strong>
