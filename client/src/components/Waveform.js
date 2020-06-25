@@ -37,6 +37,7 @@ class Waveform extends Component {
 
   loadWaveform() {
     console.log("loading waveform");
+    this.deleteWaveform();
     if (this.state.bokeh_model !== this.props.bokeh_model)
       embed.embed_item(this.props.bokeh_model, "graph");
   }
@@ -50,7 +51,7 @@ class Waveform extends Component {
   };
 
   handleLoading = () => {
-    this.setState({ isLoading: false });
+    this.setState({ isLoading: true });
   };
 
   render() {
@@ -89,7 +90,7 @@ class Waveform extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  user: state.auth.user,
+  user: state.waveform.user,
   isAuthenticated: state.auth.isAuthenticated,
   run_id: state.waveform.run_id,
   bokeh_model: state.waveform.bokeh_model,

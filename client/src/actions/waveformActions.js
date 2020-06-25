@@ -6,6 +6,8 @@ import {
   LOAD_SUCCESS,
   LOAD_FAILURE,
   SWITCH_WAVEFORM,
+  DELETE_WAVEFORM_FAILURE,
+  DELETE_WAVEFORM_SUCCESS,
 } from "./types";
 import axios from "axios";
 
@@ -83,7 +85,6 @@ export const saveWaveform = (
         dispatch({
           type: SAVE_WAVEFORM_SUCCESS,
         });
-        dispatch(loadAppData(user));
       } else {
         dispatch({ type: SAVE_WAVEFORM_FAILURE });
       }
@@ -107,6 +108,41 @@ export const switchWaveform = (run_id, build_low_level, bokeh_model) => (
       bokeh_model: bokeh_model,
     },
   });
+};
+
+export const deleteWaveform = (user, tag) => (dispatch) => {
+  // Headers
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      withCredentials: true,
+    },
+  };
+
+  // Request body
+  const body = JSON.stringify({
+    user: user,
+    tag: tag,
+  });
+
+  axios
+    .post("http://localhost:4000/api/dw", body, config)
+    .then(function (response) {
+      console.log(response.data);
+      if (response.status === 200) {
+        dispatch({
+          type: DELETE_WAVEFORM_SUCCESS,
+        });
+      } else {
+        dispatch({ type: DELETE_WAVEFORM_FAILURE });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+      dispatch({
+        type: DELETE_WAVEFORM_FAILURE,
+      });
+    });
 };
 
 export const loadAppData = (user) => (dispatch) => {

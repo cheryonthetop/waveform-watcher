@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { saveWaveform, switchWaveform } from "../actions/waveformActions";
+import {
+  saveWaveform,
+  switchWaveform,
+  deleteWaveform,
+} from "../actions/waveformActions";
 import { Button, Modal } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
 
@@ -13,12 +17,12 @@ const defaultOptions = [];
 
 class Tags extends Component {
   state = {
-    isLoading: true,
+    isLoading: false,
+    data_loaded: false,
+    show: false,
     options: defaultOptions,
     value: undefined,
-    data_loaded: false,
     comments: "",
-    show: false,
   };
 
   componentDidUpdate() {
@@ -113,19 +117,39 @@ class Tags extends Component {
     }
   };
 
+  handleDelete = () => {
+    const { value, options } = this.state;
+    const { user } = this.props;
+    const tag = value.label;
+    const newOptions = options.filter((option) => option.label !== value.label);
+    console.log(value);
+    console.log(newOptions);
+    this.setState({ options: newOptions, value: {} }, () =>
+      console.log(this.state.value)
+    );
+    this.props.dispatch(deleteWaveform(user, tag));
+  };
+
   handleClose = () => this.setState({ show: false });
 
   handleShow = () => this.setState({ show: true });
 
   render() {
-    const { isLoading, options, value, comments, show } = this.state;
+    const {
+      isLoading,
+      options,
+      value,
+      comments,
+      show,
+      data_loaded,
+    } = this.state;
     return (
       <div id="comment-box">
         <strong> Tags & Comments </strong>
         <br></br>
         <CreatableSelect
           isClearable
-          isDisabled={isLoading}
+          isDisabled={!data_loaded}
           isLoading={isLoading}
           onChange={this.handleChangeSelect}
           onCreateOption={this.handleCreateOption}
@@ -142,8 +166,14 @@ class Tags extends Component {
             value={comments}
           ></textarea>
         </div>
-        <Button variant="secondary" size="sm" onClick={this.handleSave}>
-          Save this Waveform under the Tag <br />
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={this.handleSave}
+          type="submit"
+          active
+        >
+          Save Waveform under Tag
           {value ? value.label : ""}
         </Button>
         <Modal show={show} onHide={this.handleClose}>
@@ -151,7 +181,7 @@ class Tags extends Component {
             <Modal.Title>Save error</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            You need to enter a tag or get a waveform to save!
+            You need to enter a tag AND get a waveform to save!
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleClose}>
@@ -159,6 +189,15 @@ class Tags extends Component {
             </Button>
           </Modal.Footer>
         </Modal>
+        <Button
+          style={{ marginTop: "10px" }}
+          variant="danger"
+          size="sm"
+          onClick={this.handleDelete}
+          disabled={!value}
+        >
+          Delete Tag {value ? value.label : ""}
+        </Button>
       </div>
     );
   }

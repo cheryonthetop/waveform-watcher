@@ -26,7 +26,12 @@ class GetNewWaveform extends Component {
   render() {
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
-        <Button variant="secondary" size="sm" onClick={this.handleGetWaveform}>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={this.handleGetWaveform}
+          active
+        >
           Get New Waveform
         </Button>
         <Modal show={this.state.show} onHide={this.handleClose}>
