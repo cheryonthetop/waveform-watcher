@@ -11,9 +11,15 @@ class Runs extends Component {
     options: [],
   };
 
-  componentWillReceiveProps() {
-    const options = this.props.available_runs.map((run) => createOption(run));
-    this.setState({ options: options });
+  componentDidUpdate() {
+    const { available_runs } = this.props;
+    const { options } = this.state;
+    if (available_runs && options.length !== available_runs.length) {
+      const runs = available_runs.map((run) => createOption(run));
+      this.setState({ options: runs }, () => {
+        console.log(this.state.options);
+      });
+    }
   }
 
   render() {

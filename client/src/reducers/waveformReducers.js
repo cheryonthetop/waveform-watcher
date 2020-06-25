@@ -23,7 +23,10 @@ export default function (state = initialState, action) {
   switch (action.type) {
     case LOAD_SUCCESS: {
       let available_runs = [];
-      action.payload.available_runs.map((run) => available_runs.push(run));
+      console.log(action.payload.available_runs);
+      Object.entries(action.payload.available_runs).map(([index, run]) =>
+        available_runs.push(run)
+      );
       return {
         user: action.payload.user,
         run_id: action.payload.run_id,

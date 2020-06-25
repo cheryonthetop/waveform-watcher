@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { saveWaveform, switchWaveform } from "../actions/waveformActions";
-
+import { Button, Modal } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
 
 const createOption = (label, data) => ({
@@ -18,7 +18,9 @@ class Tags extends Component {
     value: undefined,
     data_loaded: false,
     comments: "",
+    show: false,
   };
+
   componentDidUpdate() {
     const { data_loaded } = this.state;
     if (this.props.tags_data && !data_loaded) {
@@ -27,6 +29,7 @@ class Tags extends Component {
       this.setState({ data_loaded: true });
     }
   }
+
   loadOptions = () => {
     let newOptions = [];
     this.props.tags_data.map((tag_data) =>
@@ -39,7 +42,8 @@ class Tags extends Component {
       console.log("state is now:", this.state.options);
     });
   };
-  handleChange = (newValue, actionMeta) => {
+
+  handleChangeSelect = (newValue, actionMeta) => {
     console.group("Value Changed");
     console.log(newValue);
     console.log(`action: ${actionMeta.action}`);
@@ -54,7 +58,26 @@ class Tags extends Component {
         );
     }
   };
-  handleCreate = (inputValue) => {
+
+  handleChangeTextArea = (event) => {
+    const { value, options } = this.state;
+    const newComments = event.target.value;
+    const data = value.data;
+    this.setState({
+      comments: newComments,
+      value: value
+        ? { ...value, data: { ...data, comments: newComments } }
+        : value,
+      options: options.map((option) =>
+        value && option.label === value.label
+          ? { ...option, data: { ...data, comments: newComments } }
+          : option
+      ),
+    });
+    console.log("onchange comments");
+  };
+
+  handleCreateOption = (inputValue) => {
     this.setState({ isLoading: true });
     console.group("Option created");
     console.log("Wait a moment...");
@@ -71,54 +94,67 @@ class Tags extends Component {
       });
     }, 1000);
   };
+
   handleSave = () => {
     const { value } = this.state;
-    const tag = value.label;
-    const comments = value.data.comments;
     const { user, bokeh_model, run_id, build_low_level } = this.props;
-    this.props.dispatch(
-      saveWaveform(user, tag, comments, bokeh_model, run_id, build_low_level)
-    );
+    if (value && bokeh_model) {
+      const tag = value.label;
+      const comments = value.data.comments;
+      this.props.dispatch(
+        saveWaveform(user, tag, comments, bokeh_model, run_id, build_low_level)
+      );
+    } else {
+      this.handleShow();
+    }
   };
 
+  handleClose = () => this.setState({ show: false });
+
+  handleShow = () => this.setState({ show: true });
+
   render() {
-    const { isLoading, options, value, comments } = this.state;
+    const { isLoading, options, value, comments, show } = this.state;
     return (
       <div>
+        <strong> Tags & Comments </strong>
+        <br></br>
         <CreatableSelect
           isClearable
           isDisabled={isLoading}
           isLoading={isLoading}
-          onChange={this.handleChange}
-          onCreateOption={this.handleCreate}
+          onChange={this.handleChangeSelect}
+          onCreateOption={this.handleCreateOption}
           options={options}
           value={value}
         />
-        <textarea
-          id="comments"
-          className="ct"
-          style={{ lineHeight: "100%", height: "200px" }}
-          onChange={(event) => {
-            let newComments = event.target.value;
-            const data = value.data;
-            this.setState({
-              comments: newComments,
-              value: value
-                ? { ...value, data: { ...data, comments: newComments } }
-                : value,
-              options: options.map((option) =>
-                value && option.label === value.label
-                  ? { ...option, data: { ...data, comments: newComments } }
-                  : option
-              ),
-            });
-            console.log("onchange comments");
-          }}
-          value={comments}
-        ></textarea>
-        <button onClick={this.handleSave}>
-          Save this Waveform under the Tag {value ? value.label : ""}
-        </button>
+        <div className="form-group">
+          <textarea
+            className="form-control"
+            id="comments"
+            rows="5"
+            style={{ lineHeight: "100%", height: "200px" }}
+            onChange={this.handleChangeTextArea}
+            value={comments}
+          ></textarea>
+        </div>
+        <Button variant="secondary" size="sm" onClick={this.handleSave} active>
+          Save this Waveform under the Tag <br />
+          {value ? value.label : ""}
+        </Button>
+        <Modal show={show} onHide={this.handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Save error</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            You need to enter a tag or get a waveform to save!
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }

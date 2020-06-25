@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
 import Select from "react-select";
-import { Button } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import Tags from "./Tags";
 import Runs from "./Runs";
 
@@ -15,8 +15,8 @@ class Waveform extends Component {
     bokeh_model: this.props.bokeh_model,
     build_low_level: true,
     isLoading: true,
+    show: false,
   };
-  componentDidMount() {}
 
   componentDidUpdate() {
     if (
@@ -44,11 +44,19 @@ class Waveform extends Component {
   }
 
   handleGetWaveform = (user, run_id, build_low_level) => {
-    this.deleteWaveform();
-    this.setState({ isLoading: true });
-    console.log(user, run_id, build_low_level);
-    this.props.dispatch(getWaveform(user, run_id, build_low_level));
+    if (run_id && build_low_level) {
+      this.deleteWaveform();
+      this.setState({ isLoading: true });
+      console.log(user, run_id, build_low_level);
+      this.props.dispatch(getWaveform(user, run_id, build_low_level));
+    } else {
+      this.handleShow();
+    }
   };
+
+  handleClose = () => this.setState({ show: false });
+
+  handleShow = () => this.setState({ show: true });
 
   render() {
     return (
@@ -60,17 +68,18 @@ class Waveform extends Component {
             <strong>Build low-level: </strong>
             <Select
               options={[{ label: "true" }, { label: "false" }]}
-              onChange={(event) =>
-                this.setState({
-                  build_low_level: event.target.value,
-                })
-              }
+              onChange={(value, { action, removedValue }) => {
+                switch (action) {
+                  case "select-option":
+                    this.setState({ value: value });
+                }
+              }}
             />
 
             <div id="gw-div-old" style={{ marginTop: "10px" }}>
               <Button
                 variant="secondary"
-                size="lg"
+                size="sm"
                 onClick={() =>
                   this.handleGetWaveform(
                     this.props.user,
@@ -82,11 +91,23 @@ class Waveform extends Component {
               >
                 Get New Waveform
               </Button>
+              <Modal show={this.state.show} onHide={this.handleClose}>
+                <Modal.Header closeButton>
+                  <Modal.Title>Get Waveform error</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  You need to enter a run id and specify a build level to get a
+                  waveform!
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={this.handleClose}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
             </div>
             <br></br>
             <div id="comment-box">
-              <strong> Comments & Tags </strong>
-              <br></br>
               <Tags />
             </div>
           </div>
