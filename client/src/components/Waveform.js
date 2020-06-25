@@ -49,6 +49,10 @@ class Waveform extends Component {
     this.setState({ build_low_level: value.label });
   };
 
+  handleLoading = () => {
+    this.setState({ isLoading: false });
+  };
+
   render() {
     const { run_id, build_low_level, isLoading } = this.state;
     return (
@@ -64,6 +68,7 @@ class Waveform extends Component {
               run_id={run_id}
               build_low_level={build_low_level}
               user={this.props.user}
+              handleLoading={this.handleLoading}
             />
             <Tags />
           </div>

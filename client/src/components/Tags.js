@@ -13,7 +13,7 @@ const defaultOptions = [];
 
 class Tags extends Component {
   state = {
-    isLoading: false,
+    isLoading: true,
     options: defaultOptions,
     value: undefined,
     data_loaded: false,
@@ -142,7 +142,7 @@ class Tags extends Component {
             value={comments}
           ></textarea>
         </div>
-        <Button variant="secondary" size="sm" onClick={this.handleSave} active>
+        <Button variant="secondary" size="sm" onClick={this.handleSave}>
           Save this Waveform under the Tag <br />
           {value ? value.label : ""}
         </Button>

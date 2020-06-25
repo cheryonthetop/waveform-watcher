@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import { getWaveform } from "../actions/waveformActions";
 import { Button, Modal } from "react-bootstrap";
+import { connect } from "react-redux";
 
-export default class GetNewWaveform extends Component {
+class GetNewWaveform extends Component {
   state = {
     show: false,
   };
@@ -10,8 +11,7 @@ export default class GetNewWaveform extends Component {
   handleGetWaveform = () => {
     const { user, run_id, build_low_level } = this.props;
     if (run_id && build_low_level) {
-      this.deleteWaveform();
-      this.setState({ isLoading: true });
+      this.props.handleLoading();
       console.log(user, run_id, build_low_level);
       this.props.dispatch(getWaveform(user, run_id, build_low_level));
     } else {
@@ -26,12 +26,7 @@ export default class GetNewWaveform extends Component {
   render() {
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={this.handleGetWaveform}
-          active
-        >
+        <Button variant="secondary" size="sm" onClick={this.handleGetWaveform}>
           Get New Waveform
         </Button>
         <Modal show={this.state.show} onHide={this.handleClose}>
@@ -52,3 +47,5 @@ export default class GetNewWaveform extends Component {
     );
   }
 }
+
+export default connect(null, null)(GetNewWaveform);
