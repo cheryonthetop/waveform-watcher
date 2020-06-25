@@ -1,91 +1,76 @@
 import React, { Component } from "react";
 import "./stylesheets/waveform.css";
-import { getWaveform, saveWaveform } from "../actions/waveformActions";
+import { getWaveform } from "../actions/waveformActions";
 import { connect } from "react-redux";
-import Tags from "./Tags";
 import { embed } from "@bokeh/bokehjs";
+import Loading from "react-loading-animation";
+import Select from "react-select";
+import { Button } from "react-bootstrap";
+import Tags from "./Tags";
+import Runs from "./Runs";
 
 class Waveform extends Component {
   state = {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
     build_low_level: true,
-    tag: "",
-    comments: "",
+    isLoading: true,
   };
   componentDidMount() {}
 
   componentDidUpdate() {
     if (
       this.state.bokeh_model !== this.props.bokeh_model &&
-      this.props.bokeh_model !== null &&
-      this.props.bokeh_model !== undefined
+      this.props.bokeh_model
     ) {
-      this.deleteWaveform();
-      this.loadWaveform();
-      this.state.bokeh_model = this.props.bokeh_model;
+      this.setState({ isLoading: false }, () => {
+        this.deleteWaveform();
+        this.loadWaveform();
+        this.setState({ bokeh_model: this.props.bokeh_model });
+      });
     }
   }
 
   deleteWaveform() {
     var container = document.getElementById("graph");
-    if (container.hasChildNodes())
-      document.getElementById("graph").removeChild(container.childNodes[0]);
+    while (container && container.hasChildNodes())
+      container.removeChild(container.childNodes[0]);
   }
 
   loadWaveform() {
-    embed.embed_item(this.props.bokeh_model, "graph");
+    console.log("loading waveform");
+    if (this.state.bokeh_model !== this.props.bokeh_model)
+      embed.embed_item(this.props.bokeh_model, "graph");
   }
 
   handleGetWaveform = (user, run_id, build_low_level) => {
+    this.deleteWaveform();
+    this.setState({ isLoading: true });
     console.log(user, run_id, build_low_level);
     this.props.dispatch(getWaveform(user, run_id, build_low_level));
-  };
-
-  handleStateChangeTag = (value) => {
-    this.setState({ tag: value });
-  };
-
-  handleSave = () => {
-    this.props.dispatch(
-      saveWaveform(this.props.user, this.state.tag, this.state.comments)
-    );
   };
 
   render() {
     return (
       <div id="graph-container">
-        <div id="param-box">
-          <div id="param">
+        <div id="control-box">
+          <div id="control">
             <h3> Control </h3>
-            <strong>Run ID: </strong>
-            {/* <select type="text" style={{ width: "74%" }} /> */}
-            <input
-              defaultValue={this.state.run_id}
-              onChange={(event) =>
-                this.setState({
-                  run_id: event.target.value,
-                })
-              }
-            ></input>
-            <br></br>
+            <Runs />
             <strong>Build low-level: </strong>
-            <select
-              type="text"
-              style={{ width: "49%" }}
-              defaultValue={true}
+            <Select
+              options={[{ label: "true" }, { label: "false" }]}
               onChange={(event) =>
                 this.setState({
                   build_low_level: event.target.value,
                 })
               }
-            >
-              <option value={true}>True</option>
-              <option value={false}>False</option>
-            </select>
+            />
 
-            <div id="gw-div-old">
-              <button
+            <div id="gw-div-old" style={{ marginTop: "10px" }}>
+              <Button
+                variant="secondary"
+                size="lg"
                 onClick={() =>
                   this.handleGetWaveform(
                     this.props.user,
@@ -93,43 +78,33 @@ class Waveform extends Component {
                     this.state.build_low_level
                   )
                 }
+                active
               >
                 Get New Waveform
-              </button>
+              </Button>
             </div>
-
             <br></br>
-            {/* <div style={{ textAlign: "center", width: "100%" }}>
-              <strong> ********OR********</strong>
-            </div> */}
-
             <div id="comment-box">
               <strong> Comments & Tags </strong>
               <br></br>
-              {/* <input className="ct"></input> */}
-              <Tags handleStateChangeTag={this.handleStateChangeTag} />
-              <textarea
-                className="ct"
-                style={{ lineHeight: "100%", height: "200px" }}
-                onChange={(event) =>
-                  this.setState({
-                    comments: event.target.value,
-                  })
-                }
-              ></textarea>
-              <button onClick={this.handleSave}>
-                Save Waveform under tag {this.state.tag}
-              </button>
+              <Tags />
             </div>
-            {/* <div id="gw-div-new">
-              <button>Get Saved Waveform</button>
-            </div> */}
           </div>
         </div>
 
         <div id="graph-box">
-          {/* <h3> Waveform </h3> */}
-          <div id="graph"></div>
+          <Loading isLoading={this.state.isLoading}>
+            <div id="param">
+              <strong>Run ID: </strong>
+              <input value={this.props.run_id} contentEditable={false}></input>
+              <strong style={{ marginLeft: "10px" }}>Build Low Level: </strong>
+              <input
+                value={this.props.build_low_level}
+                contentEditable={false}
+              ></input>
+            </div>
+            <div id="graph"></div>
+          </Loading>
         </div>
       </div>
     );
@@ -141,7 +116,7 @@ const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
   run_id: state.waveform.run_id,
   bokeh_model: state.waveform.bokeh_model,
-  tags_data: state.waveform.tags_data,
+  build_low_level: state.waveform.build_low_level,
 });
 
 export default connect(mapStateToProps, null)(Waveform);

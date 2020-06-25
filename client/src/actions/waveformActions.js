@@ -5,6 +5,7 @@ import {
   SAVE_WAVEFORM_FAILURE,
   LOAD_SUCCESS,
   LOAD_FAILURE,
+  SWITCH_WAVEFORM,
 } from "./types";
 import axios from "axios";
 
@@ -47,7 +48,14 @@ export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
     });
 };
 
-export const saveWaveform = (user, tag, comments) => (dispatch) => {
+export const saveWaveform = (
+  user,
+  tag,
+  comments,
+  bokeh_model,
+  run_id,
+  build_low_level
+) => (dispatch) => {
   console.log("save waveform action called");
   // Headers
   const config = {
@@ -62,6 +70,9 @@ export const saveWaveform = (user, tag, comments) => (dispatch) => {
     user: user,
     tag: tag,
     comments: comments,
+    bokeh_model: bokeh_model,
+    run_id: run_id,
+    build_low_level: build_low_level,
   });
 
   axios
@@ -83,6 +94,19 @@ export const saveWaveform = (user, tag, comments) => (dispatch) => {
         type: SAVE_WAVEFORM_FAILURE,
       });
     });
+};
+
+export const switchWaveform = (run_id, build_low_level, bokeh_model) => (
+  dispatch
+) => {
+  dispatch({
+    type: SWITCH_WAVEFORM,
+    payload: {
+      run_id: run_id,
+      build_low_level: build_low_level,
+      bokeh_model: bokeh_model,
+    },
+  });
 };
 
 export const loadAppData = (user) => (dispatch) => {

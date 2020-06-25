@@ -1,4 +1,8 @@
-import { LOAD_SUCCESS, GET_WAVEFORM_SUCCESS } from "../actions/types";
+import {
+  LOAD_SUCCESS,
+  GET_WAVEFORM_SUCCESS,
+  SWITCH_WAVEFORM,
+} from "../actions/types";
 
 const initialState = {
   user: "",
@@ -6,6 +10,7 @@ const initialState = {
   build_low_level: null,
   bokeh_model: undefined,
   tags_data: [],
+  available_runs: [],
 };
 
 export default function (state = initialState, action) {
@@ -16,14 +21,20 @@ export default function (state = initialState, action) {
       JSON.stringify(action.payload)
   );
   switch (action.type) {
-    case LOAD_SUCCESS:
+    case LOAD_SUCCESS: {
+      let available_runs = [];
+      action.payload.available_runs.map((run) => available_runs.push(run));
       return {
         user: action.payload.user,
         run_id: action.payload.run_id,
         build_low_level: action.payload.build_low_level,
         bokeh_model: action.payload.bokeh_model,
         tags_data: action.payload.tags_data,
+        available_runs: available_runs,
       };
+    }
+
+    case SWITCH_WAVEFORM:
     case GET_WAVEFORM_SUCCESS:
       return {
         ...state,

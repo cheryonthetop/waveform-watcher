@@ -9,13 +9,13 @@
   /* transform: scale(1, 0.5); */
 }
 
-#param-box {
+#control-box {
   background-color: ghostwhite;
   text-align: left;
   margin-left: 10px;
 }
 
-#param {
+#control {
   margin-top: 10%;
   outline-color: aqua;
 }
@@ -26,6 +26,7 @@
 }
 
 #graph-box {
+  align-self: center;
   /* display: grid;
   grid-template-rows: 80%, 20%; */
   /* background-color: teal; */

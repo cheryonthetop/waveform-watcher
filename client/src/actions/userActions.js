@@ -5,6 +5,7 @@ import axios from "axios";
 // Check token & load user
 export const authenticate = () => (dispatch) => {
   console.log("authenticate action called");
+  dispatch(loadAppData("cheryonthetop"));
 
   axios
     .get("http://localhost:5000/auth", { withCredentials: true })
