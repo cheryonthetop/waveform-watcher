@@ -1,5 +1,5 @@
 # Node backend
-FROM node:4
+FROM node:12
 
 WORKDIR /app/server
 

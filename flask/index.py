@@ -195,6 +195,27 @@ def save_waveform():
     else:
         return make_response(jsonify({"success": False}), 400)
 
+@app.route('/api/dw',  methods = ['POST'])
+def delete_waveform():
+    if request.is_json:
+        req = request.get_json()
+        print(req)
+        user = req["user"]  
+        tag = req["tag"]
+        # Update database
+        mongo_document = my_app.find_one({"user": user, "tags_data."+tag: {"$exists": True}})
+        if (mongo_document):
+            print("#DELETING mongo document found: ")
+            my_app.update_one({"user": user, "tags_data."+tag: {"$exists": True}}, 
+                {"$pull": { 
+                        "tags_data": {tag: {"$exists": True}},
+                    }
+                }
+            ) 
+        return make_response(jsonify({"success": True}), 200)
+    else:
+        return make_response(jsonify({"success": False}), 400)
+
 
 
 if __name__ == "__main__":

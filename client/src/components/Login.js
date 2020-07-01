@@ -39,7 +39,7 @@ class Login extends Component {
               <a
                 className="btn btn-block btn-social btn-large btn-github"
                 style={{ maxWidth: "300px" }}
-                href="http://localhost:5000/auth/github"
+                href={process.env.REACT_APP_NODE_BACKEND_URL + "/auth/github"}
               >
                 <i className="fab fa-github" />
                 <span>Login with GitHub</span>

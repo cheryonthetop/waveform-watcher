@@ -29,7 +29,7 @@ export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
   });
 
   axios
-    .post("http://localhost:4000/api/gw", body, config)
+    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/gw`, body, config)
     .then(function (response) {
       console.log(response.data);
       dispatch({
@@ -78,7 +78,7 @@ export const saveWaveform = (
   });
 
   axios
-    .post("http://localhost:4000/api/sw", body, config)
+    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/sw`, body, config)
     .then(function (response) {
       console.log(response.data);
       if (response.status === 200) {
@@ -126,7 +126,7 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
   });
 
   axios
-    .post("http://localhost:4000/api/dw", body, config)
+    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/dw`, body, config)
     .then(function (response) {
       console.log(response.data);
       if (response.status === 200) {
@@ -148,7 +148,7 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
 export const loadAppData = (user) => (dispatch) => {
   console.log(user);
   axios
-    .get(`http://localhost:4000/api/data?user=${user}`, {
+    .get(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/data?user=${user}`, {
       withCredentials: true,
     })
     .then((res) =>

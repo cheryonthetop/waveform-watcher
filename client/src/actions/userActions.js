@@ -5,10 +5,12 @@ import axios from "axios";
 // Check token & load user
 export const authenticate = () => (dispatch) => {
   console.log("authenticate action called");
-  dispatch(loadAppData("cheryonthetop"));
+  // dispatch(loadAppData("cheryonthetop"));
 
   axios
-    .get("http://localhost:5000/auth", { withCredentials: true })
+    .get(`${process.env.REACT_APP_NODE_BACKEND_URL}/auth`, {
+      withCredentials: true,
+    })
     .then((res) => {
       console.log("Auth response with status" + res.data["status"]);
       if (res.data["status"] === 200) {

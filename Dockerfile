@@ -50,7 +50,7 @@ RUN chmod 1777 /cvmfs
 RUN echo "Timestamp:" `date --utc` | tee /image-build-info.txt
 
 # Build image for flask
-ADD ./flask-server/index ./flask-server/modules /app/flask-server/
+COPY . .
 
 # Flask application on port 4000
 WORKDIR /app/flask-server

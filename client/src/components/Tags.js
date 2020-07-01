@@ -174,7 +174,7 @@ class Tags extends Component {
           active
         >
           Save Waveform under Tag
-          {value ? value.label : ""}
+          {value ? " " + value.label : ""}
         </Button>
         <Modal show={show} onHide={this.handleClose}>
           <Modal.Header closeButton>

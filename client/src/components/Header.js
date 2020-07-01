@@ -12,7 +12,7 @@ export default class Header extends Component {
         </div>
         <div id="logout">
           <a
-            href="http://localhost:5000/logout"
+            href={process.env.REACT_APP_NODE_BACKEND_URL + "/logout"}
             onClick={this.handleOnClick}
             style={{ color: "white" }}
           >
