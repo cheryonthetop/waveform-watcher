@@ -1,4 +1,4 @@
-// require("dotenv").config(); // set up env variables
+require("dotenv").config(); // set up env variables
 // const express = require("express");
 // const path = require("path");
 var app = require("./app");

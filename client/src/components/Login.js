@@ -23,18 +23,6 @@ class Login extends Component {
           >
             <br />
             <h5>Welcome to Waveform Watcher</h5>
-            <div className="block">
-              <strong style={{ font: 400 }}>Username</strong>
-              <br />
-              <input type="text" className="form-control" />
-            </div>
-
-            <div className="block">
-              <strong style={{ font: 400 }}>Password</strong>
-              <br />
-              <input type="password" className="form-control" />
-            </div>
-
             <div className="github">
               <a
                 className="btn btn-block btn-social btn-large btn-github"

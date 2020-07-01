@@ -14,26 +14,7 @@ import pymongo
 import strax
 import straxen
 import json
-from context import xenon1t_dali
 from holoviews_waveform_display import waveform_display
-hv.extension("bokeh")
-
-# # Read live data
-# Load data
-st_low = xenon1t_dali(output_folder='./strax_data', build_lowlevel=True)
-st_high = xenon1t_dali(output_folder='./strax_data', build_lowlevel=False)
-runs_low = st_low.select_runs()
-runs_high = st_high.select_runs()
-available_runs = runs_low['name']
-renderer = hv.renderer('bokeh')
-print("renderer created: ", renderer)
-
-# Connect to MongoDB
-APP_DB_URI = "mongodb+srv://char_dev:2Qz2o5Kh8agcVrXB@cluster0-oumsb.mongodb.net/waveform?retryWrites=true&w=majority"
-my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
-my_auth = my_db["auth"]
-my_app = my_db["app"]
-
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 os.environ.update({'ROOT PATH' : ROOT_PATH})
 sys.path.append(os.path.join(ROOT_PATH, 'modules'))
@@ -46,8 +27,27 @@ CORS(app, supports_credentials=True) # Supports authenticated request
 LOG = logger.get_root_logger(os.environ.get(
     'ROOT_LOGGER', 'root'), filename = os.path.join(ROOT_PATH, 'output.log'))
 
-PORT = 4000 
-# os.environ.get('PORT')
+# PORT = 4000 
+PORT = os.environ.get('PORT')
+if (not PORT):
+    PORT = 4000
+hv.extension("bokeh")
+
+# # Read live data
+# Load data
+st_low = straxen.contexts.xenon1t_dali(build_lowlevel=True)
+st_high = straxen.contexts.xenon1t_dali(build_lowlevel=False)
+runs_low = st_low.select_runs()
+runs_high = st_high.select_runs()
+available_runs = runs_low['name']
+renderer = hv.renderer('bokeh')
+print("renderer created: ", renderer)
+
+# Connect to MongoDB
+APP_DB_URI = 'mongodb+srv://char_dev:2Qz2o5Kh8agcVrXB@cluster0-oumsb.mongodb.net/waveform?retryWrites=true&w=majority'
+my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
+my_auth = my_db["auth"]
+my_app = my_db["app"]
 
 def authenticate():
     def wrapped():

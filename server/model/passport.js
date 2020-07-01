@@ -4,6 +4,13 @@ var GitHubStrategy = require("passport-github2").Strategy;
 var RememberMeStrategy = require("passport-remember-me").Strategy;
 var randomString = require("./helpers/random-string");
 var MongoClient = require("mongodb").MongoClient;
+var { Octokit } = require("@octokit/rest");
+
+const octokit = new Octokit({
+  auth: "cherryonthetop",
+  userAgent: "waveform-watcher",
+  baseUrl: "https://api.github.com",
+});
 
 var CALLBACK_URL = process.env.CALLBACK_URL;
 
@@ -59,32 +66,48 @@ passport.use(
       // console.log("access token: ", accessToken);
       // console.log("refresh token: " + refreshToken);
       console.log("profile: " + JSON.stringify(profile));
+      if (
+        octokit.orgs.checkMembership({
+          org: "XENON1T",
+          username: profile.username,
+        })
+      ) {
+        const doc = model.findOrCreate(
+          { id: profile.id },
+          { username: profile.username }
+          // { new: true } // return new doc after update to be saved
+        );
+        console.log("after update:", doc.username);
+        return done(null, profile);
+      } else {
+        return done(null, false);
+      }
 
       // asynchronous verification
-      process.nextTick(function () {
-        collection
-          .find({
-            $or: [
-              { github: profile._json.login },
-              { github_id: profile._json.login },
-              { github_id: "nupole" },
-            ],
-          }) // to be deleted
-          .toArray()
-          .then(async (items) => {
-            console.log(items);
-            if (items.length === 0) return done(null, false);
-            console.log("username is: ", profile.username);
-            const doc = await model.findOrCreate(
-              { id: profile.id },
-              { username: profile.username }
-              // { new: true } // return new doc after update to be saved
-            );
-            console.log("after update:", doc.username);
-            return done(null, profile);
-          })
-          .catch((err) => console.log(err));
-      });
+      // process.nextTick(function () {
+      //   collection
+      //     .find({
+      //       $or: [
+      //         { github: profile._json.login },
+      //         { github_id: profile._json.login },
+      //         { github_id: "nupole" },
+      //       ],
+      //     }) // to be deleted
+      //     .toArray()
+      //     .then(async (items) => {
+      //       console.log(items);
+      //       if (items.length === 0) return done(null, false);
+      //       console.log("username is: ", profile.username);
+      //       const doc = await model.findOrCreate(
+      //         { id: profile.id },
+      //         { username: profile.username }
+      //         // { new: true } // return new doc after update to be saved
+      //       );
+      //       console.log("after update:", doc.username);
+      //       return done(null, profile);
+      //     })
+      //     .catch((err) => console.log(err));
+      // });
     }
   )
 );
