@@ -67,7 +67,7 @@ passport.use(
       // console.log("refresh token: " + refreshToken);
       console.log("profile: " + JSON.stringify(profile));
       if (
-        octokit.orgs.checkMembership({
+        octokit.orgs.checkMembershipForUser({
           org: "XENON1T",
           username: profile.username,
         })
