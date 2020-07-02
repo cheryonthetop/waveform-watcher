@@ -7,6 +7,8 @@ COPY . .
 
 RUN pip install -r /app/flask-server/requirements.txt
 
+RUN python -m pip install dask[dataframe]
+
 EXPOSE 4000
 
 ENTRYPOINT [ "python", "index.py" ]
