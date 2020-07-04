@@ -9,6 +9,7 @@ const createOption = (label) => ({
 class Runs extends Component {
   state = {
     options: [],
+    dataLoaded: false,
   };
 
   componentDidUpdate() {
@@ -16,7 +17,7 @@ class Runs extends Component {
     const { options } = this.state;
     if (available_runs && options.length !== available_runs.length) {
       const runs = available_runs.map((run) => createOption(run));
-      this.setState({ options: runs }, () => {
+      this.setState({ options: runs }, { dataLoaded: true }, () => {
         console.log(this.state.options);
       });
     }
@@ -43,11 +44,13 @@ class Runs extends Component {
         <Select
           options={this.state.options}
           onChange={this.handleStateChangeRunID}
+          isDisabled={!this.state.dataLoaded}
+          isLoading={!this.state.dataLoaded}
         />
         <br></br>
         <strong>Build low-level: </strong>
         <Select
-          options={[{ label: "true" }, { label: "false" }]}
+          options={[{ label: "True" }, { label: "False" }]}
           onChange={this.handleStateChangeBuildLevel}
         />
       </div>

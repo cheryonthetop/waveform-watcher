@@ -7,7 +7,7 @@ import {
 const initialState = {
   user: "",
   run_id: "",
-  build_low_level: null,
+  build_low_level: "",
   bokeh_model: undefined,
   tags_data: [],
   available_runs: [],

@@ -18,9 +18,9 @@ class Home extends Component {
   };
 
   render() {
-    if (!this.props.isAuthenticated) {
-      return <Redirect to="/login" />;
-    }
+    // if (!this.props.isAuthenticated) {
+    //   return <Redirect to="/login" />;
+    // }
 
     return (
       <div>

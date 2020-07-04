@@ -13,7 +13,7 @@ class Waveform extends Component {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
     build_low_level: true,
-    isLoading: true,
+    isLoading: this.props.bokeh_model !== undefined,
   };
 
   componentDidUpdate() {
