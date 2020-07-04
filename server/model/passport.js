@@ -65,12 +65,19 @@ passport.use(
     function verify(accessToken, refreshToken, profile, done) {
       // console.log("access token: ", accessToken);
       // console.log("refresh token: " + refreshToken);
-      console.log("profile: " + JSON.stringify(profile));
+      // console.log("profile: " + JSON.stringify(profile));
+      // github prganization membership verification
       if (
-        octokit.orgs.checkMembershipForUser({
-          org: "XENON1T",
-          username: profile.username,
-        })
+        octokit.orgs.checkMembershipForUser(
+          {
+            org: "XENON1T",
+            username: profile.username,
+          } ||
+            octokit.orgs.checkMembershipForUser({
+              org: "XENONnT",
+              username: profile.username,
+            })
+        )
       ) {
         const doc = model.findOrCreate(
           { id: profile.id },
@@ -79,35 +86,31 @@ passport.use(
         );
         console.log("after update:", doc.username);
         return done(null, profile);
-      } else {
-        return done(null, false);
       }
-
-      // asynchronous verification
-      // process.nextTick(function () {
-      //   collection
-      //     .find({
-      //       $or: [
-      //         { github: profile._json.login },
-      //         { github_id: profile._json.login },
-      //         { github_id: "nupole" },
-      //       ],
-      //     }) // to be deleted
-      //     .toArray()
-      //     .then(async (items) => {
-      //       console.log(items);
-      //       if (items.length === 0) return done(null, false);
-      //       console.log("username is: ", profile.username);
-      //       const doc = await model.findOrCreate(
-      //         { id: profile.id },
-      //         { username: profile.username }
-      //         // { new: true } // return new doc after update to be saved
-      //       );
-      //       console.log("after update:", doc.username);
-      //       return done(null, profile);
-      //     })
-      //     .catch((err) => console.log(err));
-      // });
+      // rundb verification
+      process.nextTick(function () {
+        collection
+          .find({
+            $or: [
+              { github: profile._json.login },
+              { github_id: profile._json.login },
+            ],
+          }) // to be deleted
+          .toArray()
+          .then(async (items) => {
+            console.log(items);
+            if (items.length === 0) return done(null, false);
+            console.log("username is: ", profile.username);
+            const doc = await model.findOrCreate(
+              { id: profile.id },
+              { username: profile.username }
+              // { new: true } // return new doc after update to be saved
+            );
+            console.log("after update:", doc.username);
+            return done(null, profile);
+          })
+          .catch((err) => console.log(err));
+      });
     }
   )
 );
