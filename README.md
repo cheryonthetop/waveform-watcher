@@ -69,3 +69,9 @@ You will need key environmental variables. Ask the repo owner for them before yo
 ![Workflow-2](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-2.jpg)
 ![Workflow-3](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-3.jpg)
 ![Workflow-4](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-4.jpg)
+
+---
+
+## Documentation
+
+For more info, please read the documentation [here](https://yc104.gitbook.io/waveform-watcher/)
