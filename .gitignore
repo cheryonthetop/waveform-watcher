@@ -1,7 +1,7 @@
 .env
 generated
 dockerignore
-docker-compose
+docker-compose.yml
 
 # Pycharm
 .idea
