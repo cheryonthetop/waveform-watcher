@@ -56,3 +56,7 @@ You will need key environmental variables. Ask the repo owner for them before yo
 ## The structure and workflow of the app
 
 ![Workflow-1](.gitbook/assets/workflow-1.jpg) ![Workflow-2](.gitbook/assets/workflow-2.jpg) ![Workflow-3](.gitbook/assets/workflow-3.jpg) ![Workflow-4](.gitbook/assets/workflow-4.jpg)
+
+## Documentation
+
+For more info, read the documentation [here](https://yc104.gitbook.io/waveform-watcher/)
