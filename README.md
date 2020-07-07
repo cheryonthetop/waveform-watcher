@@ -2,7 +2,12 @@
 
 A web app developed to visualize and analyze waveform data collected from XENON1T and XENONnT experiment. You can [view the website here](https://waveform-watcher.azurewebsites.net/). Access restricted to only [XENON1T](https://github.com/XENON1T) and [XENONnT](https://github.com/XENONnT) organization.
 
+## The Login Page
+
 ![Login-Page](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/login.PNG)
+
+## The Main Page
+
 ![Home-Page](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/Home.PNG)
 
 ---
@@ -25,8 +30,9 @@ A web app developed to visualize and analyze waveform data collected from XENON1
 
 You will need key environmental variables. Ask the repo owner for them before you try running the app locally.
 
-### **Run with Docker Containers**
+### Run with Docker Containers
 
+1. Clone this repo with `git clone https://github.com/cheryonthetop/waveform-watcher.git` to your local machine or download as zip file
 1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop)
 1. cd into /client
 1. Run `docker build -t client` .
@@ -44,7 +50,7 @@ You will need key environmental variables. Ask the repo owner for them before yo
 
 8. Go to http://localhost:3000 on the browser
 
-### **Run without Docker Containers**
+### Run without Docker Containers
 
 1. Install [node](https://nodejs.org/en/download/) and [python](https://www.python.org/downloads/). Note these come with the needed package managers `npm` and `pip`. So there is no need for separte installations.
 1. cd into /client
