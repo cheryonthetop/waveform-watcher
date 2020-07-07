@@ -43,7 +43,7 @@ A web app developed to visualize and analyze waveform data collected from XENON1
 
 ## The structure and workflow of the app
 
-![Workflow-1](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-1.png)
-![Workflow-2](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-2.png)
-![Workflow-3](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-3.png)
-![Workflow-4](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-4.png)
+![Workflow-1](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-1.jpg)
+![Workflow-2](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-2.jpg)
+![Workflow-3](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-3.jpg)
+![Workflow-4](https://github.com/cheryonthetop/waveform-watcher/blob/master/images/workflow/workflow-4.jpg)
