@@ -1,6 +1,5 @@
 .env
 generated
-dockerignore
 docker-compose.yml
 
 # Pycharm
