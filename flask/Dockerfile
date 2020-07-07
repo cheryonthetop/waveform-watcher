@@ -29,17 +29,9 @@ RUN yum -y install \
     yum clean all && \
     localedef -i en_US -f UTF-8 en_US.UTF-8
 
-# CA certs
-RUN mkdir -p /etc/grid-security && \
-    cd /etc/grid-security && \
-    rm -rf certificates && \
-    wget -nv https://download.pegasus.isi.edu/containers/certificates.tar.gz && \
-    tar xzf certificates.tar.gz && \
-    rm -f certificates.tar.gz
+ADD create-env conda_xnt.yml requirements.txt /tmp/
 
-ADD create-env conda_xnt.yml requirements.txt /app/
-
-RUN cd /app && \
+RUN cd /tmp && \
     bash create-env /opt/XENONnT ${XENONnT_TAG} && \
     rm -f create-env conda_xnt.yml
 
