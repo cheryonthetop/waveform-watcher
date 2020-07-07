@@ -52,6 +52,7 @@ You will need key environmental variables. Ask the repo owner for them before yo
 6. Run `npm run dev`
 7. cd into /flask
 8. Run `pip install -r requirements.txt`
+9. Go to [http://localhost:3000](http://localhost:3000) on the browser
 
 ## The structure and workflow of the app
 
