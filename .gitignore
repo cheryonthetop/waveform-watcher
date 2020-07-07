@@ -5,5 +5,3 @@ docker-compose.yml
 # Pycharm
 .idea
 node_modules
-
-flask-server
