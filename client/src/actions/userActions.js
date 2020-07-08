@@ -5,10 +5,15 @@ import axios from "axios";
 // Check token & load user
 export const authenticate = () => (dispatch) => {
   console.log("authenticate action called");
+  console.log(window.localStorage.getItem("token"));
   // dispatch(loadAppData("cheryonthetop"));
+  const url =
+    process.env.REACT_APP_NODE_BACKEND_URL +
+    "/auth?token=" +
+    window.localStorage.getItem("token");
 
   axios
-    .get(`${process.env.REACT_APP_NODE_BACKEND_URL}/auth`, {
+    .get(url, {
       withCredentials: true,
     })
     .then((res) => {
@@ -36,14 +41,9 @@ export const authenticate = () => (dispatch) => {
 
 export const logout = () => (dispatch) => {
   console.log("logout action called");
+  window.localStorage.removeItem("token");
+  console.log(window.localStorage.getItem("token"));
   dispatch({
     type: LOGOUT,
   });
-};
-
-const config = {
-  headers: {
-    "Content-type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-  },
 };

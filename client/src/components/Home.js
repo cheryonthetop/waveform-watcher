@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { logout } from "../actions/userActions";
 import PropTypes from "prop-types";
 import { Redirect } from "react-router-dom";
 import Header from "./Header";
@@ -11,11 +10,6 @@ class Home extends Component {
   componentDidMount() {
     console.log("Waveform rendered");
   }
-
-  handleOnClick = () => {
-    this.props.dispatch(logout);
-    console.log("clicked logout");
-  };
 
   render() {
     if (!this.props.isAuthenticated) {

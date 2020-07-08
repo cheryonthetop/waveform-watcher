@@ -1,7 +1,14 @@
 import React, { Component } from "react";
+import { logout } from "../actions/userActions";
+import { connect } from "react-redux";
 import "./stylesheets/header.css";
 
-export default class Header extends Component {
+class Header extends Component {
+  handleOnClick = () => {
+    this.props.dispatch(logout());
+    console.log("clicked logout");
+  };
+
   render() {
     return (
       <div id="header">
@@ -23,3 +30,7 @@ export default class Header extends Component {
     );
   }
 }
+
+const mapStateToProps = (state) => ({});
+
+export default connect(mapStateToProps, null)(Header);

@@ -69,7 +69,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // Make our db accessible to our router
 app.use(function (req, res, next) {
   req.model = model;
-  req.token = req.cookies.remember_me;
+  req.token = req.query.token;
   console.log("request:" + req);
   console.log("request headers:" + req.headers);
   console.log("request token here:" + req.token);

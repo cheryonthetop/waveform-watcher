@@ -2,11 +2,15 @@ import React, { Component } from "react";
 import { authenticate } from "../actions/userActions";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
+import queryString from "query-string";
 
 class Success extends Component {
   componentDidMount() {
-    this.props.dispatch(authenticate());
-    this.render();
+    var query = queryString.parse(this.props.location.search);
+    if (query.token) {
+      window.localStorage.setItem("token", query.token);
+      this.props.history.push("/");
+    }
   }
 
   render() {

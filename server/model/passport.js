@@ -6,12 +6,6 @@ var randomString = require("./helpers/random-string");
 var MongoClient = require("mongodb").MongoClient;
 var { Octokit } = require("@octokit/rest");
 
-const octokit = new Octokit({
-  auth: "cherryonthetop",
-  userAgent: "waveform-watcher",
-  baseUrl: "https://api.github.com",
-});
-
 var CALLBACK_URL = process.env.CALLBACK_URL;
 
 // users data for sign-in backend only (serialization, remember-me cookie)
@@ -59,72 +53,39 @@ passport.use(
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
       callbackURL: CALLBACK_URL,
-      scope: ["user:email", "user:name", "user:login", "user:id"],
+      scope: ["read:user", "read: user"],
     },
 
     function verify(accessToken, refreshToken, profile, done) {
+      const octokit = new Octokit({
+        auth: accessToken,
+        baseUrl: "https://api.github.com",
+      });
       // console.log("access token: ", accessToken);
       // console.log("refresh token: " + refreshToken);
       // console.log("profile: " + JSON.stringify(profile));
-      // github prganization membership verification
-
-      // octokit.orgs
-      //   .checkMembershipForUser({
-      //     org: "XENON1T",
-      //     username: profile.username,
-      //   })
-      //   .then((value) => {
-      //     console.log(value);
-      //     const doc = model.findOrCreate(
-      //       { id: profile.id },
-      //       { username: profile.username }
-      //       // { new: true } // return new doc after update to be saved
-      //     );
-      //     console.log("after update:", doc.username);
-      //     return done(null, profile);
-      //   })
-      //   .catch((err) => console.log(err));
-      // octokit.orgs
-      //   .checkMembershipForUser({
-      //     org: "XENONnT",
-      //     username: profile.username,
-      //   })
-      //   .then((value) => {
-      //     console.log(value);
-      //     const doc = model.findOrCreate(
-      //       { id: profile.id },
-      //       { username: profile.username }
-      //       // { new: true } // return new doc after update to be saved
-      //     );
-      //     console.log("after update:", doc.username);
-      //     return done(null, profile);
-      //   })
-      //   .catch((err) => console.log(err));
-      // rundb verification
-      process.nextTick(function () {
-        collection
-          .find({
-            $or: [
-              { github: profile._json.login },
-              { github_id: profile._json.login },
-              { github_id: "nupole" },
-            ],
-          }) // to be deleted
-          .toArray()
-          .then(async (items) => {
-            console.log(items);
-            if (items.length === 0) return done(null, false);
-            console.log("username is: ", profile.username);
-            const doc = await model.findOrCreate(
-              { id: profile.id },
-              { username: profile.username }
-              // { new: true } // return new doc after update to be saved
-            );
-            console.log("after update:", doc.username);
-            return done(null, profile);
-          })
-          .catch((err) => console.log(err));
-      });
+      // github organization membership verification
+      user = profile.username;
+      checkMembershipForUser(octokit, user, "XENON1T")
+        .then((value) => {
+          console.log("user " + user + "is in " + "XENON1T");
+          model.findOrCreate({ id: profile.id }, { username: user });
+          return done(null, profile);
+        })
+        .catch((err) => {
+          console.log(err);
+          checkMembershipForUser(octokit, user, "XENONnT")
+            .then((value) => {
+              console.log("user " + user + "is in " + "XENONnT");
+              model.findOrCreate({ id: profile.id }, { username: user });
+              return done(null, profile);
+            })
+            .catch((err) => {
+              const verified = checkMembershipForUserInDB(profile);
+              if (verified) return done(null, profile);
+              return done(null, false);
+            });
+        });
     }
   )
 );
@@ -189,6 +150,43 @@ function issueToken(user, done) {
   });
   console.log("token issued: " + token);
   return done(null, token);
+}
+
+function checkMembershipForUser(octokit, user, org) {
+  return octokit.orgs.checkMembershipForUser({
+    org: org,
+    username: user,
+  });
+}
+
+function checkMembershipForUserInDB(profile) {
+  // rundb verification
+  process.nextTick(function () {
+    collection
+      .find({
+        $or: [
+          { github: profile._json.login },
+          { github_id: profile._json.login },
+        ],
+      }) // to be deleted
+      .toArray()
+      .then(async (items) => {
+        console.log(items);
+        if (items.length === 0) return false;
+        console.log("username is: ", profile.username);
+        const doc = await model.findOrCreate(
+          { id: profile.id },
+          { username: profile.username }
+          // { new: true } // return new doc after update to be saved
+        );
+        console.log("after update:", doc.username);
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
+  });
 }
 
 console.log("passport setup finished");

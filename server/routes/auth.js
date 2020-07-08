@@ -4,7 +4,6 @@ var passport = require("passport");
 var router = express.Router();
 var issueToken = require("../model/helpers/issue-token");
 var mongoose = require("mongoose");
-const { ENGINE_METHOD_NONE } = require("constants");
 var model = mongoose.model("auth");
 
 const authCheck = (req, res, next) => {
@@ -42,7 +41,7 @@ router.get("/", authCheck, function (req, res) {
 router.get(
   "/github",
   passport.authenticate("github", {
-    scope: ["user:email", "user:name", "user:login", "user:id"],
+    scope: ["read:user", "read:org"],
   })
 );
 
@@ -63,9 +62,11 @@ router.get(
       }
       res.cookie("remember_me", token, {
         path: "/",
+        httpOnly: true,
         maxAge: 604800000,
         secure: true,
       });
+      req.token = token;
       return next();
     });
   },
@@ -73,7 +74,7 @@ router.get(
     // model.findOneAndUpdate({ id: req.user.id }, { cb_complete: true });
     console.log("updated");
     // Successful authentication, respond with success.
-    res.redirect(process.env.HOMEPAGE + "/login/success");
+    res.redirect(process.env.HOMEPAGE + "/login/success?token=" + req.token);
   }
 );
 
