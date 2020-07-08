@@ -68,16 +68,20 @@ passport.use(
       // console.log("profile: " + JSON.stringify(profile));
       // github prganization membership verification
       if (
-        octokit.orgs.checkMembershipForUser(
-          {
+        octokit.orgs
+          .checkMembershipForUser({
             org: "XENON1T",
             username: profile.username,
-          } ||
-            octokit.orgs.checkMembershipForUser({
-              org: "XENONnT",
-              username: profile.username,
-            })
-        )
+          })
+          .then((value) => console.log(value))
+          .catch((err) => console.log(err)) ||
+        octokit.orgs
+          .checkMembershipForUser({
+            org: "XENONnT",
+            username: profile.username,
+          })
+          .then((value) => console.log(value))
+          .catch((err) => console.log(err))
       ) {
         const doc = model.findOrCreate(
           { id: profile.id },

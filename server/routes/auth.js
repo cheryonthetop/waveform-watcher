@@ -4,6 +4,7 @@ var passport = require("passport");
 var router = express.Router();
 var issueToken = require("../model/helpers/issue-token");
 var mongoose = require("mongoose");
+const { ENGINE_METHOD_NONE } = require("constants");
 var model = mongoose.model("auth");
 
 const authCheck = (req, res, next) => {
@@ -64,6 +65,7 @@ router.get(
         path: "/",
         httpOnly: true,
         maxAge: 604800000,
+        sameSite: "none",
       });
       return next();
     });
