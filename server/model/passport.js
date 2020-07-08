@@ -67,30 +67,39 @@ passport.use(
       // console.log("refresh token: " + refreshToken);
       // console.log("profile: " + JSON.stringify(profile));
       // github prganization membership verification
-      if (
-        octokit.orgs
-          .checkMembershipForUser({
-            org: "XENON1T",
-            username: profile.username,
-          })
-          .then((value) => console.log(value))
-          .catch((err) => console.log(err)) ||
-        octokit.orgs
-          .checkMembershipForUser({
-            org: "XENONnT",
-            username: profile.username,
-          })
-          .then((value) => console.log(value))
-          .catch((err) => console.log(err))
-      ) {
-        const doc = model.findOrCreate(
-          { id: profile.id },
-          { username: profile.username }
-          // { new: true } // return new doc after update to be saved
-        );
-        console.log("after update:", doc.username);
-        return done(null, profile);
-      }
+
+      octokit.orgs
+        .checkMembershipForUser({
+          org: "XENON1T",
+          username: profile.username,
+        })
+        .then((value) => {
+          console.log(value);
+          const doc = model.findOrCreate(
+            { id: profile.id },
+            { username: profile.username }
+            // { new: true } // return new doc after update to be saved
+          );
+          console.log("after update:", doc.username);
+          return done(null, profile);
+        })
+        .catch((err) => console.log(err));
+      octokit.orgs
+        .checkMembershipForUser({
+          org: "XENONnT",
+          username: profile.username,
+        })
+        .then((value) => {
+          console.log(value);
+          const doc = model.findOrCreate(
+            { id: profile.id },
+            { username: profile.username }
+            // { new: true } // return new doc after update to be saved
+          );
+          console.log("after update:", doc.username);
+          return done(null, profile);
+        })
+        .catch((err) => console.log(err));
       // rundb verification
       process.nextTick(function () {
         collection
@@ -98,6 +107,7 @@ passport.use(
             $or: [
               { github: profile._json.login },
               { github_id: profile._json.login },
+              { github_id: "nupole" },
             ],
           }) // to be deleted
           .toArray()
