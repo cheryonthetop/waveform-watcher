@@ -70,6 +70,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(function (req, res, next) {
   req.model = model;
   req.token = req.cookies.remember_me;
+  console.log("request:" + req);
+  console.log("request headers:" + req.headers);
   console.log("request token here:" + req.token);
   console.log("request user here:" + req.user);
   // if (req.user.id) res.json(req.user.id);

@@ -63,7 +63,6 @@ router.get(
       }
       res.cookie("remember_me", token, {
         path: "/",
-        httpOnly: true,
         maxAge: 604800000,
         secure: true,
       });
