@@ -22,7 +22,7 @@
     "debug": "2.6.9",
     "dotenv": "8.1.0",
     "ejs": "2.6.1",
-    "express": "^4.17.1",
+    "express": "4.17.1",
     "express-session": "1.17.1",
     "flash": "0.0.0",
     "flask": "0.2.10",
