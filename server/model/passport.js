@@ -6,6 +6,11 @@ var randomString = require("./helpers/random-string");
 var MongoClient = require("mongodb").MongoClient;
 var { Octokit } = require("@octokit/rest");
 
+const octokit = new Octokit({
+  auth: process.env.GITHUB_PERSONAL_TOKEN,
+  baseUrl: "https://api.github.com",
+});
+
 var CALLBACK_URL = process.env.CALLBACK_URL;
 
 // users data for sign-in backend only (serialization, remember-me cookie)
@@ -57,10 +62,6 @@ passport.use(
     },
 
     function verify(accessToken, refreshToken, profile, done) {
-      const octokit = new Octokit({
-        auth: accessToken,
-        baseUrl: "https://api.github.com",
-      });
       // console.log("access token: ", accessToken);
       // console.log("refresh token: " + refreshToken);
       // console.log("profile: " + JSON.stringify(profile));
@@ -81,6 +82,7 @@ passport.use(
               return done(null, profile);
             })
             .catch((err) => {
+              console.log(err);
               const verified = checkMembershipForUserInDB(profile);
               if (verified) return done(null, profile);
               return done(null, false);
