@@ -44,7 +44,7 @@ renderer = hv.renderer('bokeh')
 print("renderer created: ", renderer)
 
 # Connect to MongoDB
-APP_DB_URI = 'mongodb+srv://char_dev:2Qz2o5Kh8agcVrXB@cluster0-oumsb.mongodb.net/waveform?retryWrites=true&w=majority'
+APP_DB_URI = os.environ.get("APP_DB_URI", None)
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_auth = my_db["auth"]
 my_app = my_db["app"]
