@@ -79,9 +79,9 @@ export const saveWaveform = (
 
   axios
     .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/sw`, body, config)
-    .then(function (response) {
-      console.log(response.data);
-      if (response.status === 200) {
+    .then(function (res) {
+      console.log(res.data);
+      if (res.status === 200) {
         dispatch({
           type: SAVE_WAVEFORM_SUCCESS,
         });
@@ -127,9 +127,9 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
 
   axios
     .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/dw`, body, config)
-    .then(function (response) {
-      console.log(response.data);
-      if (response.status === 200) {
+    .then(function (res) {
+      console.log(res.data);
+      if (res.status === 200) {
         dispatch({
           type: DELETE_WAVEFORM_SUCCESS,
         });

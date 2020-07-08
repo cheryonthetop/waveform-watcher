@@ -7,28 +7,33 @@ var mongoose = require("mongoose");
 var model = mongoose.model("auth");
 
 const authCheck = (req, res, next) => {
-  var token = req.token;
-  console.log("request token in auth: " + token);
-  if (!token) return next();
-  model.find({}, (err, users) => {
-    users.map((user) => {
-      if (user.tokens.has(token)) {
-        console.log("found client token!!");
-        res.json({
-          status: 200,
-          user: user.username,
-          id: user.id,
-          // token: req.token,
-          // cookies: req.cookies,
-        });
-      }
+  // if browser allows third-party cookie
+  if (req.user)
+    res.status(200).json({
+      user: req.user.username,
+      id: req.user.id,
     });
-  });
+  // if browser does not allow third party cookie
+  else {
+    var token = req.token;
+    if (!token) return next();
+    model.find({}, (err, users) => {
+      users.map((user) => {
+        if (user.tokens.has(token)) {
+          console.log("found client token!!");
+          res.json({
+            status: 200,
+            user: user.username,
+            id: user.id,
+          });
+        }
+      });
+    });
+  }
 };
 
 router.get("/", authCheck, function (req, res) {
-  res.json({
-    status: 401,
+  res.status(401).json({
     authenticated: false,
   });
 });

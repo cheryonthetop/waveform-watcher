@@ -18,7 +18,7 @@ export const authenticate = () => (dispatch) => {
     })
     .then((res) => {
       console.log("Auth response with status" + res.data["status"]);
-      if (res.data["status"] === 200) {
+      if (res.status === 200) {
         dispatch({
           type: AUTH_SUCCESS,
           payload: res.data,
