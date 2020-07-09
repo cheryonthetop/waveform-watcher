@@ -12,7 +12,10 @@ export default class Events extends Component {
     return (
       <div>
         <strong>Event: </strong>
-        <Select options={[]} onChange={this.handleStateChangeEvent} />
+        <Select
+          options={[{ label: "1" }, { label: "2" }, { label: "3" }]}
+          onChange={this.handleStateChangeEvent}
+        />
       </div>
     );
   }

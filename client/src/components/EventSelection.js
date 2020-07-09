@@ -21,29 +21,26 @@ class EventSelection extends Component {
       this.props.event_plot
     ) {
       this.setState({ isLoading: false }, () => {
-        this.deleteWaveform();
-        this.loadWaveform();
+        this.deleteEventPlots();
+        this.loadEventPlots();
         this.setState({ event_plot: this.props.event_plot });
       });
     }
   }
 
-  deleteWaveform() {
+  deleteEventPlots() {
     var container = document.getElementById("graph");
     while (container && container.hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
-  loadWaveform() {
+  loadEventPlots() {
     console.log("loading waveform");
-    this.deleteWaveform();
+    this.deleteEventPlots();
     if (this.state.event_plot !== this.props.event_plot)
       embed.embed_item(this.props.event_plot, "graph");
   }
 
-  handleLoadPlot() {
-    embed.embed_item(this.props.event_plot, "graph");
-  }
   handleStateChangeRunID = (value) => {
     this.setState({ run_id: value.label });
   };
@@ -52,7 +49,7 @@ class EventSelection extends Component {
     this.setState({ isLoading: true });
   };
 
-  handleOnClick = () => {
+  handleOnClickWaveform = () => {
     this.props.history.push("/waveform");
   };
 
@@ -71,7 +68,7 @@ class EventSelection extends Component {
               handleLoading={this.handleLoading}
             />
             <br />
-            <Button onClick={this.handleOnClick} size="sm">
+            <Button onClick={this.handleOnClickWaveform} size="sm">
               Go to waveform{" "}
             </Button>
           </div>

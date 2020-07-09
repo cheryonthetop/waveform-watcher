@@ -16,6 +16,8 @@ import straxen
 import json
 from holoviews_waveform_display import waveform_display
 from context import xenon1t_dali
+# from waveforms import WaveformWatcher
+
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 os.environ.update({'ROOT PATH' : ROOT_PATH})
 sys.path.append(os.path.join(ROOT_PATH, 'modules'))
@@ -41,6 +43,8 @@ runs = st.select_runs()
 available_runs = runs['name']
 renderer = hv.renderer('bokeh')
 print("renderer created: ", renderer)
+# event_selection = WaveformWatcher().event_selection()
+# print(event_selection)
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
@@ -92,6 +96,63 @@ def send_data():
     json_str = dumps(document)
     return make_response(json_str, 200)
 
+@app.route('/api/ge', methods = ['POST'])
+def get_event_plot():
+    if request.is_json:
+        req = request.get_json()
+        run_id = req["run_id"]
+        events = st.get_df(run_id, 'event_info')
+        dset = hv.Dataset(events)
+        # Fields
+        DIMS = [
+        ["cs1", "cs2"],
+        ["z","r" ],
+        ["e_light", 'e_charge'],
+        ["e_light", 'e_ces'],
+        ["drift_time", "n_peaks"],
+        ]
+        # Use different color for each plot
+        colors = hv.Cycle('Category10').values
+        plots = [
+            hv.Points(dset, dims).opts(color=c)
+            for c, dims in zip(colors, DIMS)
+        ]
+        
+        # Construct Layout to be viewed
+        event_selection = hv.Layout(plots).cols(3)
+
+        # Send to client
+        bokeh_model = renderer.server_doc(event_selection).roots[0]
+        bokeh_model_json = bokeh.embed.json_item(bokeh_model)        
+        return json.dumps(bokeh_model_json)
+
+
+def get_data(run_id, events):
+    
+    #TODO: Check types and handle appropriately.  
+    # Can specify either int for event ID or time range.  
+    # Or list of these.  If not list, then convert to list
+    data_found = True # implement by checking collection 'waveform_data', false if not in cache
+    if not data_found:
+        raise FileNotFoundError
+
+
+    df = st.get_array(run_id, "event_info")
+    event = df[events[0]]# insert event into mongo in other python script
+    return event
+
+def cache_data(run_id, events):
+    # This would add a new document into a new collection 'fetch' in mongo
+    # with the format: 
+    # {"status" : "new", "run_id" : run_id, "events" : events}
+    # after checking that the data already isn't in the cache somehow by calling
+    # get_data()
+    
+    #check if events is list, maybe start with single events
+    try:
+        get_data(run_id, events)
+    except FileNotFoundError:
+        pass # insert mongo document into 'fetch'
 
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
