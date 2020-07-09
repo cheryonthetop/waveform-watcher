@@ -1,15 +1,15 @@
 import React, { Component } from "react";
-import "./stylesheets/waveform.css";
+import "../stylesheets/waveform.css";
 import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
-import Tags from "./Tags";
-import Runs from "./Runs";
-import GetNewWaveform from "./GetNewWaveform";
-import Param from "./Param";
-import Events from "./Events";
+import Tags from "../Tags";
+import Runs from "../Runs";
+import GetNewWaveform from "../GetNewWaveform";
+import Param from "../Param";
+import Events from "../Events";
 import { Redirect } from "react-router-dom";
-import Header from "./Header";
+import Header from "../Header";
 
 class Waveform extends Component {
   state = {

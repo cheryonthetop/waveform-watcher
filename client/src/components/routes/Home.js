@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Redirect } from "react-router-dom";
-import Header from "./Header";
-import EventSelection from "./EventSelection";
-import "./stylesheets/index.css";
+import Header from "../Header";
+import EventSelection from "../EventSelection";
+import "../stylesheets/index.css";
 
 class Home extends Component {
   componentDidMount() {

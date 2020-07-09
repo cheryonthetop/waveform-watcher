@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import "./stylesheets/login.css";
+import "../stylesheets/login.css";
 import { Redirect } from "react-router-dom";
 
 class Login extends Component {
