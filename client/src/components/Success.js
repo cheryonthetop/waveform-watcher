@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { authenticate } from "../actions/userActions";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import queryString from "query-string";

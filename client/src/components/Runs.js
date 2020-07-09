@@ -30,13 +30,6 @@ class Runs extends Component {
     }
   };
 
-  handleStateChangeBuildLevel = (value, { action, removedValue }) => {
-    switch (action) {
-      case "select-option":
-        this.props.handleStateChangeBuildLevel(value);
-    }
-  };
-
   render() {
     return (
       <div>
@@ -47,9 +40,6 @@ class Runs extends Component {
           isDisabled={!this.state.dataLoaded}
           isLoading={!this.state.dataLoaded}
         />
-        <br></br>
-        <strong>Event: </strong>
-        <Select options={[]} onChange={this.handleStateChangeBuildLevel} />
       </div>
     );
   }

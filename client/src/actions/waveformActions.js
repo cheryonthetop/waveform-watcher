@@ -8,6 +8,8 @@ import {
   SWITCH_WAVEFORM,
   DELETE_WAVEFORM_FAILURE,
   DELETE_WAVEFORM_SUCCESS,
+  GET_EVENT_PLOT_SUCCESS,
+  GET_EVENT_PLOT_FAILURE,
 } from "./types";
 import axios from "axios";
 
@@ -46,6 +48,45 @@ export const getWaveform = (user, run_id, event) => (dispatch) => {
       console.log(err);
       dispatch({
         type: GET_WAVEFORM_FAILURE,
+      });
+    });
+};
+
+export const getEventPlot = (user, run_id, event) => (dispatch) => {
+  console.log(run_id);
+  // Headers
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      withCredentials: true,
+    },
+  };
+
+  // Request body
+  const body = JSON.stringify({
+    user: user,
+    run_id: run_id,
+    event: event,
+  });
+
+  axios
+    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/ge`, body, config)
+    .then(function (response) {
+      console.log(response.data);
+      dispatch({
+        type: GET_EVENT_PLOT_SUCCESS,
+        payload: {
+          run_id: run_id,
+          event: event,
+          event_plot: response.data,
+        },
+      });
+      return response.data;
+    })
+    .catch((err) => {
+      console.log(err);
+      dispatch({
+        type: GET_EVENT_PLOT_FAILURE,
       });
     });
 };

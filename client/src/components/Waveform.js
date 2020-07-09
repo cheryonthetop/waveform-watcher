@@ -7,6 +7,9 @@ import Tags from "./Tags";
 import Runs from "./Runs";
 import GetNewWaveform from "./GetNewWaveform";
 import Param from "./Param";
+import Events from "./Events";
+import { Redirect } from "react-router-dom";
+import Header from "./Header";
 
 class Waveform extends Component {
   state = {
@@ -46,7 +49,7 @@ class Waveform extends Component {
     this.setState({ run_id: value.label });
   };
 
-  handleStateChangeBuildLevel = (value) => {
+  handleStateChangeEvent = (value) => {
     this.setState({ event: value.label });
   };
 
@@ -55,31 +58,39 @@ class Waveform extends Component {
   };
 
   render() {
+    if (!this.props.isAuthenticated) {
+      return <Redirect to="/login" />;
+    }
     const { run_id, event, isLoading } = this.state;
     return (
-      <div id="graph-container">
-        <div id="control-box">
-          <div id="control">
-            <h3> Control </h3>
-            <Runs
-              handleStateChangeRunID={this.handleStateChangeRunID}
-              handleStateChangeBuildLevel={this.handleStateChangeBuildLevel}
-            />
-            <GetNewWaveform
-              run_id={run_id}
-              event={event}
-              user={this.props.user}
-              handleLoading={this.handleLoading}
-            />
-            <Tags />
+      <div>
+        <Header />
+        <div id="graph-container">
+          <div id="control-box">
+            <div id="control">
+              <h3> Control </h3>
+              <Runs handleStateChangeRunID={this.handleStateChangeRunID} />
+              <br />
+              <Events handleStateChangeEvent={this.handleStateChangeEvent} />
+              <GetNewWaveform
+                run_id={run_id}
+                event={event}
+                user={this.props.user}
+                handleLoading={this.handleLoading}
+              />
+              <Tags />
+            </div>
           </div>
-        </div>
 
-        <div id="graph-box">
-          <Loading isLoading={isLoading}>
-            <Param run_id={this.props.run_id} event={this.props.event}></Param>
-            <div id="graph" />
-          </Loading>
+          <div id="graph-box">
+            <Loading isLoading={isLoading}>
+              <Param
+                run_id={this.props.run_id}
+                event={this.props.event}
+              ></Param>
+              <div id="graph" />
+            </Loading>
+          </div>
         </div>
       </div>
     );

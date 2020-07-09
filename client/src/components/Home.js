@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import PropTypes from "prop-types";
 import { Redirect } from "react-router-dom";
 import Header from "./Header";
-import Waveform from "./Waveform";
+import EventSelection from "./EventSelection";
 import "./stylesheets/index.css";
 
 class Home extends Component {
@@ -24,7 +24,7 @@ class Home extends Component {
 
           {/* Body */}
           <div className="body" style={{ textAlign: "center" }}>
-            <Waveform />
+            <EventSelection />
           </div>
         </div>
       </div>

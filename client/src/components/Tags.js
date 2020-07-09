@@ -56,7 +56,7 @@ class Tags extends Component {
     if (actionMeta.action === "select-option") {
       this.setState({ comments: newValue.data.comments });
       const { run_id, event, bokeh_model } = newValue.data;
-      if (bokeh_model && run_id && event)
+      if (bokeh_model && run_id)
         this.props.dispatch(switchWaveform(run_id, event, bokeh_model));
     }
   };

@@ -2,6 +2,12 @@ import {
   LOAD_SUCCESS,
   GET_WAVEFORM_SUCCESS,
   SWITCH_WAVEFORM,
+  LOAD_FAILURE,
+  GET_EVENT_PLOT_FAILURE,
+  SAVE_WAVEFORM_FAILURE,
+  GET_WAVEFORM_FAILURE,
+  GET_EVENT_PLOT_SUCCESS,
+  DELETE_WAVEFORM_FAILURE,
 } from "../actions/types";
 
 const initialState = {
@@ -45,6 +51,18 @@ export default function (state = initialState, action) {
         event: action.payload.event,
         bokeh_model: action.payload.bokeh_model,
       };
+    case GET_EVENT_PLOT_SUCCESS:
+      return {
+        ...state,
+        run_id: action.payload.run_id,
+        event: action.payload.event,
+        event_plot: action.payload.event_plot,
+      };
+    case LOAD_FAILURE:
+    case DELETE_WAVEFORM_FAILURE:
+    case GET_EVENT_PLOT_FAILURE:
+    case SAVE_WAVEFORM_FAILURE:
+    case GET_WAVEFORM_FAILURE:
     default:
       return state;
   }

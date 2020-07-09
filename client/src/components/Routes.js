@@ -5,6 +5,7 @@ import Home from "./Home";
 import Login from "./Login";
 import Success from "./Success";
 import Failure from "./Failure";
+import Waveform from "./Waveform";
 
 class Routes extends Component {
   componentDidMount() {}
@@ -17,6 +18,7 @@ class Routes extends Component {
           <Route exact path="/login" component={Login} />
           <Route exact path="/login/success" component={Success} />
           <Route exact path="/login/failure" component={Failure} />
+          <Route exact path="/waveform" component={Waveform} />
           <Route exact path="/" component={Home} />
         </div>
       </BrowserRouter>
