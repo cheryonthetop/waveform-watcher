@@ -35,11 +35,9 @@ hv.extension("bokeh")
 
 # # Read live data
 # Load data
-st_low = straxen.contexts.xenon1t_dali(build_lowlevel=True)
-st_high = straxen.contexts.xenon1t_dali(build_lowlevel=False)
-runs_low = st_low.select_runs()
-runs_high = st_high.select_runs()
-available_runs = runs_low['name']
+st = straxen.contexts.xenon1t_dali(build_lowlevel=False)
+runs = st.select_runs()
+available_runs = runs['name']
 renderer = hv.renderer('bokeh')
 print("renderer created: ", renderer)
 
@@ -82,7 +80,6 @@ def send_data():
         print("does not have record for the user: ", user)
         post = {'user': user,                 
                 "run_id": "",
-                "build_low_level": True,
                 "bokeh_model": None,
                 "tags_data": []}
         document = my_app.insert_one(post)
@@ -97,19 +94,12 @@ def get_waveform():
         req = request.get_json()
         print(req)
         run_id = req["run_id"]
-        build_low_level = req["build_low_level"]
         user = req["user"]   
-        plot = None         
-        if build_low_level:
-            df = st_low.get_array(run_id, "event_info")
-            event = df[4]
-            print(event)
-            plot = waveform_display(context = st_low, run_id = str(run_id), time_within=event)
-        else:
-            df = st_high.get_array(run_id, "event_info")
-            event = df[4]
-            print(event)
-            plot = waveform_display(context = st_high, run_id = str(run_id), time_within=event)
+        event = req["event"]
+        df = st.get_array(run_id, "event_info")
+        event = df[4]
+        print(event)
+        plot = waveform_display(context = st, run_id = str(run_id), time_within=event)
         
         # A container for Bokeh Models to be reflected to the client side BokehJS library.
         bokeh_document = renderer.server_doc(plot)
@@ -123,7 +113,7 @@ def get_waveform():
             my_app.update_one({"user": user}, 
             {"$set": { 
                 "run_id": run_id, 
-                "build_low_level" : build_low_level,
+                "event" : event,
                 "bokeh_model": bokeh_model_json,
                 }
             }
@@ -132,7 +122,7 @@ def get_waveform():
             post = {
                 "user": user,
                 "run_id": run_id,
-                "build_low_level": build_low_level,
+                "event": event,
                 "bokeh_model": bokeh_model_json,
                 "tags_data": [],
                 }
@@ -146,18 +136,18 @@ def get_waveform():
 def save_waveform():
     if request.is_json:
         req = request.get_json()
-        print(req["user"], req["tag"], req["comments"], req["build_low_level"], req["run_id"])
+        print(req["user"], req["tag"], req["comments"], req["run_id"])
         user = req["user"]  
         tag = req["tag"]
         comments = req["comments"]
-        build_low_level = req["build_low_level"]
+        event = req["event"]
         run_id = req["run_id"]
         bokeh_model = req["bokeh_model"]
         # Update database
         my_app.update_one({"user": user}, 
             {"$set": { 
                 "run_id": run_id, 
-                "build_low_level" : build_low_level,
+                "event" : event,
                 "bokeh_model": bokeh_model,
                 }
             }
@@ -170,7 +160,7 @@ def save_waveform():
                 {"$set": { 
                         "tags_data.$."+tag+".comments": comments,
                         "tags_data.$."+tag+".run_id": run_id,
-                        "tags_data.$."+tag+".build_low_level": build_low_level,
+                        "tags_data.$."+tag+".event": event,
                         "tags_data.$."+tag+".bokeh_model": bokeh_model
                     }
                 }
@@ -183,7 +173,7 @@ def save_waveform():
                         "tags_data": {
                             tag: {
                                 "run_id": run_id,
-                                "build_low_level": build_low_level,
+                                "event": event,
                                 "comments": comments,
                                 "bokeh_model": bokeh_model,
                             }

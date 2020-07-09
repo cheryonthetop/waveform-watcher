@@ -17,7 +17,8 @@ export const authenticate = () => (dispatch) => {
       withCredentials: true,
     })
     .then((res) => {
-      console.log("Auth response with status" + res.data["status"]);
+      console.log("Auth response with status " + res.status);
+      console.log("response" + JSON.stringify(res.data));
       if (res.status === 200) {
         dispatch({
           type: AUTH_SUCCESS,

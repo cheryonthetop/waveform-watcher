@@ -11,7 +11,7 @@ import {
 } from "./types";
 import axios from "axios";
 
-export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
+export const getWaveform = (user, run_id, event) => (dispatch) => {
   console.log(run_id);
   // Headers
   const config = {
@@ -25,7 +25,7 @@ export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
   const body = JSON.stringify({
     user: user,
     run_id: run_id,
-    build_low_level: build_low_level,
+    event: event,
   });
 
   axios
@@ -36,7 +36,7 @@ export const getWaveform = (user, run_id, build_low_level) => (dispatch) => {
         type: GET_WAVEFORM_SUCCESS,
         payload: {
           run_id: run_id,
-          build_low_level: build_low_level,
+          event: event,
           bokeh_model: response.data,
         },
       });
@@ -56,7 +56,7 @@ export const saveWaveform = (
   comments,
   bokeh_model,
   run_id,
-  build_low_level
+  event
 ) => (dispatch) => {
   console.log("save waveform action called");
   // Headers
@@ -74,7 +74,7 @@ export const saveWaveform = (
     comments: comments,
     bokeh_model: bokeh_model,
     run_id: run_id,
-    build_low_level: build_low_level,
+    event: event,
   });
 
   axios
@@ -97,14 +97,12 @@ export const saveWaveform = (
     });
 };
 
-export const switchWaveform = (run_id, build_low_level, bokeh_model) => (
-  dispatch
-) => {
+export const switchWaveform = (run_id, event, bokeh_model) => (dispatch) => {
   dispatch({
     type: SWITCH_WAVEFORM,
     payload: {
       run_id: run_id,
-      build_low_level: build_low_level,
+      event: event,
       bokeh_model: bokeh_model,
     },
   });

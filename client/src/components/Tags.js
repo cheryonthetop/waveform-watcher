@@ -55,11 +55,9 @@ class Tags extends Component {
     this.setState({ value: newValue });
     if (actionMeta.action === "select-option") {
       this.setState({ comments: newValue.data.comments });
-      const { run_id, build_low_level, bokeh_model } = newValue.data;
-      if (bokeh_model && run_id && build_low_level)
-        this.props.dispatch(
-          switchWaveform(run_id, build_low_level, bokeh_model)
-        );
+      const { run_id, event, bokeh_model } = newValue.data;
+      if (bokeh_model && run_id && event)
+        this.props.dispatch(switchWaveform(run_id, event, bokeh_model));
     }
   };
 
@@ -105,12 +103,12 @@ class Tags extends Component {
 
   handleSave = () => {
     const { value } = this.state;
-    const { user, bokeh_model, run_id, build_low_level } = this.props;
+    const { user, bokeh_model, run_id, event } = this.props;
     if (value && bokeh_model) {
       const tag = value.label;
       const comments = value.data.comments;
       this.props.dispatch(
-        saveWaveform(user, tag, comments, bokeh_model, run_id, build_low_level)
+        saveWaveform(user, tag, comments, bokeh_model, run_id, event)
       );
     } else {
       this.handleShow();
@@ -208,7 +206,7 @@ const mapStateToProps = (state) => ({
   tags_data: state.waveform.tags_data,
   bokeh_model: state.waveform.bokeh_model,
   run_id: state.waveform.run_id,
-  build_low_level: state.waveform.build_low_level,
+  event: state.waveform.event,
 });
 
 export default connect(mapStateToProps, null)(Tags);

@@ -12,7 +12,7 @@ class Waveform extends Component {
   state = {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
-    build_low_level: true,
+    event: "",
     isLoading: false,
   };
 
@@ -47,7 +47,7 @@ class Waveform extends Component {
   };
 
   handleStateChangeBuildLevel = (value) => {
-    this.setState({ build_low_level: value.label });
+    this.setState({ event: value.label });
   };
 
   handleLoading = () => {
@@ -55,7 +55,7 @@ class Waveform extends Component {
   };
 
   render() {
-    const { run_id, build_low_level, isLoading } = this.state;
+    const { run_id, event, isLoading } = this.state;
     return (
       <div id="graph-container">
         <div id="control-box">
@@ -67,7 +67,7 @@ class Waveform extends Component {
             />
             <GetNewWaveform
               run_id={run_id}
-              build_low_level={build_low_level}
+              event={event}
               user={this.props.user}
               handleLoading={this.handleLoading}
             />
@@ -77,10 +77,7 @@ class Waveform extends Component {
 
         <div id="graph-box">
           <Loading isLoading={isLoading}>
-            <Param
-              run_id={this.props.run_id}
-              build_low_level={this.props.build_low_level}
-            ></Param>
+            <Param run_id={this.props.run_id} event={this.props.event}></Param>
             <div id="graph" />
           </Loading>
         </div>
@@ -94,7 +91,7 @@ const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
   run_id: state.waveform.run_id,
   bokeh_model: state.waveform.bokeh_model,
-  build_low_level: state.waveform.build_low_level,
+  event: state.waveform.event,
 });
 
 export default connect(mapStateToProps, null)(Waveform);

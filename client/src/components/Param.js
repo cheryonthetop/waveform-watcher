@@ -9,12 +9,9 @@ export default class Param extends Component {
         hidden={!this.props.run_id}
       >
         <strong>Run ID: </strong>
-        <input value={this.props.run_id} contentEditable={false}></input>
-        <strong style={{ marginLeft: "10px" }}>Build Low Level: </strong>
-        <input
-          value={this.props.build_low_level}
-          contentEditable={false}
-        ></input>
+        <input defaultValue={this.props.run_id} readOnly></input>
+        <strong style={{ marginLeft: "10px" }}>Event: </strong>
+        <input defaultValue={this.props.event} readOnly></input>
       </div>
     );
   }

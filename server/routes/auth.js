@@ -8,21 +8,22 @@ var model = mongoose.model("auth");
 
 const authCheck = (req, res, next) => {
   // if browser allows third-party cookie
-  if (req.user)
-    res.status(200).json({
-      user: req.user.username,
-      id: req.user.id,
+  if (req.user) {
+    console.log("type of req.user is " + typeof req.user);
+    const { username, id } = req.user[0];
+    res.status(200).send({
+      user: username,
+      id: id,
     });
-  // if browser does not allow third party cookie
-  else {
+  } else {
+    // if browser does not allow third party cookie
     var token = req.token;
     if (!token) return next();
     model.find({}, (err, users) => {
       users.map((user) => {
         if (user.tokens.has(token)) {
           console.log("found client token!!");
-          res.json({
-            status: 200,
+          res.status(200).send({
             user: user.username,
             id: user.id,
           });
@@ -33,9 +34,7 @@ const authCheck = (req, res, next) => {
 };
 
 router.get("/", authCheck, function (req, res) {
-  res.status(401).json({
-    authenticated: false,
-  });
+  res.sendStatus(401);
 });
 
 // GET /auth/github

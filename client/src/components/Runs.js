@@ -48,11 +48,8 @@ class Runs extends Component {
           isLoading={!this.state.dataLoaded}
         />
         <br></br>
-        <strong>Build low-level: </strong>
-        <Select
-          options={[{ label: "True" }, { label: "False" }]}
-          onChange={this.handleStateChangeBuildLevel}
-        />
+        <strong>Event: </strong>
+        <Select options={[]} onChange={this.handleStateChangeBuildLevel} />
       </div>
     );
   }

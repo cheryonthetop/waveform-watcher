@@ -7,7 +7,7 @@ import {
 const initialState = {
   user: "",
   run_id: "",
-  build_low_level: "",
+  event: "",
   bokeh_model: undefined,
   tags_data: [],
   available_runs: [],
@@ -30,7 +30,7 @@ export default function (state = initialState, action) {
       return {
         user: action.payload.user,
         run_id: action.payload.run_id,
-        build_low_level: action.payload.build_low_level,
+        event: action.payload.event,
         bokeh_model: action.payload.bokeh_model,
         tags_data: action.payload.tags_data,
         available_runs: available_runs,
@@ -42,7 +42,7 @@ export default function (state = initialState, action) {
       return {
         ...state,
         run_id: action.payload.run_id,
-        build_low_level: action.payload.build_low_level,
+        event: action.payload.event,
         bokeh_model: action.payload.bokeh_model,
       };
     default:

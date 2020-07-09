@@ -9,11 +9,11 @@ class GetNewWaveform extends Component {
   };
 
   handleGetWaveform = () => {
-    const { user, run_id, build_low_level } = this.props;
-    if (run_id && build_low_level) {
+    const { user, run_id, event } = this.props;
+    if (run_id) {
       this.props.handleLoading();
-      console.log(user, run_id, build_low_level);
-      this.props.dispatch(getWaveform(user, run_id, build_low_level));
+      console.log(user, run_id, event);
+      this.props.dispatch(getWaveform(user, run_id, event));
     } else {
       this.handleShow();
     }
@@ -38,10 +38,7 @@ class GetNewWaveform extends Component {
           <Modal.Header closeButton>
             <Modal.Title>Get Waveform error</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
-            You need to enter a run id and specify a build level to get a
-            waveform!
-          </Modal.Body>
+          <Modal.Body>You need to enter a run id to get a waveform!</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleClose}>
               Close
