@@ -16,7 +16,9 @@ class Waveform extends Component {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
     event: "",
-    isLoading: this.props.isLoading,
+    isLoading:
+      this.props.bokeh_model &&
+      !document.getElementById("graph").hasChildNodes(),
   };
 
   componentDidUpdate() {
