@@ -63,17 +63,6 @@ def not_found(error):
     LOG.error(error)
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/')
-def index():
-    """static files server"""
-    return send_from_directory('dist', 'index.html')
-
-@app.route('/<path:path>')
-def static_proxy(path):
-    file_name = path.split('/')[-1]
-    dir_name = path.join('dist', '/'.join(path.split('/')[:-1]))
-    return send_from_directory(dir_name, file_name)
-
 @app.route('/api/data')
 def send_data():
     print(request.cookies)
