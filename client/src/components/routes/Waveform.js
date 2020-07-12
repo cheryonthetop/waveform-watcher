@@ -16,14 +16,16 @@ class Waveform extends Component {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
     event: "",
-    isLoading: false,
+    isLoading: this.props.isLoading,
   };
 
   componentDidUpdate() {
-    if (
-      this.state.bokeh_model !== this.props.bokeh_model &&
-      this.props.bokeh_model
-    ) {
+    const { bokeh_model } = this.state;
+    const hasOldWaveform =
+      bokeh_model && !document.getElementById("graph").hasChildNodes();
+    const hasNewWaveform =
+      bokeh_model !== this.props.bokeh_model && bokeh_model;
+    if (hasNewWaveform || hasOldWaveform) {
       this.setState({ isLoading: false }, () => {
         this.deleteWaveform();
         this.loadWaveform();
@@ -103,6 +105,7 @@ const mapStateToProps = (state) => ({
   run_id: state.waveform.run_id,
   bokeh_model: state.waveform.bokeh_model,
   event: state.waveform.event,
+  isLoading: state.waveform.isLoading,
 });
 
 export default connect(mapStateToProps, null)(Waveform);

@@ -17,6 +17,7 @@ const initialState = {
   bokeh_model: undefined,
   tags_data: [],
   available_runs: [],
+  isLoading: true,
 };
 
 export default function (state = initialState, action) {
@@ -40,6 +41,7 @@ export default function (state = initialState, action) {
         bokeh_model: action.payload.bokeh_model,
         tags_data: action.payload.tags_data,
         available_runs: available_runs,
+        isLoading: false,
       };
     }
 
