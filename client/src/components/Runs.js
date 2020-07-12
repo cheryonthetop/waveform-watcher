@@ -9,13 +9,24 @@ const createOption = (label) => ({
 class Runs extends Component {
   state = {
     options: [],
-    dataLoaded: false,
+    dataLoaded: !this.props.isLoading,
   };
 
+  componentDidMount() {
+    this.loadAvailableRuns();
+  }
+
   componentDidUpdate() {
+    this.loadAvailableRuns();
+  }
+
+  loadAvailableRuns() {
     const { available_runs } = this.props;
-    const { dataLoaded } = this.state;
-    if (available_runs && !dataLoaded) {
+    const { dataLoaded, options } = this.state;
+    console.log("available runs: " + available_runs);
+    console.log("data loaded is " + dataLoaded);
+    console.log("options are " + options);
+    if (available_runs.length !== 0 && options.length === 0) {
       const runs = available_runs.map((run) => createOption(run));
       this.setState({ options: runs, dataLoaded: true }, () => {
         console.log(this.state.options);
@@ -47,6 +58,7 @@ class Runs extends Component {
 
 const mapStateToProps = (state) => ({
   available_runs: state.waveform.available_runs,
+  isLoading: state.waveform.isLoading,
 });
 
 export default connect(mapStateToProps, null)(Runs);

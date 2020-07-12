@@ -16,20 +16,31 @@ class Waveform extends Component {
     run_id: this.props.run_id,
     bokeh_model: this.props.bokeh_model,
     event: "",
-    isLoading:
-      this.props.bokeh_model &&
-      !document.getElementById("graph").hasChildNodes(),
+    waveformLoaded: false,
+    isLoading: this.props.isLoading,
   };
 
+  componentDidMount() {
+    this.tryLoadWaveform();
+  }
+
   componentDidUpdate() {
-    const { bokeh_model } = this.state;
-    const hasOldWaveform =
-      bokeh_model && !document.getElementById("graph").hasChildNodes();
+    this.tryLoadWaveform();
+  }
+
+  tryLoadWaveform() {
+    const { bokeh_model, waveformLoaded } = this.state;
+    // console.log(
+    //   this.props.bokeh_model !== undefined,
+    //   document.getElementById("graph") !== null,
+    //   !document.getElementById("graph").hasChildNodes()
+    // );
+    const hasOldWaveform = bokeh_model !== undefined;
     const hasNewWaveform =
-      bokeh_model !== this.props.bokeh_model && bokeh_model;
-    if (hasNewWaveform || hasOldWaveform) {
-      this.setState({ isLoading: false }, () => {
-        this.deleteWaveform();
+      bokeh_model !== undefined && bokeh_model !== this.props.bokeh_model;
+    if (hasNewWaveform || (!waveformLoaded && hasOldWaveform)) {
+      console.log("Tries loading");
+      this.setState({ isLoading: false, waveformLoaded: true }, () => {
         this.loadWaveform();
         this.setState({ bokeh_model: this.props.bokeh_model });
       });
@@ -38,14 +49,14 @@ class Waveform extends Component {
 
   deleteWaveform() {
     var container = document.getElementById("graph");
-    while (container && container.hasChildNodes())
+    while (container && document.getElementById("graph").hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
   loadWaveform() {
     console.log("loading waveform");
     this.deleteWaveform();
-    if (this.state.bokeh_model !== this.props.bokeh_model)
+    if (document.getElementById("graph").childNodes.length === 0)
       embed.embed_item(this.props.bokeh_model, "graph");
   }
 
@@ -91,6 +102,7 @@ class Waveform extends Component {
               <Param
                 run_id={this.props.run_id}
                 event={this.props.event}
+                bokeh_model={this.props.bokeh_model}
               ></Param>
               <div id="graph" />
             </Loading>

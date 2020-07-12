@@ -17,7 +17,7 @@ const defaultOptions = [];
 
 class Tags extends Component {
   state = {
-    isLoading: false,
+    isLoading: this.props.isLoading,
     data_loaded: false,
     show: false,
     options: defaultOptions,
@@ -25,10 +25,19 @@ class Tags extends Component {
     comments: "",
   };
 
+  componentDidMount() {
+    this.tryLoadOptions();
+  }
+
   componentDidUpdate() {
-    const { data_loaded } = this.state;
-    if (this.props.tags_data && !data_loaded) {
-      console.log("tags data is:" + this.props.tags_data);
+    this.tryLoadOptions();
+  }
+
+  tryLoadOptions() {
+    const { options, data_loaded } = this.state;
+    const { tags_data } = this.props;
+    if (!data_loaded) {
+      console.log("tags data is:" + tags_data);
       this.loadOptions();
       this.setState({ data_loaded: true });
     }
@@ -207,6 +216,7 @@ const mapStateToProps = (state) => ({
   bokeh_model: state.waveform.bokeh_model,
   run_id: state.waveform.run_id,
   event: state.waveform.event,
+  isLoading: state.waveform.isLoading,
 });
 
 export default connect(mapStateToProps, null)(Tags);

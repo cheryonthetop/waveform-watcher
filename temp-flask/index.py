@@ -41,8 +41,8 @@ hv.extension("bokeh")
 st = xenon1t_dali(build_lowlevel=False)
 runs = st.select_runs()
 available_runs = runs['name']
-renderer = hv.renderer('bokeh')
-print("renderer created: ", renderer)
+# renderer = hv.renderer('bokeh')
+# print("renderer created: ", renderer)
 # event_selection = WaveformWatcher().event_selection()
 # print(event_selection)
 
@@ -111,7 +111,7 @@ def get_event_plot():
         event_selection = hv.Layout(plots).cols(3)
 
         # Send to client
-        bokeh_model = renderer.server_doc(event_selection).roots[0]
+        bokeh_model = hv.renderer('bokeh').server_doc(event_selection).roots[-1]
         bokeh_model_json = bokeh.embed.json_item(bokeh_model)        
         return json.dumps(bokeh_model_json)
 
@@ -157,10 +157,10 @@ def get_waveform():
         plot = waveform_display(context = st, run_id = str(run_id), time_within=event)
         
         # A container for Bokeh Models to be reflected to the client side BokehJS library.
-        bokeh_document = renderer.server_doc(plot)
+        bokeh_document = hv.renderer('bokeh').server_doc(plot)
         print("converted to doc: ", bokeh_document)
 
-        bokeh_model = bokeh_document.roots[0]
+        bokeh_model = bokeh_document.roots[-1]
         bokeh_model_json = bokeh.embed.json_item(bokeh_model)        
         # Update database
         mongo_document = my_app.find_one({"user": user})
