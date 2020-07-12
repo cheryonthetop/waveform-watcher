@@ -14,8 +14,8 @@ class Runs extends Component {
 
   componentDidUpdate() {
     const { available_runs } = this.props;
-    const { options } = this.state;
-    if (available_runs && options.length !== available_runs.length) {
+    const { dataLoaded } = this.state;
+    if (available_runs && !dataLoaded) {
       const runs = available_runs.map((run) => createOption(run));
       this.setState({ options: runs, dataLoaded: true }, () => {
         console.log(this.state.options);
