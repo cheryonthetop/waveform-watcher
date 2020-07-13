@@ -2,6 +2,7 @@ import os
 import sys
 import threading
 import requests    
+import time
 from flask import jsonify, request, make_response, send_from_directory
 from flask_cors import CORS
 import numpy as np
@@ -11,6 +12,7 @@ from holoviews import dim, opts
 import bokeh
 from bokeh.document import Document
 from bson.json_util import dumps, loads
+import pickle
 import pymongo
 import strax
 import straxen
@@ -37,7 +39,6 @@ if (not PORT):
     PORT = 4000
 hv.extension("bokeh")
 
-# # Read live data
 # Load data
 st = xenon1t_dali(build_lowlevel=False)
 runs = st.select_runs()
@@ -45,8 +46,6 @@ available_runs = runs['name']
 renderer = hv.renderer('bokeh')
 # A lock for renderer to avoid race condition
 lock = threading.Lock()
-# event_selection = WaveformWatcher().event_selection()
-# print(event_selection)
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
@@ -124,34 +123,33 @@ def get_event_plot():
         return json.dumps(events_json)
 
 
-def get_data(run_id, events):
+def get_data(run_id, event_id):
     #TODO: Check types and handle appropriately.  
     # Can specify either int for event ID or time range.  
     # Or list of these.  If not list, then convert to list
-    results = []
-    for event in events:
-        document = my_event.find_one({"event_id" : event})
-        if (document):
-            results.append(np.frombuffer(document["event_id"], allow_pickle=True))
-        else:
-            raise FileNotFoundError
-    return results
+    event = None
+    document = my_event.find_one({"run_id" : run_id, "event_id" : event_id})
+    if (document):
+        event = pickle.loads(document["event"])
+    else:
+        cache_data(run_id, event_id)
+    return event
 
-def cache_data(run_id, events):
-    # This would add a new document into a new collection 'fetch' in mongo
-    # with the format: 
-    # {"status" : "new", "run_id" : run_id, "events" : events}
-    # after checking that the data already isn't in the cache somehow by calling
-    # get_data()
-    try:
-        results = get_data(run_id, events)
-        return results
-    except FileNotFoundError:
-        for event in events:
-            post = {"status" : "new", "run_id" : run_id, "event" : event}
-            my_request.insert_one(post) # insert mongo document into 'fetch'
-    finally:
-        return False
+def cache_data(run_id, event_id):
+    document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
+    # cache to request if not already in it
+    if (document == None):
+        post = {"status" : "new", "run_id" : run_id, "event_id" : event_id}
+        my_request.insert_one(post) # insert mongo document into 'fetch'
+
+def get_event(run_id, event_id):
+    while True:
+        event = get_data(run_id, event_id)
+        if (event != None):
+            return event
+        print("still getting event...")
+        # Wait for event to be loaded
+        time.sleep(5)
 
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
@@ -160,20 +158,26 @@ def get_waveform():
         print(req)
         run_id = req["run_id"]
         user = req["user"]   
-        event_id = int(req["event_id"])
-        df = st.get_array(run_id, "event_info")
-        event = df[event_id]
+        event_id = req["event_id"]
+        # df = st.get_array(run_id, "event_info")
+        # event = df[event_id]
+        event = get_event(run_id, event_id)
         print(event)
         plot = waveform_display(context = st, run_id = str(run_id), time_within=event)
         waveform = None
         lock.acquire()
         try:
             waveform =  renderer.server_doc(plot).roots[-1]
+            print(waveform)
         finally:
             lock.release()
-        waveform_json = bokeh.embed.json_item(waveform)        
+        waveform =  renderer.server_doc(plot).roots[-1]
+
+        waveform_json = bokeh.embed.json_item(waveform)  
+        print("json item is ", waveform)      
         # Update database
         mongo_document = my_app.find_one({"user": user})
+        print("found doc ", mongo_document)
         if (mongo_document):
             my_app.update_one({"user": user}, 
             {"$set": { 
@@ -183,6 +187,7 @@ def get_waveform():
                 }
             }
             )
+        print("returning waveform...")
         return json.dumps(waveform_json)
 
     else:
