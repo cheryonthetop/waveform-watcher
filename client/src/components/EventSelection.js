@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "./stylesheets/waveform.css";
+import "./stylesheets/body.css";
 import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
@@ -10,39 +10,39 @@ import { withRouter } from "react-router";
 
 class EventSelection extends Component {
   state = {
-    run_id: this.props.run_id,
-    event_plot: this.props.event_plot,
+    runID: this.props.runID,
+    eventPlot: this.props.eventPlot,
     isLoading: false,
   };
 
   componentDidUpdate() {
-    if (
-      this.state.event_plot !== this.props.event_plot &&
-      this.props.event_plot
-    ) {
+    this.tryLoadeventPlots();
+  }
+
+  tryLoadeventPlots() {
+    if (this.state.eventPlot !== this.props.eventPlot && this.props.eventPlot) {
       this.setState({ isLoading: false }, () => {
-        this.deleteEventPlots();
-        this.loadEventPlots();
-        this.setState({ event_plot: this.props.event_plot });
+        this.deleteeventPlots();
+        this.loadeventPlots();
+        this.setState({ eventPlot: this.props.eventPlot });
       });
     }
   }
-
-  deleteEventPlots() {
+  deleteeventPlots() {
     var container = document.getElementById("graph");
     while (container && container.hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
-  loadEventPlots() {
+  loadeventPlots() {
     console.log("loading waveform");
-    this.deleteEventPlots();
-    if (this.state.event_plot !== this.props.event_plot)
-      embed.embed_item(this.props.event_plot, "graph");
+    this.deleteeventPlots();
+    if (this.state.eventPlot !== this.props.eventPlot)
+      embed.embed_item(this.props.eventPlot, "graph");
   }
 
   handleStateChangeRunID = (value) => {
-    this.setState({ run_id: value.label });
+    this.setState({ runID: value.label });
   };
 
   handleLoading = () => {
@@ -54,7 +54,7 @@ class EventSelection extends Component {
   };
 
   render() {
-    const { run_id, event, isLoading } = this.state;
+    const { runID, event, isLoading } = this.state;
     return (
       <div id="graph-container">
         <div id="control-box">
@@ -62,7 +62,7 @@ class EventSelection extends Component {
             <h3> Control </h3>
             <Runs handleStateChangeRunID={this.handleStateChangeRunID} />
             <GetNewEventPlot
-              run_id={run_id}
+              runID={runID}
               event={event}
               user={this.props.user}
               handleLoading={this.handleLoading}
@@ -86,8 +86,8 @@ class EventSelection extends Component {
 
 const mapStateToProps = (state) => ({
   user: state.waveform.user,
-  run_id: state.waveform.run_id,
-  event_plot: state.waveform.event_plot,
+  runID: state.waveform.runID,
+  eventPlot: state.waveform.eventPlot,
   event: state.waveform.event,
 });
 

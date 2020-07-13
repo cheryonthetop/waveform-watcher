@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "../stylesheets/waveform.css";
+import "../stylesheets/body.css";
 import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
@@ -9,15 +9,17 @@ import GetNewWaveform from "../GetNewWaveform";
 import Param from "../Param";
 import Events from "../Events";
 import { Redirect } from "react-router-dom";
+import { Button } from "react-bootstrap";
+import { withRouter } from "react-router-dom";
 import Header from "../Header";
 
 class Waveform extends Component {
   state = {
-    run_id: this.props.run_id,
-    bokeh_model: this.props.bokeh_model,
-    event: "",
-    waveformLoaded: false,
+    runID: this.props.runID,
+    waveform: this.props.waveform,
+    eventID: this.props.eventID,
     isLoading: this.props.isLoading,
+    waveformLoaded: false,
   };
 
   componentDidMount() {
@@ -29,20 +31,14 @@ class Waveform extends Component {
   }
 
   tryLoadWaveform() {
-    const { bokeh_model, waveformLoaded } = this.state;
-    // console.log(
-    //   this.props.bokeh_model !== undefined,
-    //   document.getElementById("graph") !== null,
-    //   !document.getElementById("graph").hasChildNodes()
-    // );
-    const hasOldWaveform = bokeh_model !== undefined;
-    const hasNewWaveform =
-      bokeh_model !== undefined && bokeh_model !== this.props.bokeh_model;
-    if (hasNewWaveform || (!waveformLoaded && hasOldWaveform)) {
+    const { waveform, waveformLoaded, isLoading } = this.state;
+    const hasOldWaveform = waveform !== undefined;
+    const hasNewWaveform = waveform && waveform !== this.props.waveform;
+    if ((hasNewWaveform && isLoading) || (!waveformLoaded && hasOldWaveform)) {
       console.log("Tries loading");
       this.setState({ isLoading: false, waveformLoaded: true }, () => {
         this.loadWaveform();
-        this.setState({ bokeh_model: this.props.bokeh_model });
+        this.setState({ waveform: this.props.waveform });
       });
     }
   }
@@ -56,16 +52,19 @@ class Waveform extends Component {
   loadWaveform() {
     console.log("loading waveform");
     this.deleteWaveform();
-    if (document.getElementById("graph").childNodes.length === 0)
-      embed.embed_item(this.props.bokeh_model, "graph");
+    embed.embed_item(this.props.waveform, "graph");
   }
 
   handleStateChangeRunID = (value) => {
-    this.setState({ run_id: value.label });
+    this.setState({ runID: value.label });
   };
 
   handleStateChangeEvent = (value) => {
-    this.setState({ event: value.label });
+    this.setState({ eventID: value.label });
+  };
+
+  handleViewEvents = () => {
+    this.props.history.push("/");
   };
 
   handleLoading = () => {
@@ -76,7 +75,7 @@ class Waveform extends Component {
     if (!this.props.isAuthenticated) {
       return <Redirect to="/login" />;
     }
-    const { run_id, event, isLoading } = this.state;
+    const { runID, eventID, isLoading } = this.state;
     return (
       <div>
         <Header />
@@ -88,21 +87,28 @@ class Waveform extends Component {
               <br />
               <Events handleStateChangeEvent={this.handleStateChangeEvent} />
               <GetNewWaveform
-                run_id={run_id}
-                event={event}
+                runID={runID}
+                eventID={eventID}
                 user={this.props.user}
                 handleLoading={this.handleLoading}
               />
               <Tags />
             </div>
+            <Button
+              id="btn-view-events"
+              size="sm"
+              onClick={this.handleViewEvents}
+            >
+              Go Back to View Events{" "}
+            </Button>
           </div>
 
           <div id="graph-box">
             <Loading isLoading={isLoading}>
               <Param
-                run_id={this.props.run_id}
-                event={this.props.event}
-                bokeh_model={this.props.bokeh_model}
+                runID={this.props.runID}
+                eventID={this.props.eventID}
+                waveform={this.props.waveform}
               ></Param>
               <div id="graph" />
             </Loading>
@@ -116,10 +122,10 @@ class Waveform extends Component {
 const mapStateToProps = (state) => ({
   user: state.waveform.user,
   isAuthenticated: state.auth.isAuthenticated,
-  run_id: state.waveform.run_id,
-  bokeh_model: state.waveform.bokeh_model,
-  event: state.waveform.event,
+  runID: state.waveform.runID,
+  waveform: state.waveform.waveform,
+  eventID: state.waveform.eventID,
   isLoading: state.waveform.isLoading,
 });
 
-export default connect(mapStateToProps, null)(Waveform);
+export default connect(mapStateToProps, null)(withRouter(Waveform));

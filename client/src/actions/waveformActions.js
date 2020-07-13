@@ -13,7 +13,7 @@ import {
 } from "./types";
 import axios from "axios";
 
-export const getWaveform = (user, run_id, event) => (dispatch) => {
+export const getWaveform = (user, run_id, event_id) => (dispatch) => {
   console.log(run_id);
   // Headers
   const config = {
@@ -27,7 +27,7 @@ export const getWaveform = (user, run_id, event) => (dispatch) => {
   const body = JSON.stringify({
     user: user,
     run_id: run_id,
-    event: event,
+    event_id: event_id,
   });
 
   axios
@@ -38,8 +38,8 @@ export const getWaveform = (user, run_id, event) => (dispatch) => {
         type: GET_WAVEFORM_SUCCESS,
         payload: {
           run_id: run_id,
-          event: event,
-          bokeh_model: response.data,
+          event_id: event_id,
+          waveform: response.data,
         },
       });
       return response.data;
@@ -52,7 +52,7 @@ export const getWaveform = (user, run_id, event) => (dispatch) => {
     });
 };
 
-export const getEventPlot = (user, run_id, event) => (dispatch) => {
+export const getEventPlot = (user, run_id, event_id) => (dispatch) => {
   console.log(run_id);
   // Headers
   const config = {
@@ -66,7 +66,7 @@ export const getEventPlot = (user, run_id, event) => (dispatch) => {
   const body = JSON.stringify({
     user: user,
     run_id: run_id,
-    event: event,
+    event_id: event_id,
   });
 
   axios
@@ -77,8 +77,8 @@ export const getEventPlot = (user, run_id, event) => (dispatch) => {
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
           run_id: run_id,
-          event: event,
-          event_plot: response.data,
+          event_id: event_id,
+          eventPlot: response.data,
         },
       });
       return response.data;
@@ -95,9 +95,9 @@ export const saveWaveform = (
   user,
   tag,
   comments,
-  bokeh_model,
+  waveform,
   run_id,
-  event
+  event_id
 ) => (dispatch) => {
   console.log("save waveform action called");
   // Headers
@@ -113,9 +113,9 @@ export const saveWaveform = (
     user: user,
     tag: tag,
     comments: comments,
-    bokeh_model: bokeh_model,
+    waveform: waveform,
     run_id: run_id,
-    event: event,
+    event_id: event_id,
   });
 
   axios
@@ -138,13 +138,13 @@ export const saveWaveform = (
     });
 };
 
-export const switchWaveform = (run_id, event, bokeh_model) => (dispatch) => {
+export const switchWaveform = (run_id, event_id, waveform) => (dispatch) => {
   dispatch({
     type: SWITCH_WAVEFORM,
     payload: {
       run_id: run_id,
-      event: event,
-      bokeh_model: bokeh_model,
+      event_id: event_id,
+      waveform: waveform,
     },
   });
 };

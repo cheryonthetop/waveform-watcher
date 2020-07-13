@@ -6,12 +6,12 @@ export default class Param extends Component {
       <div
         id="param"
         style={{ paddingTop: "20px" }}
-        hidden={this.props.bokeh_model === undefined}
+        hidden={this.props.waveform === undefined}
       >
         <strong>Run ID: </strong>
-        <input defaultValue={this.props.run_id} readOnly></input>
+        <input defaultValue={this.props.runID} readOnly></input>
         <strong style={{ marginLeft: "10px" }}>Event: </strong>
-        <input defaultValue={this.props.event} readOnly></input>
+        <input defaultValue={this.props.eventID} readOnly></input>
       </div>
     );
   }

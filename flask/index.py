@@ -37,7 +37,7 @@ hv.extension("bokeh")
 # Load data
 st = straxen.contexts.xenon1t_dali(build_lowlevel=False)
 runs = st.select_runs()
-available_runs = runs['name']
+availableRuns = runs['name']
 renderer = hv.renderer('bokeh')
 print("renderer created: ", renderer)
 
@@ -79,11 +79,11 @@ def send_data():
     if (document == None):
         print("does not have record for the user: ", user)
         post = {'user': user,                 
-                "run_id": "",
-                "bokeh_model": None,
+                "runID": "",
+                "waveform": None,
                 "tags_data": []}
         document = my_app.insert_one(post)
-    document["available_runs"] = available_runs
+    document["availableRuns"] = availableRuns
     json_str = dumps(document)
     return make_response(json_str, 200)
 
@@ -93,41 +93,41 @@ def get_waveform():
     if request.is_json:
         req = request.get_json()
         print(req)
-        run_id = req["run_id"]
+        runID = req["runID"]
         user = req["user"]   
         event = req["event"]
-        df = st.get_array(run_id, "event_info")
+        df = st.get_array(runID, "event_info")
         event = df[4]
         print(event)
-        plot = waveform_display(context = st, run_id = str(run_id), time_within=event)
+        plot = waveform_display(context = st, runID = str(runID), time_within=event)
         
         # A container for Bokeh Models to be reflected to the client side BokehJS library.
         bokeh_document = renderer.server_doc(plot)
         print("converted to doc: ", bokeh_document)
 
-        bokeh_model = bokeh_document.roots[0]
-        bokeh_model_json = bokeh.embed.json_item(bokeh_model)        
+        waveform = bokeh_document.roots[0]
+        waveform_json = bokeh.embed.json_item(waveform)        
         # Update database
         mongo_document = my_app.find_one({"user": user})
         if (mongo_document):
             my_app.update_one({"user": user}, 
             {"$set": { 
-                "run_id": run_id, 
+                "runID": runID, 
                 "event" : event,
-                "bokeh_model": bokeh_model_json,
+                "waveform": waveform_json,
                 }
             }
             )
         else:
             post = {
                 "user": user,
-                "run_id": run_id,
+                "runID": runID,
                 "event": event,
-                "bokeh_model": bokeh_model_json,
+                "waveform": waveform_json,
                 "tags_data": [],
                 }
             my_app.insert_one(post)
-        return json.dumps(bokeh_model_json)
+        return json.dumps(waveform_json)
 
     else:
         return make_response(jsonify({"success": False}), 400)
@@ -136,19 +136,19 @@ def get_waveform():
 def save_waveform():
     if request.is_json:
         req = request.get_json()
-        print(req["user"], req["tag"], req["comments"], req["run_id"])
+        print(req["user"], req["tag"], req["comments"], req["runID"])
         user = req["user"]  
         tag = req["tag"]
         comments = req["comments"]
         event = req["event"]
-        run_id = req["run_id"]
-        bokeh_model = req["bokeh_model"]
+        runID = req["runID"]
+        waveform = req["waveform"]
         # Update database
         my_app.update_one({"user": user}, 
             {"$set": { 
-                "run_id": run_id, 
+                "runID": runID, 
                 "event" : event,
-                "bokeh_model": bokeh_model,
+                "waveform": waveform,
                 }
             }
         )
@@ -159,9 +159,9 @@ def save_waveform():
             my_app.update_one({"user": user, "tags_data."+tag: {"$exists": True}}, 
                 {"$set": { 
                         "tags_data.$."+tag+".comments": comments,
-                        "tags_data.$."+tag+".run_id": run_id,
+                        "tags_data.$."+tag+".runID": runID,
                         "tags_data.$."+tag+".event": event,
-                        "tags_data.$."+tag+".bokeh_model": bokeh_model
+                        "tags_data.$."+tag+".waveform": waveform
                     }
                 }
             )
@@ -172,10 +172,10 @@ def save_waveform():
                     "$push": {
                         "tags_data": {
                             tag: {
-                                "run_id": run_id,
+                                "runID": runID,
                                 "event": event,
                                 "comments": comments,
-                                "bokeh_model": bokeh_model,
+                                "waveform": waveform,
                             }
                         }
                     }

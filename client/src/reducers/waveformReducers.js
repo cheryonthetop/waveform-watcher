@@ -12,11 +12,11 @@ import {
 
 const initialState = {
   user: "",
-  run_id: "",
-  event: "",
-  bokeh_model: undefined,
-  tags_data: [],
-  available_runs: [],
+  runID: "",
+  eventID: "",
+  waveform: undefined,
+  tagsData: [],
+  availableRuns: [],
   isLoading: true,
 };
 
@@ -29,18 +29,18 @@ export default function (state = initialState, action) {
   );
   switch (action.type) {
     case LOAD_SUCCESS: {
-      let available_runs = [];
+      let availableRuns = [];
       console.log(action.payload.available_runs);
       Object.entries(action.payload.available_runs).map(([index, run]) =>
-        available_runs.push(run)
+        availableRuns.push(run)
       );
       return {
         user: action.payload.user,
-        run_id: action.payload.run_id,
-        event: action.payload.event,
-        bokeh_model: action.payload.bokeh_model,
-        tags_data: action.payload.tags_data,
-        available_runs: available_runs,
+        runID: action.payload.run_id,
+        eventID: action.payload.event_id,
+        waveform: action.payload.waveform,
+        tagsData: action.payload.tags_data,
+        availableRuns: availableRuns,
         isLoading: false,
       };
     }
@@ -49,16 +49,16 @@ export default function (state = initialState, action) {
     case GET_WAVEFORM_SUCCESS:
       return {
         ...state,
-        run_id: action.payload.run_id,
-        event: action.payload.event,
-        bokeh_model: action.payload.bokeh_model,
+        runID: action.payload.run_id,
+        eventID: action.payload.event_id,
+        waveform: action.payload.waveform,
       };
     case GET_EVENT_PLOT_SUCCESS:
       return {
         ...state,
-        run_id: action.payload.run_id,
-        event: action.payload.event,
-        event_plot: action.payload.event_plot,
+        runID: action.payload.run_id,
+        eventID: action.payload.event_id,
+        eventPlot: action.payload.eventPlot,
       };
     case LOAD_FAILURE:
     case DELETE_WAVEFORM_FAILURE:

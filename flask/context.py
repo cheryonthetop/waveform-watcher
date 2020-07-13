@@ -210,8 +210,8 @@ def xenon1t_led(**kwargs):
         **st.context_config)
 
 st = xenon1t_dali(output_folder="./strax_data", build_lowlevel=True)
-run_id = '170204_1710'
-df = st.get_array(run_id, "event_info")
+runID = '170204_1710'
+df = st.get_array(runID, "event_info")
 event = df[4]
-p1 = st.plot_waveform(run_id, deep=True, time_within=event)
-p2 = st.waveform_display(run_id, time_within=event)
+p1 = st.plot_waveform(runID, deep=True, time_within=event)
+p2 = st.waveform_display(runID, time_within=event)

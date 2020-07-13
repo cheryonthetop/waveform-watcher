@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 import requests    
 from flask import jsonify, request, make_response, send_from_directory
 from flask_cors import CORS
@@ -41,8 +42,9 @@ hv.extension("bokeh")
 st = xenon1t_dali(build_lowlevel=False)
 runs = st.select_runs()
 available_runs = runs['name']
-# renderer = hv.renderer('bokeh')
-# print("renderer created: ", renderer)
+renderer = hv.renderer('bokeh')
+# A lock for renderer to avoid race condition
+lock = threading.Lock()
 # event_selection = WaveformWatcher().event_selection()
 # print(event_selection)
 
@@ -51,6 +53,8 @@ APP_DB_URI = os.environ.get("APP_DB_URI", None)
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_auth = my_db["auth"]
 my_app = my_db["app"]
+my_request = my_db["request"]
+my_event = my_db["event"]
 
 def authenticate():
     def wrapped():
@@ -74,14 +78,12 @@ def send_data():
         print("does not have record for the user: ", user)
         post = {'user': user,                 
                 "run_id": "",
-                "event": "",
-                "bokeh_model": None,
+                "event_id": "",
+                "waveform": None,
                 "tags_data": []}
         my_app.insert_one(post)
         document = my_app.find_one({'user': user})
     document["available_runs"] = available_runs
-    if document["event"]:
-        document["event"] = "dummy"
     json_str = dumps(document)
     return make_response(json_str, 200)
 
@@ -90,6 +92,7 @@ def get_event_plot():
     if request.is_json:
         req = request.get_json()
         run_id = req["run_id"]
+        print("RUN ID IS: " , run_id)
         events = st.get_df(run_id, 'event_info')
         dset = hv.Dataset(events)
         # Fields
@@ -111,24 +114,28 @@ def get_event_plot():
         event_selection = hv.Layout(plots).cols(3)
 
         # Send to client
-        bokeh_model = hv.renderer('bokeh').server_doc(event_selection).roots[-1]
-        bokeh_model_json = bokeh.embed.json_item(bokeh_model)        
-        return json.dumps(bokeh_model_json)
+        lock.acquire()
+        events = None
+        try:
+            events = renderer.server_doc(event_selection).roots[-1]
+        finally:
+            lock.release()
+        events_json = bokeh.embed.json_item(events)        
+        return json.dumps(events_json)
 
 
 def get_data(run_id, events):
-    
     #TODO: Check types and handle appropriately.  
     # Can specify either int for event ID or time range.  
     # Or list of these.  If not list, then convert to list
-    data_found = True # implement by checking collection 'waveform_data', false if not in cache
-    if not data_found:
-        raise FileNotFoundError
-
-
-    df = st.get_array(run_id, "event_info")
-    event = df[events[0]]# insert event into mongo in other python script
-    return event
+    results = []
+    for event in events:
+        document = my_event.find_one({"event_id" : event})
+        if (document):
+            results.append(np.frombuffer(document["event_id"], allow_pickle=True))
+        else:
+            raise FileNotFoundError
+    return results
 
 def cache_data(run_id, events):
     # This would add a new document into a new collection 'fetch' in mongo
@@ -136,12 +143,15 @@ def cache_data(run_id, events):
     # {"status" : "new", "run_id" : run_id, "events" : events}
     # after checking that the data already isn't in the cache somehow by calling
     # get_data()
-    
-    #check if events is list, maybe start with single events
     try:
-        get_data(run_id, events)
+        results = get_data(run_id, events)
+        return results
     except FileNotFoundError:
-        pass # insert mongo document into 'fetch'
+        for event in events:
+            post = {"status" : "new", "run_id" : run_id, "event" : event}
+            my_request.insert_one(post) # insert mongo document into 'fetch'
+    finally:
+        return False
 
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
@@ -150,30 +160,30 @@ def get_waveform():
         print(req)
         run_id = req["run_id"]
         user = req["user"]   
-        event = req["event"]
+        event_id = int(req["event_id"])
         df = st.get_array(run_id, "event_info")
-        event = df[4]
+        event = df[event_id]
         print(event)
         plot = waveform_display(context = st, run_id = str(run_id), time_within=event)
-        
-        # A container for Bokeh Models to be reflected to the client side BokehJS library.
-        bokeh_document = hv.renderer('bokeh').server_doc(plot)
-        print("converted to doc: ", bokeh_document)
-
-        bokeh_model = bokeh_document.roots[-1]
-        bokeh_model_json = bokeh.embed.json_item(bokeh_model)        
+        waveform = None
+        lock.acquire()
+        try:
+            waveform =  renderer.server_doc(plot).roots[-1]
+        finally:
+            lock.release()
+        waveform_json = bokeh.embed.json_item(waveform)        
         # Update database
         mongo_document = my_app.find_one({"user": user})
         if (mongo_document):
             my_app.update_one({"user": user}, 
             {"$set": { 
                 "run_id": run_id, 
-                "event" : event.tostring(),
-                "bokeh_model": bokeh_model_json,
+                "event_id" : event_id,
+                "waveform": waveform_json,
                 }
             }
             )
-        return json.dumps(bokeh_model_json)
+        return json.dumps(waveform_json)
 
     else:
         return make_response(jsonify({"success": False}), 400)
@@ -182,19 +192,23 @@ def get_waveform():
 def save_waveform():
     if request.is_json:
         req = request.get_json()
-        print(req["user"], req["tag"], req["comments"], req["run_id"])
-        user = req["user"]  
+        print(req["user"], req["tag"], req["run_id"])
+        user = req["user"]
         tag = req["tag"]
-        comments = req["comments"]
-        event = req["event"]
+        comments = None
+        try:
+            comments = req["comments"]
+        except KeyError:
+            comments = ""
+        event_id = req["event_id"]
         run_id = req["run_id"]
-        bokeh_model = req["bokeh_model"]
+        waveform = req["waveform"]
         # Update database
         my_app.update_one({"user": user}, 
             {"$set": { 
                 "run_id": run_id, 
-                "event" : event,
-                "bokeh_model": bokeh_model,
+                "event_id" : event_id,
+                "waveform": waveform,
                 }
             }
         )
@@ -206,8 +220,8 @@ def save_waveform():
                 {"$set": { 
                         "tags_data.$."+tag+".comments": comments,
                         "tags_data.$."+tag+".run_id": run_id,
-                        "tags_data.$."+tag+".event": event,
-                        "tags_data.$."+tag+".bokeh_model": bokeh_model
+                        "tags_data.$."+tag+".event_id": event_id,
+                        "tags_data.$."+tag+".waveform": waveform
                     }
                 }
             )
@@ -219,9 +233,9 @@ def save_waveform():
                         "tags_data": {
                             tag: {
                                 "run_id": run_id,
-                                "event": event,
+                                "event_id": event_id,
                                 "comments": comments,
-                                "bokeh_model": bokeh_model,
+                                "waveform": waveform,
                             }
                         }
                     }
@@ -257,4 +271,4 @@ def delete_waveform():
 if __name__ == "__main__":
     # LOG.info('running environment: %s', os.environ.get('ENV'))
     app.config['DEBUG'] = os.environ.get('ENV') == 'development' #debug mode
-    app.run(host = '0.0.0.0', port = int(PORT)) # Run the app
+    app.run(host = '0.0.0.0', port = int(PORT), threaded=True) # Run the app

@@ -21,13 +21,13 @@ class Runs extends Component {
   }
 
   loadAvailableRuns() {
-    const { available_runs } = this.props;
+    const { availableRuns } = this.props;
     const { dataLoaded, options } = this.state;
-    console.log("available runs: " + available_runs);
+    console.log("available runs: " + availableRuns);
     console.log("data loaded is " + dataLoaded);
     console.log("options are " + options);
-    if (available_runs.length !== 0 && options.length === 0) {
-      const runs = available_runs.map((run) => createOption(run));
+    if (availableRuns.length !== 0 && options.length === 0) {
+      const runs = availableRuns.map((run) => createOption(run));
       this.setState({ options: runs, dataLoaded: true }, () => {
         console.log(this.state.options);
       });
@@ -57,7 +57,7 @@ class Runs extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  available_runs: state.waveform.available_runs,
+  availableRuns: state.waveform.availableRuns,
   isLoading: state.waveform.isLoading,
 });
 

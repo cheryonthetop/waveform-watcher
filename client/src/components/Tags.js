@@ -18,11 +18,11 @@ const defaultOptions = [];
 class Tags extends Component {
   state = {
     isLoading: this.props.isLoading,
-    data_loaded: false,
+    dataLoaded: false,
     show: false,
     options: defaultOptions,
     value: undefined,
-    comments: "",
+    comments: " ",
   };
 
   componentDidMount() {
@@ -34,18 +34,18 @@ class Tags extends Component {
   }
 
   tryLoadOptions() {
-    const { options, data_loaded } = this.state;
-    const { tags_data } = this.props;
-    if (!data_loaded) {
-      console.log("tags data is:" + tags_data);
+    const { options, dataLoaded } = this.state;
+    const { tagsData } = this.props;
+    if (!dataLoaded) {
+      console.log("tags data is:" + tagsData);
       this.loadOptions();
-      this.setState({ data_loaded: true });
+      this.setState({ dataLoaded: true });
     }
   }
 
   loadOptions = () => {
     let newOptions = [];
-    this.props.tags_data.map((tag_data) =>
+    this.props.tagsData.map((tag_data) =>
       Object.entries(tag_data).map(([tag, data]) =>
         newOptions.push(createOption(tag, data))
       )
@@ -64,9 +64,9 @@ class Tags extends Component {
     this.setState({ value: newValue });
     if (actionMeta.action === "select-option") {
       this.setState({ comments: newValue.data.comments });
-      const { run_id, event, bokeh_model } = newValue.data;
-      if (bokeh_model && run_id)
-        this.props.dispatch(switchWaveform(run_id, event, bokeh_model));
+      const { runID, eventID, waveform } = newValue.data;
+      if (waveform && runID)
+        this.props.dispatch(switchWaveform(runID, eventID, waveform));
     }
   };
 
@@ -98,26 +98,26 @@ class Tags extends Component {
     console.log("Wait a moment...");
     setTimeout(() => {
       const { options } = this.state;
-      const newOption = createOption(inputValue, {});
+      const newOption = createOption(inputValue, { comments: " " });
       console.log(newOption);
       console.groupEnd();
       this.setState({
         isLoading: false,
         options: [...options, newOption],
         value: newOption,
-        comments: "",
+        comments: " ",
       });
     }, 1000);
   };
 
   handleSave = () => {
     const { value } = this.state;
-    const { user, bokeh_model, run_id, event } = this.props;
-    if (value && bokeh_model) {
+    const { user, waveform, runID, eventID } = this.props;
+    if (value && waveform) {
       const tag = value.label;
       const comments = value.data.comments;
       this.props.dispatch(
-        saveWaveform(user, tag, comments, bokeh_model, run_id, event)
+        saveWaveform(user, tag, comments, waveform, runID, eventID)
       );
     } else {
       this.handleShow();
@@ -148,7 +148,7 @@ class Tags extends Component {
       value,
       comments,
       show,
-      data_loaded,
+      dataLoaded,
     } = this.state;
     return (
       <div id="comment-box">
@@ -156,7 +156,7 @@ class Tags extends Component {
         <br></br>
         <CreatableSelect
           isClearable
-          isDisabled={!data_loaded}
+          isDisabled={!dataLoaded}
           isLoading={isLoading}
           onChange={this.handleChangeSelect}
           onCreateOption={this.handleCreateOption}
@@ -212,10 +212,10 @@ class Tags extends Component {
 
 const mapStateToProps = (state) => ({
   user: state.waveform.user,
-  tags_data: state.waveform.tags_data,
-  bokeh_model: state.waveform.bokeh_model,
-  run_id: state.waveform.run_id,
-  event: state.waveform.event,
+  tagsData: state.waveform.tagsData,
+  waveform: state.waveform.waveform,
+  runID: state.waveform.runID,
+  eventID: state.waveform.eventID,
   isLoading: state.waveform.isLoading,
 });
 
