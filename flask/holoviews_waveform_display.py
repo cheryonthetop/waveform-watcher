@@ -203,7 +203,7 @@ def _range_plot(f, full_time_range, t_reference, **kwargs):
     requires=['records', 'peaks', 'peak_basics'],
     hv_bokeh=True)
 def waveform_display(
-        context, runID, to_pe, time_range, t_reference, records, peaks,
+        context, run_id, to_pe, time_range, t_reference, records, peaks,
         config,
         width=600, show_largest=None):
     """Plot a waveform overview display"
@@ -217,7 +217,7 @@ def waveform_display(
                                                      config=config)
 
     time_v_channel = context.hvdisp_plot_records_2d(
-        runID=runID, to_pe=to_pe,
+        run_id=run_id, to_pe=to_pe,
         records=records_points,
         width=width,
         time_stream=time_stream,
@@ -232,7 +232,7 @@ def waveform_display(
         array: hv.DynamicMap(
             _range_plot(
                 context.hvdisp_plot_pmt_pattern,
-                runID=runID, to_pe=to_pe,
+                run_id=run_id, to_pe=to_pe,
                 records=records,
                 full_time_range=time_range,
                 t_reference=t_reference,
@@ -244,7 +244,7 @@ def waveform_display(
     peak_wvs = hv.DynamicMap(
         _range_plot(
             context.hvdisp_plot_peak_waveforms,
-            runID=runID,
+            run_id=run_id,
             width=width,
             full_time_range=time_range,
             t_reference=t_reference,
