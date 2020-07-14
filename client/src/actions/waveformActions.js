@@ -12,6 +12,7 @@ import {
   GET_EVENT_PLOT_FAILURE,
 } from "./types";
 import axios from "axios";
+import { errorReported } from "./errorActions";
 
 export const getWaveform = (user, run_id, event_id) => (dispatch) => {
   console.log(run_id);
@@ -32,17 +33,19 @@ export const getWaveform = (user, run_id, event_id) => (dispatch) => {
 
   axios
     .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/gw`, body, config)
-    .then(function (response) {
-      console.log(response.data);
-      dispatch({
-        type: GET_WAVEFORM_SUCCESS,
-        payload: {
-          run_id: run_id,
-          event_id: event_id,
-          waveform: response.data,
-        },
-      });
-      return response.data;
+    .then(function (res) {
+      console.log(res.data);
+      res.status === 200
+        ? dispatch({
+            type: GET_WAVEFORM_SUCCESS,
+            payload: {
+              run_id: run_id,
+              event_id: event_id,
+              waveform: res.data,
+            },
+          })
+        : dispatch(errorReported(res.data));
+      return res.data;
     })
     .catch((err) => {
       console.log(err);
@@ -71,17 +74,17 @@ export const getEventPlot = (user, run_id, event_id) => (dispatch) => {
 
   axios
     .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/ge`, body, config)
-    .then(function (response) {
-      console.log(response.data);
+    .then(function (res) {
+      console.log(res.data);
       dispatch({
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
           run_id: run_id,
           event_id: event_id,
-          eventPlot: response.data,
+          eventPlot: res.data,
         },
       });
-      return response.data;
+      return res.data;
     })
     .catch((err) => {
       console.log(err);

@@ -157,7 +157,7 @@ class Tags extends Component {
         <CreatableSelect
           isClearable
           isDisabled={!dataLoaded}
-          isLoading={isLoading}
+          isLoading={!dataLoaded}
           onChange={this.handleChangeSelect}
           onCreateOption={this.handleCreateOption}
           options={options}

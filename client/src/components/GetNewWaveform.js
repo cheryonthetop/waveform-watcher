@@ -1,53 +1,103 @@
 import React, { Component } from "react";
 import { getWaveform } from "../actions/waveformActions";
-import { Button, Modal } from "react-bootstrap";
+import { errorServed } from "../actions/errorActions";
+import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
+import ErrorModal from "./ErrorModal";
 
 class GetNewWaveform extends Component {
   state = {
     show: false,
+    repetitive: false,
   };
 
-  handleGetWaveform = () => {
-    const { user, runID, eventID } = this.props;
-    if (runID) {
-      this.props.handleLoading();
-      console.log(user, runID, eventID);
-      this.props.dispatch(getWaveform(user, runID, eventID));
+  handleGetWaveform = (runID, eventID) => {
+    const { user, currRunID, currEventID } = this.props;
+    if (runID && eventID) {
+      if (runID === currRunID && eventID === currEventID)
+        this.handleShowModalRep();
+      else {
+        this.props.handleLoading();
+        console.log(user, runID, eventID);
+        this.props.dispatch(getWaveform(user, runID, eventID));
+      }
     } else {
-      this.handleShow();
+      this.handleShowModal();
     }
   };
 
   handleClose = () => this.setState({ show: false });
 
-  handleShow = () => this.setState({ show: true });
+  handleShowModal = () => this.setState({ show: true });
+
+  handleCloseRep = () => this.setState({ repetitive: false });
+
+  handleShowModalRep = () => this.setState({ repetitive: true });
+
+  handleCloseError = () => this.props.dispatch(errorServed());
 
   render() {
+    const { show, repetitive } = this.state;
+    const { msg, error, runID, eventID } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
         <Button
           variant="secondary"
           size="sm"
-          onClick={this.handleGetWaveform}
+          onClick={() =>
+            this.handleGetWaveform(runID, toString(parseInt(eventID) - 1))
+          }
           active
         >
           Get New Waveform
         </Button>
-        <Modal show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Get Waveform error</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>You need to enter a run id to get a waveform!</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            this.handleGetWaveform(runID, toString(parseInt(eventID) + 1))
+          }
+          active
+          style={{ marginTop: "10px" }}
+        >
+          Get Previous Event
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => this.handleGetWaveform(runID, eventID)}
+          active
+          style={{ marginTop: "10px" }}
+        >
+          Get Next Event
+        </Button>
+        <ErrorModal
+          title="Get New Waveform Error"
+          body="You need to enter a run ID to get a new Waveform"
+          show={show}
+          handleClose={this.handleClose}
+        />
+        <ErrorModal
+          title="You are already looking at this event"
+          body="Use a different run ID or event ID"
+          show={repetitive}
+          handleClose={this.handleCloseRep}
+        />
+        <ErrorModal
+          title="Get New Waveform Error"
+          body={msg}
+          show={error}
+          handleClose={this.handleCloseError}
+        />
       </div>
     );
   }
 }
 
-export default connect(null, null)(GetNewWaveform);
+const mapStateToProps = (state) => ({
+  currRunID: state.waveform.runID,
+  currEventID: state.waveform.eventID,
+  error: state.error.error,
+  msg: state.error.msg,
+});
+export default connect(mapStateToProps, null)(GetNewWaveform);

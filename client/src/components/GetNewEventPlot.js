@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { getEventPlot } from "../actions/waveformActions";
-import { Button, Modal } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
+import ErrorModal from "./ErrorModal";
 
 class GetNewEventPlot extends Component {
   state = {
@@ -10,6 +11,7 @@ class GetNewEventPlot extends Component {
 
   handleGetEventPlot = () => {
     const { user, runID, eventID } = this.props;
+
     if (runID) {
       this.props.handleLoading();
       console.log(user, runID, eventID);
@@ -24,6 +26,7 @@ class GetNewEventPlot extends Component {
   handleShow = () => this.setState({ show: true });
 
   render() {
+    const { show } = this.state;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
         <Button
@@ -34,19 +37,12 @@ class GetNewEventPlot extends Component {
         >
           View Events
         </Button>
-        <Modal show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Get Event Plot error</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            You need to enter a run id to view event plots!
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <ErrorModal
+          title="Get New Event Plot Error"
+          body="You need to enter a run ID to get a new Event Plot"
+          show={show}
+          handleClose={this.handleClose}
+        />
       </div>
     );
   }
