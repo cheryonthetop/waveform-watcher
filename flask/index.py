@@ -18,6 +18,7 @@ import json
 import threading
 import datetime
 from holoviews_waveform_display import waveform_display
+from context import xenon1t_dali
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 os.environ.update({'ROOT PATH' : ROOT_PATH})
@@ -92,8 +93,9 @@ def get_event_plot():
         req = request.get_json()
         run_id = req["run_id"]
         print("RUN ID IS: " , run_id)
-        # events = st.get_df(run_id, 'event_info')
-        events = None
+        st = xenon1t_dali()
+        events = st.get_df(run_id, 'event_info')
+        # events = None
         dset = hv.Dataset(events)
         # Fields
         DIMS = [
@@ -112,6 +114,7 @@ def get_event_plot():
         
         # Construct Layout to be viewed
         event_selection = hv.Layout(plots).cols(3)
+        event_selection = hv.selection.link_selections.instance()(event_selection)
 
         # Send to client
         events = renderer.server_doc(event_selection).roots[-1]
@@ -129,7 +132,7 @@ def get_waveform():
         event_id = req["event_id"]
         waveform = wait_for_waveform(run_id, event_id)
         if (isinstance(waveform, str)):
-            return make_response(jsonify({"err_msg" : waveform}), 500)
+            return make_response(jsonify({"err_msg" : waveform}), 202)
         print("Retrieved waveform from cache")
         # Update database in another thread
         threading.Thread(target=update_waveform_db, args=(user, run_id, event_id, waveform)).start()

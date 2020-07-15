@@ -53,9 +53,10 @@ class GetNewWaveform extends Component {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() =>
-            this.handleGetWaveform(runID, toString(parseInt(eventID) - 1))
-          }
+          onClick={() => {
+            const previous = parseInt(eventID) - 1;
+            this.handleGetWaveform(runID, previous.toString());
+          }}
           active
           style={{ marginTop: "10px" }}
         >
@@ -64,9 +65,10 @@ class GetNewWaveform extends Component {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() =>
-            this.handleGetWaveform(runID, toString(parseInt(eventID) + 1))
-          }
+          onClick={() => {
+            const previous = parseInt(eventID) + 1;
+            this.handleGetWaveform(runID, previous.toString());
+          }}
           active
           style={{ marginTop: "10px" }}
         >

@@ -35,16 +35,16 @@ export const getWaveform = (user, run_id, event_id) => (dispatch) => {
     .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/gw`, body, config)
     .then(function (res) {
       console.log(res.data);
-      res.status === 200
-        ? dispatch({
-            type: GET_WAVEFORM_SUCCESS,
-            payload: {
-              run_id: run_id,
-              event_id: event_id,
-              waveform: res.data,
-            },
-          })
-        : dispatch(errorReported(res.data));
+      if (res.data.err_msg) dispatch(errorReported(res.data.err_msg));
+      else
+        dispatch({
+          type: GET_WAVEFORM_SUCCESS,
+          payload: {
+            run_id: run_id,
+            event_id: event_id,
+            waveform: res.data,
+          },
+        });
       return res.data;
     })
     .catch((err) => {
