@@ -5,6 +5,7 @@ export default class Events extends Component {
   handleStateChangeEvent = (value, { action, removedValue }) => {
     switch (action) {
       case "select-option":
+        console.log("new event selected: ", value);
         this.props.handleStateChangeEvent(value);
     }
   };

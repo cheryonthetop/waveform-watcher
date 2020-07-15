@@ -32,8 +32,9 @@ class Waveform extends Component {
 
   tryLoadWaveform() {
     const { waveform, waveformLoaded, isLoading } = this.state;
-    const hasOldWaveform = waveform !== undefined;
-    const hasNewWaveform = waveform && waveform !== this.props.waveform;
+    const hasOldWaveform = waveform && waveform !== undefined;
+    const hasNewWaveform =
+      this.props.waveform && waveform !== this.props.waveform;
     if ((hasNewWaveform && isLoading) || (!waveformLoaded && hasOldWaveform)) {
       console.log("Tries loading");
       this.setState({ isLoading: false, waveformLoaded: true }, () => {
@@ -60,6 +61,7 @@ class Waveform extends Component {
   };
 
   handleStateChangeEvent = (value) => {
+    console.log("Changing event ID to: ", value.label);
     this.setState({ eventID: value.label });
   };
 

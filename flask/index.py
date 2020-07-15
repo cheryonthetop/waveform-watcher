@@ -14,12 +14,10 @@ from bokeh.document import Document
 from bson.json_util import dumps, loads
 import pickle
 import pymongo
-import strax
-import straxen
 import json
+import threading
+import datetime
 from holoviews_waveform_display import waveform_display
-from context import xenon1t_dali
-# from waveforms import WaveformWatcher
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 os.environ.update({'ROOT PATH' : ROOT_PATH})
@@ -37,23 +35,23 @@ LOG = logger.get_root_logger(os.environ.get(
 PORT = os.environ.get('PORT')
 if (not PORT):
     PORT = 4000
+    
 hv.extension("bokeh")
-
-# Load data
-st = xenon1t_dali(build_lowlevel=False)
-runs = st.select_runs()
-available_runs = runs['name']
-renderer = hv.renderer('bokeh')
-# A lock for renderer to avoid race condition
-lock = threading.Lock()
+renderer = hv.renderer('bokeh') # Bokeh Server
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
+if (APP_DB_URI == None):
+    print("MongoDB Connection String Not Set")
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_auth = my_db["auth"]
 my_app = my_db["app"]
 my_request = my_db["request"]
-my_event = my_db["event"]
+my_waveform = my_db["waveform"]
+my_run = my_db["run"]
+
+available_runs = my_run.find_one({})["runs"]
+print("Available runs are: ", available_runs[:5])
 
 def authenticate():
     def wrapped():
@@ -65,6 +63,8 @@ def not_found(error):
     """error handler"""
     LOG.error(error)
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+###### API Routes
 
 @app.route('/api/data')
 def send_data():
@@ -92,7 +92,8 @@ def get_event_plot():
         req = request.get_json()
         run_id = req["run_id"]
         print("RUN ID IS: " , run_id)
-        events = st.get_df(run_id, 'event_info')
+        # events = st.get_df(run_id, 'event_info')
+        events = None
         dset = hv.Dataset(events)
         # Fields
         DIMS = [
@@ -113,44 +114,11 @@ def get_event_plot():
         event_selection = hv.Layout(plots).cols(3)
 
         # Send to client
-        lock.acquire()
-        events = None
-        try:
-            events = renderer.server_doc(event_selection).roots[-1]
-        finally:
-            lock.release()
+        events = renderer.server_doc(event_selection).roots[-1]
+
         events_json = bokeh.embed.json_item(events)        
         return json.dumps(events_json)
-
-
-def get_data(run_id, event_id):
-    #TODO: Check types and handle appropriately.  
-    # Can specify either int for event ID or time range.  
-    # Or list of these.  If not list, then convert to list
-    event = None
-    document = my_event.find_one({"run_id" : run_id, "event_id" : event_id})
-    if (document):
-        event = pickle.loads(document["event"])
-    else:
-        cache_data(run_id, event_id)
-    return event
-
-def cache_data(run_id, event_id):
-    document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
-    # cache to request if not already in it
-    if (document == None):
-        post = {"status" : "new", "run_id" : run_id, "event_id" : event_id}
-        my_request.insert_one(post) # insert mongo document into 'fetch'
-
-def get_event(run_id, event_id):
-    while True:
-        event = get_data(run_id, event_id)
-        if (event != None):
-            return event
-        print("still getting event...")
-        # Wait for event to be loaded
-        time.sleep(5)
-
+        
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
     if request.is_json:
@@ -159,40 +127,18 @@ def get_waveform():
         run_id = req["run_id"]
         user = req["user"]   
         event_id = req["event_id"]
-        # df = st.get_array(run_id, "event_info")
-        # event = df[event_id]
-        event = get_event(run_id, event_id)
-        print(event)
-        plot = waveform_display(context = st, run_id = str(run_id), time_within=event)
-        waveform = None
-        lock.acquire()
-        try:
-            waveform =  renderer.server_doc(plot).roots[-1]
-            print(waveform)
-        finally:
-            lock.release()
-        waveform =  renderer.server_doc(plot).roots[-1]
-
-        waveform_json = bokeh.embed.json_item(waveform)  
-        print("json item is ", waveform)      
-        # Update database
-        mongo_document = my_app.find_one({"user": user})
-        print("found doc ", mongo_document)
-        if (mongo_document):
-            my_app.update_one({"user": user}, 
-            {"$set": { 
-                "run_id": run_id, 
-                "event_id" : event_id,
-                "waveform": waveform_json,
-                }
-            }
-            )
+        waveform = wait_for_waveform(run_id, event_id)
+        if (isinstance(waveform, str)):
+            return make_response(jsonify({"err_msg" : waveform}), 500)
+        print("Retrieved waveform from cache")
+        # Update database in another thread
+        threading.Thread(target=update_waveform_db, args=(user, run_id, event_id, waveform)).start()
         print("returning waveform...")
-        return json.dumps(waveform_json)
+        return json.dumps(waveform)
 
     else:
         return make_response(jsonify({"success": False}), 400)
-
+        
 @app.route('/api/sw',  methods = ['POST'])
 def save_waveform():
     if request.is_json:
@@ -272,6 +218,56 @@ def delete_waveform():
         return make_response(jsonify({"success": False}), 400)
 
 
+###### Helper Routine
+
+def get_waveform(run_id, event_id):
+    #TODO: Check types and handle appropriately.  
+    # Can specify either int for event ID or time range.  
+    # Or list of these.  If not list, then convert to list
+    waveform = None
+    document = my_waveform.find_one({"run_id" : run_id, "event_id" : event_id})
+    if (document):
+        if (document["waveform"]):
+            waveform = document["waveform"]
+        else:
+            return document["msg"]
+    else:
+        cache_waveform_request(run_id, event_id)
+    return waveform
+
+def cache_waveform_request(run_id, event_id):
+    document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
+    # cache to request if not already in it
+    if (document == None):
+        post = {"status" : "new", "run_id" : run_id, "event_id" : event_id}
+        my_request.insert_one(post) # insert mongo document into 'fetch'
+
+def wait_for_waveform(run_id, event_id):
+    # only wait for 1 minute
+    endtime = datetime.datetime.now() + datetime.timedelta(0, 60)
+    while True:
+        waveform = get_waveform(run_id, event_id)
+        if (waveform != None):
+            return waveform
+        print("still getting waveform...")
+        # Wait for waveform to be loaded
+        time.sleep(5)
+        if (datetime.datetime.now() >= endtime):
+            return "Get Waveform Timeout. Please Try Again."
+
+def update_waveform_db(user, run_id, event_id, waveform):
+    mongo_document = my_app.find_one({"user": user})
+    print("updating waveform in the app db... ")
+    if (mongo_document):
+        my_app.update_one({"user": user}, 
+            {"$set": { 
+                "run_id": run_id, 
+                "event_id" : event_id,
+                "waveform": waveform,
+                }
+            }
+        )
+    print("updating waveform in the app db completed!")
 
 if __name__ == "__main__":
     # LOG.info('running environment: %s', os.environ.get('ENV'))

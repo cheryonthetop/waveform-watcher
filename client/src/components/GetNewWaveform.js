@@ -13,6 +13,7 @@ class GetNewWaveform extends Component {
 
   handleGetWaveform = (runID, eventID) => {
     const { user, currRunID, currEventID } = this.props;
+    console.log("event ID is: ", eventID);
     if (runID && eventID) {
       if (runID === currRunID && eventID === currEventID)
         this.handleShowModalRep();
@@ -44,9 +45,7 @@ class GetNewWaveform extends Component {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() =>
-            this.handleGetWaveform(runID, toString(parseInt(eventID) - 1))
-          }
+          onClick={() => this.handleGetWaveform(runID, eventID)}
           active
         >
           Get New Waveform
@@ -55,7 +54,7 @@ class GetNewWaveform extends Component {
           variant="secondary"
           size="sm"
           onClick={() =>
-            this.handleGetWaveform(runID, toString(parseInt(eventID) + 1))
+            this.handleGetWaveform(runID, toString(parseInt(eventID) - 1))
           }
           active
           style={{ marginTop: "10px" }}
@@ -65,7 +64,9 @@ class GetNewWaveform extends Component {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => this.handleGetWaveform(runID, eventID)}
+          onClick={() =>
+            this.handleGetWaveform(runID, toString(parseInt(eventID) + 1))
+          }
           active
           style={{ marginTop: "10px" }}
         >
