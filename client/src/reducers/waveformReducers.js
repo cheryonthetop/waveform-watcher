@@ -21,12 +21,14 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
-  console.log(
-    "received action of type " +
-      action.type +
-      " and data " +
-      JSON.stringify(action.payload)
-  );
+  action.payload
+    ? console.log(
+        "received action of type " +
+          action.type +
+          " and data " +
+          JSON.stringify(action.payload).toString().slice(0, 100)
+      )
+    : console.log("received action of type " + action.type);
   switch (action.type) {
     case LOAD_SUCCESS: {
       let availableRuns = [];

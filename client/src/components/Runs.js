@@ -28,9 +28,7 @@ class Runs extends Component {
     // console.log("options are " + options);
     if (availableRuns.length !== 0 && options.length === 0) {
       const runs = availableRuns.map((run) => createOption(run));
-      this.setState({ options: runs, dataLoaded: true }, () => {
-        console.log(this.state.options);
-      });
+      this.setState({ options: runs, dataLoaded: true });
     }
   }
 
