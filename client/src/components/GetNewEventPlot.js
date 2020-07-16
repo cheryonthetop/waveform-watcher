@@ -10,12 +10,12 @@ class GetNewEventPlot extends Component {
   };
 
   handleGetEventPlot = () => {
-    const { user, runID, eventID } = this.props;
+    const { user, runID } = this.props;
 
     if (runID) {
       this.props.handleLoading();
-      console.log(user, runID, eventID);
-      this.props.dispatch(getEventPlot(user, runID, eventID));
+      console.log(user, runID);
+      this.props.dispatch(getEventPlot(user, runID));
     } else {
       this.handleShow();
     }

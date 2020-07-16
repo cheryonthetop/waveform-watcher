@@ -55,7 +55,7 @@ export const getWaveform = (user, run_id, event_id) => (dispatch) => {
     });
 };
 
-export const getEventPlot = (user, run_id, event_id) => (dispatch) => {
+export const getEventPlot = (user, run_id) => (dispatch) => {
   console.log(run_id);
   // Headers
   const config = {
@@ -69,7 +69,6 @@ export const getEventPlot = (user, run_id, event_id) => (dispatch) => {
   const body = JSON.stringify({
     user: user,
     run_id: run_id,
-    event_id: event_id,
   });
 
   axios
@@ -80,7 +79,6 @@ export const getEventPlot = (user, run_id, event_id) => (dispatch) => {
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
           run_id: run_id,
-          event_id: event_id,
           eventPlot: res.data,
         },
       });

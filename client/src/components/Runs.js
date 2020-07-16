@@ -22,10 +22,10 @@ class Runs extends Component {
 
   loadAvailableRuns() {
     const { availableRuns } = this.props;
-    const { dataLoaded, options } = this.state;
-    console.log("available runs: " + availableRuns);
-    console.log("data loaded is " + dataLoaded);
-    console.log("options are " + options);
+    const { options } = this.state;
+    // console.log("available runs: " + availableRuns);
+    // console.log("data loaded is " + dataLoaded);
+    // console.log("options are " + options);
     if (availableRuns.length !== 0 && options.length === 0) {
       const runs = availableRuns.map((run) => createOption(run));
       this.setState({ options: runs, dataLoaded: true }, () => {

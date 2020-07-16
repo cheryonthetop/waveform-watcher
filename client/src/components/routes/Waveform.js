@@ -61,8 +61,8 @@ class Waveform extends Component {
   };
 
   handleStateChangeEvent = (value) => {
-    console.log("Changing event ID to: ", value.label);
-    this.setState({ eventID: value.label });
+    console.log("Changing event ID to: ", value);
+    this.setState({ eventID: value });
   };
 
   handleViewEvents = () => {

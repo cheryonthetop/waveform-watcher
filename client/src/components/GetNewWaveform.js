@@ -7,13 +7,14 @@ import ErrorModal from "./ErrorModal";
 
 class GetNewWaveform extends Component {
   state = {
-    show: false,
+    noRun: false,
+    noEvent: false,
     repetitive: false,
+    eventIsNotInt: false,
   };
 
   handleGetWaveform = (runID, eventID) => {
     const { user, currRunID, currEventID } = this.props;
-    console.log("event ID is: ", eventID);
     if (runID && eventID) {
       if (runID === currRunID && eventID === currEventID)
         this.handleShowModalRep();
@@ -23,13 +24,29 @@ class GetNewWaveform extends Component {
         this.props.dispatch(getWaveform(user, runID, eventID));
       }
     } else {
-      this.handleShowModal();
+      if (!runID && !eventID) this.handleShowModalNoRunNoEvent();
+      else if (!runID) this.handleShowModalNoRun();
+      else if (!eventID) this.handleShowModalNoEvent();
     }
   };
 
-  handleClose = () => this.setState({ show: false });
+  handleCloseNoRun = () => this.setState({ noRun: false });
 
-  handleShowModal = () => this.setState({ show: true });
+  handleShowModalNoRun = () => this.setState({ noRun: true });
+
+  handleCloseNoEvent = () => this.setState({ noEvent: false });
+
+  handleShowModalNoEvent = () => this.setState({ noEvent: true });
+
+  handleCloseNoRunNoEvent = () =>
+    this.setState({ noRun: false, noEvent: false });
+
+  handleShowModalNoRunNoEvent = () =>
+    this.setState({ noRun: true, noEvent: true });
+
+  handleCloseEventIsNotInt = () => this.setState({ eventIsNotInt: false });
+
+  handleShowModalEventIsNotInt = () => this.setState({ eventIsNotInt: true });
 
   handleCloseRep = () => this.setState({ repetitive: false });
 
@@ -38,7 +55,7 @@ class GetNewWaveform extends Component {
   handleCloseError = () => this.props.dispatch(errorServed());
 
   render() {
-    const { show, repetitive } = this.state;
+    const { noRun, noEvent, repetitive, eventIsNotInt } = this.state;
     const { msg, error, runID, eventID } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
@@ -76,15 +93,33 @@ class GetNewWaveform extends Component {
         </Button>
         <ErrorModal
           title="Get New Waveform Error"
-          body="You need to enter a run ID to get a new Waveform"
-          show={show}
-          handleClose={this.handleClose}
+          body="You Need To Enter an Run ID to Get a New Waveform"
+          show={noRun}
+          handleClose={this.handleCloseNoRun}
+        />
+        <ErrorModal
+          title="Get New Waveform Error"
+          body="You Need To Enter an Event ID to Get a New Waveform"
+          show={noEvent}
+          handleClose={this.handleCloseNoEvent}
+        />
+        <ErrorModal
+          title="Get New Waveform Error"
+          body="You Need To Enter a Run ID and an Event ID to Get a New Waveform"
+          show={noEvent && noRun}
+          handleClose={this.handleCloseNoRunNoEvent}
         />
         <ErrorModal
           title="You are already looking at this event"
           body="Use a different run ID or event ID"
           show={repetitive}
           handleClose={this.handleCloseRep}
+        />
+        <ErrorModal
+          show={eventIsNotInt}
+          handleClose={this.handleCloseEventIsNotInt}
+          title="Input Error"
+          body="Event ID Must Be Integer"
         />
         <ErrorModal
           title="Get New Waveform Error"

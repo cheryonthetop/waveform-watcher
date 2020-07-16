@@ -1,21 +1,19 @@
 import React, { Component } from "react";
-import Select from "react-select";
+import { Form } from "react-bootstrap";
 
 export default class Events extends Component {
-  handleStateChangeEvent = (value, { action, removedValue }) => {
-    switch (action) {
-      case "select-option":
-        console.log("new event selected: ", value);
-        this.props.handleStateChangeEvent(value);
-    }
-  };
   render() {
     return (
       <div>
         <strong>Event: </strong>
-        <Select
-          options={[{ label: "1" }, { label: "2" }, { label: "3" }]}
-          onChange={this.handleStateChangeEvent}
+        <Form.Control
+          type="string"
+          placeholder="Enter an Integer Event ID"
+          onChange={(event) =>
+            Number.isInteger(parseInt(event.target.value))
+              ? this.props.handleStateChangeEvent(event.target.value)
+              : this.handleShow()
+          }
         />
       </div>
     );

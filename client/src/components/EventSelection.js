@@ -69,7 +69,7 @@ class EventSelection extends Component {
             />
             <br />
             <Button onClick={this.handleOnClickWaveform} size="sm">
-              Go to waveform
+              Go to Waveform
             </Button>
           </div>
         </div>

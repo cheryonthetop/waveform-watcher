@@ -30,7 +30,6 @@ export default function (state = initialState, action) {
   switch (action.type) {
     case LOAD_SUCCESS: {
       let availableRuns = [];
-      console.log(action.payload.available_runs);
       Object.entries(action.payload.available_runs).map(([index, run]) =>
         availableRuns.push(run)
       );
@@ -57,7 +56,6 @@ export default function (state = initialState, action) {
       return {
         ...state,
         runID: action.payload.run_id,
-        eventID: action.payload.event_id,
         eventPlot: action.payload.eventPlot,
       };
     case LOAD_FAILURE:
