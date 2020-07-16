@@ -11,6 +11,9 @@ import holoviews as hv
 from holoviews import dim, opts
 import bokeh
 from bokeh.document import Document
+from bokeh.models import ColumnDataSource, CustomJS, OpenURL, TapTool
+from bokeh.plotting import figure, show
+from bokeh.layouts import gridplot
 from bson.json_util import dumps, loads
 import pickle
 import pymongo
@@ -39,11 +42,32 @@ if (not PORT):
     
 hv.extension("bokeh")
 renderer = hv.renderer('bokeh') # Bokeh Server
+# Fixed Parameter in Plots for Event Selections
+DIMS = [
+    ["cs1", "cs2"],
+    ["z","r" ],
+    ["e_light", 'e_charge'],
+    ["e_light", 'e_ces'],
+    ["drift_time", "n_peaks"],
+]
+COLORS = hv.Cycle('Category10').values
+TOOLS=['box_select', 'lasso_select', 'box_zoom', 'pan', 
+       'wheel_zoom', 'hover', 'tap', 'save', 'reset']
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
 if (APP_DB_URI == None):
     print("MongoDB Connection String Not Set")
+
+# The URL of the app (front-end)
+if os.environ.get("ENV") == "production":
+    APP_URL = os.environ.get("APP_URL", None)  
+else: 
+    APP_URL = "http://localhost:3000"
+if (APP_URL == None):
+    print("Env Variable APP_URL Is Not Set")
+    
+    
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_auth = my_db["auth"]
 my_app = my_db["app"]
@@ -95,32 +119,23 @@ def get_event_plot():
         print("RUN ID IS: " , run_id)
         st = xenon1t_dali()
         events = st.get_df(run_id, 'event_info')
-        # events = None
-        dset = hv.Dataset(events)
-        # Fields
-        DIMS = [
-        ["cs1", "cs2"],
-        ["z","r" ],
-        ["e_light", 'e_charge'],
-        ["e_light", 'e_ces'],
-        ["drift_time", "n_peaks"],
-        ]
-        # Use different color for each plot
-        colors = hv.Cycle('Category10').values
-        plots = [
-            hv.Points(dset, dims).opts(color=c)
-            for c, dims in zip(colors, DIMS)
-        ]
-        
-        # Construct Layout to be viewed
-        event_selection = hv.Layout(plots).cols(3)
-        event_selection = hv.selection.link_selections.instance()(event_selection)
-
+        source = ColumnDataSource(events)
+        plots = []
+        # use the "color" column of the CDS to complete the URL
+        # e.g. if the glyph at index 10 is selected, then @color
+        # will be replaced with source.data['color'][10]
+        url = "{APP_URL}/waveform/{run_id}/@event_number/".format(APP_URL=APP_URL, run_id=run_id)
+        for color,dim in zip(COLORS, DIMS):
+            p = figure(tools=TOOLS, x_axis_label=dim[0], y_axis_label=dim[1])
+            p.circle(dim[0], dim[1], source=source, alpha=0.6, color=color)
+            taptool = p.select(type=TapTool)
+            taptool.callback = OpenURL(url=url)
+            plots.append(p)
+        # make a grid
+        grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
         # Send to client
-        events = renderer.server_doc(event_selection).roots[-1]
-
-        events_json = bokeh.embed.json_item(events)        
-        return json.dumps(events_json)
+        grid = bokeh.embed.json_item(grid)  
+        return json.dumps(grid)
         
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
