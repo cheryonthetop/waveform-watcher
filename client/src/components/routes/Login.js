@@ -4,13 +4,11 @@ import "../stylesheets/login.css";
 import { Redirect } from "react-router-dom";
 
 class Login extends Component {
-  componentDidMount() {
-    console.log("lifecycle method called");
-  }
-
   render() {
     if (this.props.isAuthenticated) {
-      return <Redirect to="/" />;
+      const pathname = window.localStorage.getItem("redirect");
+      window.localStorage.removeItem("redirect");
+      return pathname ? <Redirect to={pathname} /> : <Redirect to="/" />;
     }
 
     return (

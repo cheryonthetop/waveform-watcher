@@ -10,9 +10,7 @@ export default class Events extends Component {
           type="string"
           placeholder="Enter an Integer Event ID"
           onChange={(event) =>
-            Number.isInteger(parseInt(event.target.value))
-              ? this.props.handleStateChangeEvent(event.target.value)
-              : this.handleShow()
+            this.props.handleStateChangeEvent(event.target.value)
           }
         />
       </div>

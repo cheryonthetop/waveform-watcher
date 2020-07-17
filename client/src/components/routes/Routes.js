@@ -19,6 +19,7 @@ class Routes extends Component {
           <Route exact path="/login/success" component={Success} />
           <Route exact path="/login/failure" component={Failure} />
           <Route exact path="/waveform" component={Waveform} />
+          <Route exact path="/waveform/:run/:event" component={Waveform} />
           <Route exact path="/" component={Home} />
         </div>
       </BrowserRouter>

@@ -23,6 +23,10 @@ class Waveform extends Component {
   };
 
   componentDidMount() {
+    const {
+      params: { run, event },
+    } = this.props.match;
+    console.log("URL Params:", run, event);
     this.tryLoadWaveform();
   }
 
@@ -75,6 +79,7 @@ class Waveform extends Component {
 
   render() {
     if (!this.props.isAuthenticated) {
+      window.localStorage.setItem("redirect", this.props.location.pathname);
       return <Redirect to="/login" />;
     }
     const { runID, eventID, isLoading } = this.state;
