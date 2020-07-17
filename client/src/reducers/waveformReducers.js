@@ -49,8 +49,8 @@ export default function (state = initialState, action) {
     case GET_WAVEFORM_SUCCESS:
       return {
         ...state,
-        runID: action.payload.run_id,
-        eventID: action.payload.event_id,
+        runID: action.payload.runID,
+        eventID: action.payload.eventID,
         waveform: action.payload.waveform,
       };
     case GET_EVENT_PLOT_SUCCESS:

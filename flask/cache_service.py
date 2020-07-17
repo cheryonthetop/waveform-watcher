@@ -9,6 +9,7 @@ import pymongo
 import datetime
 import time
 import bokeh
+import gridfs
 from holoviews_waveform_display import waveform_display
 
 # Bokeh backend setup
@@ -26,7 +27,7 @@ if (APP_DB_URI == None):
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
-my_events = my_db["events"]
+fs = gridfs.GridFS(my_db, collection="events")
 st = straxen.contexts.xenon1t_dali()
 
 def load_waveform(run_id, event_id):
@@ -43,13 +44,13 @@ def load_waveform(run_id, event_id):
 
 def load_events(run_id):
     events = st.get_df(run_id, 'event_info')
+    events.reset_index(inplace=True)
+    events = events.to_json(orient="records")
     return events
     
 def cache_events(run_id, events, msg):
-    post = {"run_id" : run_id, "events": events, "msg": msg}
-    document = my_events.find_one(post)
-    if (document == None):
-        my_events.insert_one(post)
+    if (fs.exists(run_id) == False):
+        fs.put(events, _id=run_id, msg=msg, encoding="UTF-8")
 
 def cache_waveform(run_id, event_id, waveform, msg):
     post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}
@@ -58,6 +59,7 @@ def cache_waveform(run_id, event_id, waveform, msg):
         my_waveform.insert_one(post)
 
 def process_waveform(run_id, event_id):
+    print("Start processing waveform for run", run_id, "and event ", event_id)
     try:
         waveform = load_waveform(run_id, event_id)
         cache_waveform(run_id, event_id, waveform, "")
@@ -71,6 +73,7 @@ def process_waveform(run_id, event_id):
     print("Just cached the waveform for run ", run_id, "and event ", event_id)
     
 def process_events(run_id):
+    print("Start processing events for run", run_id)
     try:
         events = load_events(run_id)
         cache_events(run_id, events, "")
@@ -95,7 +98,7 @@ def fetch_request():
                 process_waveform(run_id, event_id)
             else:
                 run_id = document["run_id"]
-                process_events(event_id)
+                process_events(run_id)
             document = my_request.find_one_and_update({"status": "new"}, 
                                             {"$set" : {"status": "use"}})
         # Sleep the app if no new requests

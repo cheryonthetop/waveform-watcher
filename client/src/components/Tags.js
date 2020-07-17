@@ -67,8 +67,11 @@ class Tags extends Component {
       this.setState({ comments: newValue.data.comments });
       // Data comes from Mongo DB, hence the _ in variable name below
       const { run_id, event_id, waveform } = newValue.data;
-      if (waveform && run_id & event_id)
+      console.log(run_id, event_id, waveform);
+      if (waveform && run_id && event_id) {
+        console.log("Switching Waveform...");
         this.props.dispatch(switchWaveform(run_id, event_id, waveform));
+      }
     }
   };
 
