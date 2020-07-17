@@ -14,8 +14,8 @@ import {
 import axios from "axios";
 import { errorReported } from "./errorActions";
 
-export const getWaveform = (user, run_id, event_id) => (dispatch) => {
-  console.log(run_id);
+export const getWaveform = (user, runID, eventID) => (dispatch) => {
+  console.log(runID);
   // Headers
   const config = {
     headers: {
@@ -27,8 +27,8 @@ export const getWaveform = (user, run_id, event_id) => (dispatch) => {
   // Request body
   const body = JSON.stringify({
     user: user,
-    run_id: run_id,
-    event_id: event_id,
+    run_id: runID,
+    event_id: eventID,
   });
 
   axios
@@ -40,8 +40,8 @@ export const getWaveform = (user, run_id, event_id) => (dispatch) => {
         dispatch({
           type: GET_WAVEFORM_SUCCESS,
           payload: {
-            run_id: run_id,
-            event_id: event_id,
+            runID: runID,
+            eventID: eventID,
             waveform: res.data,
           },
         });
@@ -55,8 +55,8 @@ export const getWaveform = (user, run_id, event_id) => (dispatch) => {
     });
 };
 
-export const getEventPlot = (user, run_id) => (dispatch) => {
-  console.log(run_id);
+export const getEventPlot = (user, runID) => (dispatch) => {
+  console.log(runID);
   // Headers
   const config = {
     headers: {
@@ -68,7 +68,7 @@ export const getEventPlot = (user, run_id) => (dispatch) => {
   // Request body
   const body = JSON.stringify({
     user: user,
-    run_id: run_id,
+    run_id: runID,
   });
 
   axios
@@ -78,7 +78,7 @@ export const getEventPlot = (user, run_id) => (dispatch) => {
       dispatch({
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
-          run_id: run_id,
+          runID: runID,
           eventPlot: res.data,
         },
       });
@@ -92,14 +92,9 @@ export const getEventPlot = (user, run_id) => (dispatch) => {
     });
 };
 
-export const saveWaveform = (
-  user,
-  tag,
-  comments,
-  waveform,
-  run_id,
-  event_id
-) => (dispatch) => {
+export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
+  dispatch
+) => {
   console.log("save waveform action called");
   // Headers
   const config = {
@@ -115,8 +110,8 @@ export const saveWaveform = (
     tag: tag,
     comments: comments,
     waveform: waveform,
-    run_id: run_id,
-    event_id: event_id,
+    run_id: runID,
+    event_id: eventID,
   });
 
   axios
@@ -139,12 +134,12 @@ export const saveWaveform = (
     });
 };
 
-export const switchWaveform = (run_id, event_id, waveform) => (dispatch) => {
+export const switchWaveform = (runID, eventID, waveform) => (dispatch) => {
   dispatch({
     type: SWITCH_WAVEFORM,
     payload: {
-      run_id: run_id,
-      event_id: event_id,
+      runID: runID,
+      eventID: eventID,
       waveform: waveform,
     },
   });
