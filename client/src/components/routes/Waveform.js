@@ -6,11 +6,13 @@ import Loading from "react-loading-animation";
 import Tags from "../Tags";
 import Runs from "../Runs";
 import GetNewWaveform from "../GetNewWaveform";
+import { getWaveform } from "../../actions/waveformActions";
 import Param from "../Param";
 import Events from "../Events";
 import { Redirect } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
+import ErrorModal from "../ErrorModal";
 import Header from "../Header";
 
 class Waveform extends Component {
@@ -20,18 +22,38 @@ class Waveform extends Component {
     eventID: this.props.eventID,
     isLoading: this.props.isLoading,
     waveformLoaded: false,
+    runNA: false,
+    isNotInt: false,
   };
 
   componentDidMount() {
-    const {
-      params: { run, event },
-    } = this.props.match;
-    console.log("URL Params:", run, event);
-    this.tryLoadWaveform();
+    if (!this.props.isLoading) {
+      this.tryLoadWavefromFromURL();
+      this.tryLoadWaveform();
+    }
   }
 
   componentDidUpdate() {
-    this.tryLoadWaveform();
+    if (!this.props.isLoading) {
+      this.tryLoadWavefromFromURL();
+      this.tryLoadWaveform();
+    }
+  }
+
+  tryLoadWavefromFromURL() {
+    const {
+      user,
+      availableRuns,
+      match: {
+        params: { run, event },
+      },
+    } = this.props;
+    console.log("URL Params:", run, event);
+    if (!run || !event) return;
+    else if (!availableRuns.find((element) => element == run))
+      this.handleShowModalRunNotAvailable();
+    else if (!Number.isInteger(parseInt(event))) this.handleShowModalIsNotInt();
+    else this.props.dispatch(getWaveform(user, run, event));
   }
 
   tryLoadWaveform() {
@@ -40,7 +62,7 @@ class Waveform extends Component {
     const hasNewWaveform =
       this.props.waveform && waveform !== this.props.waveform;
     if ((hasNewWaveform && isLoading) || (!waveformLoaded && hasOldWaveform)) {
-      console.log("Tries loading");
+      console.log("Tries loading...");
       this.setState({ isLoading: false, waveformLoaded: true }, () => {
         this.loadWaveform();
         this.setState({ waveform: this.props.waveform });
@@ -55,7 +77,7 @@ class Waveform extends Component {
   }
 
   loadWaveform() {
-    console.log("loading waveform");
+    console.log("Loading Waveform...");
     this.deleteWaveform();
     embed.embed_item(this.props.waveform, "graph");
   }
@@ -77,12 +99,28 @@ class Waveform extends Component {
     this.setState({ isLoading: true });
   };
 
+  handleShowModalIsNotInt = () => {
+    this.setState({ isNotInt: true });
+  };
+
+  handleCloseModalIsNotInt = () => {
+    this.setState({ isNotInt: false });
+  };
+
+  handleShowModalRunNotAvailable = () => {
+    this.setState({ runNA: true });
+  };
+
+  handleCloseModalRunNotAvailable = () => {
+    this.setState({ runNA: false });
+  };
+
   render() {
     if (!this.props.isAuthenticated) {
       window.localStorage.setItem("redirect", this.props.location.pathname);
       return <Redirect to="/login" />;
     }
-    const { runID, eventID, isLoading } = this.state;
+    const { runID, eventID, isLoading, isNotInt, runNA } = this.state;
     return (
       <div>
         <Header />
@@ -121,14 +159,30 @@ class Waveform extends Component {
             </Loading>
           </div>
         </div>
+
+        <ErrorModal
+          title="URL Params Error"
+          body={"The Run " + this.props.match.params.run + " Is Not Available"}
+          show={runNA}
+          handleClose={this.handleCloseModalRunNotAvailable}
+        />
+        <ErrorModal
+          title="URL Params Error"
+          body={
+            "The Event " + this.props.match.params.event + " Is Not an Integer"
+          }
+          show={isNotInt}
+          handleClose={this.handleCloseModalIsNotInt}
+        />
       </div>
     );
   }
 }
 
 const mapStateToProps = (state) => ({
-  user: state.waveform.user,
+  user: state.auth.user,
   isAuthenticated: state.auth.isAuthenticated,
+  availableRuns: state.waveform.availableRuns,
   runID: state.waveform.runID,
   waveform: state.waveform.waveform,
   eventID: state.waveform.eventID,

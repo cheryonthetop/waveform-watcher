@@ -26,6 +26,7 @@ if (APP_DB_URI == None):
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
+my_events = my_db["events"]
 st = straxen.contexts.xenon1t_dali()
 
 def load_data(run_id, event_id):
@@ -39,6 +40,16 @@ def load_data(run_id, event_id):
         lock.release()
     waveform = bokeh.embed.json_item(waveform)
     return waveform
+
+def load_events(run_id):
+    events = st.get_df(run_id, 'event_info')
+    return events
+    
+def cache_events(run_id, events, msg):
+    post = {"run_id" : run_id, "events": events, "msg": msg}
+    document = my_events.find_one(post)
+    if (document == None):
+        my_events.insert_one(post)
 
 def cache_data(run_id, event_id, waveform, msg):
     post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}

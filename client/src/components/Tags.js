@@ -5,8 +5,9 @@ import {
   switchWaveform,
   deleteWaveform,
 } from "../actions/waveformActions";
-import { Button, Modal } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
+import ErrorModal from "./ErrorModal";
 
 const createOption = (label, data) => ({
   label,
@@ -19,27 +20,27 @@ class Tags extends Component {
   state = {
     isLoading: this.props.isLoading,
     dataLoaded: false,
-    show: false,
+    noTag: false,
+    noWaveform: false,
+    noAnything: false,
     options: defaultOptions,
     value: undefined,
     comments: " ",
   };
 
   componentDidMount() {
-    this.tryLoadOptions();
+    if (!this.props.isLoading && !this.state.dataLoaded) this.tryLoadOptions();
   }
 
   componentDidUpdate() {
-    this.tryLoadOptions();
+    if (!this.props.isLoading && !this.state.dataLoaded) this.tryLoadOptions();
   }
 
   tryLoadOptions() {
-    const { options, dataLoaded } = this.state;
-    const { tagsData } = this.props;
-    if (!dataLoaded) {
-      console.log("tags data is:" + tagsData);
-      this.loadOptions();
-      this.setState({ dataLoaded: true });
+    if (this.state.options) {
+      this.setState({ dataLoaded: true }, () => this.loadOptions());
+    } else {
+      console.log("There is no tags to load. The user has no data");
     }
   }
 
@@ -111,7 +112,7 @@ class Tags extends Component {
   };
 
   handleSave = () => {
-    const { value } = this.state;
+    const { value, options } = this.state;
     const { user, waveform, runID, eventID } = this.props;
     if (value && waveform) {
       const tag = value.label;
@@ -119,14 +120,26 @@ class Tags extends Component {
       this.props.dispatch(
         saveWaveform(user, tag, comments, waveform, runID, eventID)
       );
+      const newOptions = options.map((option) => {
+        if (option === value) {
+          option.waveform = { data: waveform };
+          return option;
+        } else {
+          return option;
+        }
+      });
+      this.setState(options, newOptions);
     } else {
-      this.handleShow();
+      if (!value && !waveform) this.handleShowModalNoAnything();
+      else if (!waveform) this.handleShowModalNoWaveform();
+      else this.handleShowModalNoTag();
     }
   };
 
   handleDelete = () => {
     const { value, options } = this.state;
     const { user } = this.props;
+
     const tag = value.label;
     const newOptions = options.filter((option) => option.label !== value.label);
     console.log(value);
@@ -137,17 +150,26 @@ class Tags extends Component {
     this.props.dispatch(deleteWaveform(user, tag));
   };
 
-  handleClose = () => this.setState({ show: false });
+  handleCloseModalNoTag = () => this.setState({ noTag: false });
 
-  handleShow = () => this.setState({ show: true });
+  handleShowModalNoTag = () => this.setState({ noTag: true });
+
+  handleCloseModalNoWaveform = () => this.setState({ noWaveform: false });
+
+  handleShowModalNoWaveform = () => this.setState({ noWaveform: true });
+
+  handleCloseModalNoAnything = () => this.setState({ noAnything: false });
+
+  handleShowModalNoAnything = () => this.setState({ noAnything: true });
 
   render() {
     const {
-      isLoading,
       options,
       value,
       comments,
-      show,
+      noTag,
+      noWaveform,
+      noAnything,
       dataLoaded,
     } = this.state;
     return (
@@ -180,22 +202,10 @@ class Tags extends Component {
           type="submit"
           active
         >
-          Save Waveform under Tag
-          {value ? " " + value.label : ""}
+          Save Waveform
+          {value ? "under Tag " + value.label : ""}
         </Button>
-        <Modal show={show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Save error</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            You need to enter a tag AND get a waveform to save!
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <br />
         <Button
           style={{ marginTop: "10px" }}
           variant="danger"
@@ -205,6 +215,24 @@ class Tags extends Component {
         >
           Delete Tag {value ? value.label : ""}
         </Button>
+        <ErrorModal
+          title="Save Error"
+          body="You Need to Create or Select a Tag to Perform Save Operation!"
+          show={noTag}
+          handleClose={this.handleCloseModalNoTag}
+        />
+        <ErrorModal
+          title="Save Error"
+          body="You Need to Have a Waveform to Perform Save Operation!"
+          show={noWaveform}
+          handleClose={this.handleCloseModalNoWaveform}
+        />
+        <ErrorModal
+          title="Save Error"
+          body="You Need to Have a Waveform and a Tag to Perform Save Operation!"
+          show={noAnything}
+          handleClose={this.handleCloseModalNoAnything}
+        />
       </div>
     );
   }

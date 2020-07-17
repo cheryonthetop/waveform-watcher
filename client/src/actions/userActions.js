@@ -5,8 +5,6 @@ import axios from "axios";
 // Check token & load user
 export const authenticate = () => (dispatch) => {
   console.log("authenticate action called");
-  console.log(window.localStorage.getItem("token"));
-  // dispatch(loadAppData("cheryonthetop"));
   const url =
     process.env.REACT_APP_NODE_BACKEND_URL +
     "/auth?token=" +

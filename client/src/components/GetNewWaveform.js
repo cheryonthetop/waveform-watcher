@@ -56,7 +56,7 @@ class GetNewWaveform extends Component {
 
   render() {
     const { noRun, noEvent, repetitive, eventIsNotInt } = this.state;
-    const { msg, error, runID, eventID } = this.props;
+    const { msg, error, runID, eventID, currRunID, currEventID } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
         <Button
@@ -71,8 +71,8 @@ class GetNewWaveform extends Component {
           variant="secondary"
           size="sm"
           onClick={() => {
-            const previous = parseInt(eventID) - 1;
-            this.handleGetWaveform(runID, previous.toString());
+            const previous = currEventID ? parseInt(currEventID) - 1 : "";
+            this.handleGetWaveform(currRunID, previous.toString());
           }}
           active
           style={{ marginTop: "10px" }}
@@ -83,8 +83,8 @@ class GetNewWaveform extends Component {
           variant="secondary"
           size="sm"
           onClick={() => {
-            const previous = parseInt(eventID) + 1;
-            this.handleGetWaveform(runID, previous.toString());
+            const previous = currEventID ? parseInt(currEventID) + 1 : "";
+            this.handleGetWaveform(currRunID, previous.toString());
           }}
           active
           style={{ marginTop: "10px" }}

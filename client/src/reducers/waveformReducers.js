@@ -11,7 +11,6 @@ import {
 } from "../actions/types";
 
 const initialState = {
-  user: "",
   runID: "",
   eventID: "",
   waveform: undefined,
