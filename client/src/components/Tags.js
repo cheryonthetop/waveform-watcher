@@ -65,9 +65,10 @@ class Tags extends Component {
     this.setState({ value: newValue });
     if (actionMeta.action === "select-option") {
       this.setState({ comments: newValue.data.comments });
-      const { runID, eventID, waveform } = newValue.data;
-      if (waveform && runID)
-        this.props.dispatch(switchWaveform(runID, eventID, waveform));
+      // Data comes from Mongo DB, hence the _ in variable name below
+      const { run_id, event_id, waveform } = newValue.data;
+      if (waveform && run_id & event_id)
+        this.props.dispatch(switchWaveform(run_id, event_id, waveform));
     }
   };
 
@@ -128,7 +129,7 @@ class Tags extends Component {
           return option;
         }
       });
-      this.setState(options, newOptions);
+      this.setState({ options: newOptions });
     } else {
       if (!value && !waveform) this.handleShowModalNoAnything();
       else if (!waveform) this.handleShowModalNoWaveform();
@@ -203,7 +204,7 @@ class Tags extends Component {
           active
         >
           Save Waveform
-          {value ? "under Tag " + value.label : ""}
+          {value ? " under Tag " + value.label : ""}
         </Button>
         <br />
         <Button

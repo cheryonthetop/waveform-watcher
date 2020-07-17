@@ -74,6 +74,7 @@ my_app = my_db["app"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_run = my_db["run"]
+my_events = my_db["events"]
 
 available_runs = my_run.find_one({})["runs"]
 print("Available runs are: ", available_runs[:5])
@@ -117,8 +118,7 @@ def get_event_plot():
         req = request.get_json()
         run_id = req["run_id"]
         print("RUN ID IS: " , run_id)
-        st = xenon1t_dali()
-        events = st.get_df(run_id, 'event_info')
+        events = wait_for_events(run_id)
         source = ColumnDataSource(events)
         plots = []
         # use the "color" column of the CDS to complete the URL
@@ -136,6 +136,8 @@ def get_event_plot():
         # Send to client
         grid = bokeh.embed.json_item(grid)  
         return json.dumps(grid)
+    else:
+        return make_response(jsonify({"success": False}), 400)
         
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
@@ -150,10 +152,9 @@ def get_waveform():
             return make_response(jsonify({"err_msg" : waveform}), 202)
         print("Retrieved waveform from cache")
         # Update database in another thread
-        threading.Thread(target=update_waveform_db, args=(user, run_id, event_id, waveform)).start()
+        threading.Thread(target=update_db_from_get, args=(user, run_id, event_id, waveform)).start()
         print("returning waveform...")
         return json.dumps(waveform)
-
     else:
         return make_response(jsonify({"success": False}), 400)
         
@@ -172,44 +173,8 @@ def save_waveform():
         event_id = req["event_id"]
         run_id = req["run_id"]
         waveform = req["waveform"]
-        # Update database
-        my_app.update_one({"user": user}, 
-            {"$set": { 
-                "run_id": run_id, 
-                "event_id" : event_id,
-                "waveform": waveform,
-                }
-            }
-        )
-        mongo_document = my_app.find_one({"user": user, "tags_data."+tag: {"$exists": True}})
-        if (mongo_document):
-            print("mongo document found: ")
-
-            my_app.update_one({"user": user, "tags_data."+tag: {"$exists": True}}, 
-                {"$set": { 
-                        "tags_data.$."+tag+".comments": comments,
-                        "tags_data.$."+tag+".run_id": run_id,
-                        "tags_data.$."+tag+".event_id": event_id,
-                        "tags_data.$."+tag+".waveform": waveform
-                    }
-                }
-            )
-        else:
-            mongo_document = my_app.find_one({"user": user})
-            my_app.update_one({"user": user},
-                {
-                    "$push": {
-                        "tags_data": {
-                            tag: {
-                                "run_id": run_id,
-                                "event_id": event_id,
-                                "comments": comments,
-                                "waveform": waveform,
-                            }
-                        }
-                    }
-                }
-            )
+        # Update database in another thread
+        threading.Thread(target=update_db_from_save, args=(user, run_id, event_id, waveform, tag, comments)).start()
         return make_response(jsonify({"success": True}), 200)
     else:
         return make_response(jsonify({"success": False}), 400)
@@ -239,9 +204,6 @@ def delete_waveform():
 ###### Helper Routine
 
 def get_waveform(run_id, event_id):
-    #TODO: Check types and handle appropriately.  
-    # Can specify either int for event ID or time range.  
-    # Or list of these.  If not list, then convert to list
     waveform = None
     document = my_waveform.find_one({"run_id" : run_id, "event_id" : event_id})
     if (document):
@@ -257,7 +219,7 @@ def cache_waveform_request(run_id, event_id):
     document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
     # cache to request if not already in it
     if (document == None):
-        post = {"status" : "new", "run_id" : run_id, "event_id" : event_id}
+        post = {"status" : "new", "run_id" : run_id, "event_id" : event_id, "request": "events"}
         my_request.insert_one(post) # insert mongo document into 'fetch'
 
 def wait_for_waveform(run_id, event_id):
@@ -272,10 +234,42 @@ def wait_for_waveform(run_id, event_id):
         time.sleep(5)
         if (datetime.datetime.now() >= endtime):
             return "Get Waveform Timeout. Please Try Again."
+    
+def get_events(run_id):
+    events = None
+    document = my_events.find_one({"run_id" : run_id})
+    if (document):
+        if (document["events"]):
+            events = pd.DataFrame(document["events"])
+        else:
+            return document["msg"]
+    else:
+        cache_events_request(run_id)
+    return events
 
-def update_waveform_db(user, run_id, event_id, waveform):
+def cache_events_request(run_id):
+    document = my_request.find_one({"run_id" : run_id})
+    # cache to request if not already in it
+    if (document == None):
+        post = {"status" : "new", "run_id" : run_id, "request": "events"}
+        my_request.insert_one(post) # insert mongo document into 'fetch'
+
+def wait_for_events(run_id):
+    # only wait for 1 minute
+    endtime = datetime.datetime.now() + datetime.timedelta(0, 60)
+    while True:
+        events = get_events(run_id)
+        if (events != None):
+            return events
+        print("Still Getting Events...")
+        # Wait for waveform to be loaded
+        time.sleep(5)
+        if (datetime.datetime.now() >= endtime):
+            return "Get Events Timeout. Please Try Again."
+
+def update_db_from_get(user, run_id, event_id, waveform):
     mongo_document = my_app.find_one({"user": user})
-    print("updating waveform in the app db... ")
+    print("updating waveform in the app db from get... ")
     if (mongo_document):
         my_app.update_one({"user": user}, 
             {"$set": { 
@@ -285,7 +279,48 @@ def update_waveform_db(user, run_id, event_id, waveform):
                 }
             }
         )
-    print("updating waveform in the app db completed!")
+    print("updating waveform in the app db from get completed!")
+    
+def update_db_from_save(user, run_id, event_id, waveform, tag, comments):
+    print("updating waveform in the app db from save...")
+    my_app.update_one({"user": user}, 
+    {"$set": { 
+        "run_id": run_id, 
+        "event_id" : event_id,
+        "waveform": waveform,
+        }
+    })
+    mongo_document = my_app.find_one({"user": user, "tags_data."+tag: {"$exists": True}})
+    if (mongo_document):
+        print("mongo document found: ")
+
+        my_app.update_one({"user": user, "tags_data."+tag: {"$exists": True}}, 
+            {"$set": { 
+                    "tags_data.$."+tag+".comments": comments,
+                    "tags_data.$."+tag+".run_id": run_id,
+                    "tags_data.$."+tag+".event_id": event_id,
+                    "tags_data.$."+tag+".waveform": waveform
+                }
+            }
+        )
+    else:
+        mongo_document = my_app.find_one({"user": user})
+        my_app.update_one({"user": user},
+            {
+                "$push": {
+                    "tags_data": {
+                        tag: {
+                            "run_id": run_id,
+                            "event_id": event_id,
+                            "comments": comments,
+                            "waveform": waveform,
+                        }
+                    }
+                }
+            }
+        )
+        print("updating waveform in the app db from save completed!")
+
 
 if __name__ == "__main__":
     # LOG.info('running environment: %s', os.environ.get('ENV'))

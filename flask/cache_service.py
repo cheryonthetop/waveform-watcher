@@ -29,7 +29,7 @@ my_waveform = my_db["waveform"]
 my_events = my_db["events"]
 st = straxen.contexts.xenon1t_dali()
 
-def load_data(run_id, event_id):
+def load_waveform(run_id, event_id):
     df = st.get_array(run_id, "event_info")
     event = df[int(event_id)]
     waveform = waveform_display(context=st, run_id=run_id, time_within=event)
@@ -51,33 +51,53 @@ def cache_events(run_id, events, msg):
     if (document == None):
         my_events.insert_one(post)
 
-def cache_data(run_id, event_id, waveform, msg):
+def cache_waveform(run_id, event_id, waveform, msg):
     post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}
     document = my_waveform.find_one(post)
     if (document == None):
         my_waveform.insert_one(post)
 
+def process_waveform(run_id, event_id):
+    try:
+        waveform = load_waveform(run_id, event_id)
+        cache_waveform(run_id, event_id, waveform, "")
+    except Exception as e:
+        print("An exception occured ", e)
+        if hasattr(e, "message"):
+            cache_waveform(run_id, event_id, None, e.message)
+        else:
+            cache_waveform(run_id, event_id, None, "Data Not Available")
+    my_request.delete_one({"status": "use", "event_id": event_id, "run_id": run_id})
+    print("Just cached the waveform for run ", run_id, "and event ", event_id)
+    
+def process_events(run_id):
+    try:
+        events = load_events(run_id)
+        cache_events(run_id, events, "")
+    except Exception as e:
+        print("An exception occured ", e)
+        if hasattr(e, "message"):
+            cache_events(run_id, None, e.message)
+        else:
+            cache_events(run_id, None, "Data Not Available")
+    my_request.delete_one({"status": "use", "run_id": run_id})
+    print("Just cached the events for run ", run_id)
+    
 def fetch_request():
     while True:
         document = my_request.find_one_and_update({"status": "new"}, 
                                                   {"$set" : {"status": "use"}})
         while (document):
-            event_id = document["event_id"]
-            run_id = document["run_id"]
-            try:
-                waveform = load_data(run_id, event_id)
-                cache_data(run_id, event_id, waveform, "")
-            except Exception as e:
-                print("An exception occured ", e)
-                if hasattr(e, "message"):
-                    cache_data(run_id, event_id, None, e.message)
-                else:
-                    cache_data(run_id, event_id, None, "Data Not Available")
-            my_request.find_one_and_update({"status": "use", "event_id": event_id, "run_id": run_id}, 
-                                           {"$set" : {"status": "old"}})
-            print("Just cached the run ", run_id, "and event ", event_id)
+            request = document["request"]
+            if (request == "waveform"):
+                run_id = document["run_id"]
+                event_id = document["event_id"]
+                process_waveform(run_id, event_id)
+            else:
+                run_id = document["run_id"]
+                process_events(event_id)
             document = my_request.find_one_and_update({"status": "new"}, 
-                                                      {"$set" : {"status": "use"}})
+                                            {"$set" : {"status": "use"}})
         # Sleep the app if no new requests
         time.sleep(10)
 
