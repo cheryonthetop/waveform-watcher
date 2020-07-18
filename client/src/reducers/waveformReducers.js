@@ -56,7 +56,6 @@ export default function (state = initialState, action) {
     case GET_EVENT_PLOT_SUCCESS:
       return {
         ...state,
-        runID: action.payload.run_id,
         eventPlot: action.payload.eventPlot,
       };
     case LOAD_FAILURE:

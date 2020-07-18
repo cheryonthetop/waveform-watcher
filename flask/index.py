@@ -17,7 +17,6 @@ from bokeh.layouts import gridplot
 from bson.json_util import dumps, loads
 import pickle
 import pymongo
-import gridfs
 import json
 import threading
 import datetime
@@ -75,7 +74,7 @@ my_app = my_db["app"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_run = my_db["run"]
-fs = gridfs.GridFS(my_db, collection="events")
+my_events = my_db["events"]
 
 available_runs = my_run.find_one({})["runs"]
 print("Available runs are: ", available_runs[:5])
@@ -121,7 +120,7 @@ def get_event_plot():
         print("RUN ID IS: " , run_id)
         events = wait_for_events(run_id)
         if (isinstance(events, str)):
-            return make_response(jsonify({"err_msg" : events}), 200)
+            return make_response(jsonify({"err_msg" : waveform}), 202)
         source = ColumnDataSource(events)
         plots = []
         # use the "color" column of the CDS to complete the URL
@@ -152,7 +151,7 @@ def get_waveform():
         event_id = req["event_id"]
         waveform = wait_for_waveform(run_id, event_id)
         if (isinstance(waveform, str)):
-            return make_response(jsonify({"err_msg" : waveform}), 200)
+            return make_response(jsonify({"err_msg" : waveform}), 202)
         print("Retrieved waveform from cache")
         # Update database in another thread
         threading.Thread(target=update_db_from_get, args=(user, run_id, event_id, waveform)).start()
@@ -227,30 +226,26 @@ def cache_waveform_request(run_id, event_id):
 
 def wait_for_waveform(run_id, event_id):
     # only wait for 1 minute
-    endtime = datetime.datetime.now() + datetime.timedelta(0, 60)
+    endtime = datetime.datetime.now() + datetime.timedelta(0, 180)
     while True:
         waveform = get_waveform(run_id, event_id)
         if (waveform != None):
+            print("Retrieved Waveform")
             return waveform
         print("still getting waveform...")
         # Wait for waveform to be loaded
         time.sleep(5)
         if (datetime.datetime.now() >= endtime):
-            print("Get Waveform Timeout")
             return "Get Waveform Timeout. Please Try Again."
     
 def get_events(run_id):
     events = None
-    if (fs.exists(run_id)):
-        file = fs.get(run_id)
-        print("reading json")
-        data = json.load(file)
-        events = pd.DataFrame.from_dict(data)
-        # events = pd.read_json(file, orient="records", lines=True, chunksize=5)
-        print("reading json complete")
-        print(events)
-        if (events == None):
-            return "Events Not Available"
+    document = my_events.find_one({"run_id" : run_id})
+    if (document):
+        if (document["events"]):
+            events = pd.DataFrame(document["events"])
+        else:
+            return document["msg"]
     else:
         cache_events_request(run_id)
     return events
@@ -264,16 +259,16 @@ def cache_events_request(run_id):
 
 def wait_for_events(run_id):
     # only wait for 1 minute
-    endtime = datetime.datetime.now() + datetime.timedelta(0, 120)
+    endtime = datetime.datetime.now() + datetime.timedelta(0, 180)
     while True:
         events = get_events(run_id)
-        if (events != None):
+        if (isinstance(events, pd.DataFrame)):
+            print("retrieved events")
             return events
         print("Still Getting Events...")
         # Wait for waveform to be loaded
         time.sleep(5)
         if (datetime.datetime.now() >= endtime):
-            print("Get Events Timeout")
             return "Get Events Timeout. Please Try Again."
 
 def update_db_from_get(user, run_id, event_id, waveform):

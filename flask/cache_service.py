@@ -9,7 +9,8 @@ import pymongo
 import datetime
 import time
 import bokeh
-import gridfs
+import pandas as pd
+import traceback
 from holoviews_waveform_display import waveform_display
 
 # Bokeh backend setup
@@ -27,7 +28,9 @@ if (APP_DB_URI == None):
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
-fs = gridfs.GridFS(my_db, collection="events")
+my_events = my_db["events"]
+dims = ["cs1", "cs2", "z", "r", "e_light", "e_charge", 
+        "e_light", "e_ces", "drift_time", "n_peaks", "event_number"]
 st = straxen.contexts.xenon1t_dali()
 
 def load_waveform(run_id, event_id):
@@ -36,6 +39,7 @@ def load_waveform(run_id, event_id):
     waveform = waveform_display(context=st, run_id=run_id, time_within=event)
     lock.acquire()
     try:
+        print("Waveform is: ", waveform)
         waveform = renderer.server_doc(waveform).roots[-1]
     finally:
         lock.release()
@@ -44,13 +48,16 @@ def load_waveform(run_id, event_id):
 
 def load_events(run_id):
     events = st.get_df(run_id, 'event_info')
-    events.reset_index(inplace=True)
-    events = events.to_json(orient="records")
-    return events
+    new_events = pd.DataFrame()
+    for dim in dims:
+        new_events[dim] = events[dim]
+    return new_events.to_dict("records")
     
 def cache_events(run_id, events, msg):
-    if (fs.exists(run_id) == False):
-        fs.put(events, _id=run_id, msg=msg, encoding="UTF-8")
+    post = {"run_id" : run_id, "events": events, "msg": msg}
+    document = my_events.find_one(post)
+    if (document == None):
+        my_events.insert_one(post)
 
 def cache_waveform(run_id, event_id, waveform, msg):
     post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}
@@ -59,12 +66,13 @@ def cache_waveform(run_id, event_id, waveform, msg):
         my_waveform.insert_one(post)
 
 def process_waveform(run_id, event_id):
-    print("Start processing waveform for run", run_id, "and event ", event_id)
+    print("starts processing waveform for run ", run_id, " and ", event_id)
     try:
         waveform = load_waveform(run_id, event_id)
         cache_waveform(run_id, event_id, waveform, "")
     except Exception as e:
-        print("An exception occured ", e)
+        print("An exception occured ")
+        traceback.print_tb(e.__traceback__)
         if hasattr(e, "message"):
             cache_waveform(run_id, event_id, None, e.message)
         else:
@@ -73,12 +81,13 @@ def process_waveform(run_id, event_id):
     print("Just cached the waveform for run ", run_id, "and event ", event_id)
     
 def process_events(run_id):
-    print("Start processing events for run", run_id)
+    print("starts processing events for run ", run_id)
     try:
         events = load_events(run_id)
         cache_events(run_id, events, "")
     except Exception as e:
         print("An exception occured ", e)
+        traceback.print_tb(e.__traceback__)
         if hasattr(e, "message"):
             cache_events(run_id, None, e.message)
         else:

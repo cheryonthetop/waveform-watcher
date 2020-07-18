@@ -79,7 +79,6 @@ export const getEventPlot = (user, runID) => (dispatch) => {
       dispatch({
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
-          runID: runID,
           eventPlot: res.data,
         },
       });
