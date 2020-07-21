@@ -39,8 +39,11 @@ class EventSelection extends Component {
 
   loadEventPlots() {
     console.log("loading events...");
-    if (this.state.eventPlot !== this.props.eventPlot)
-      document.getElementById("graph").appendChild(this.props.eventPlot);
+    if (this.state.eventPlot !== this.props.eventPlot) {
+      const script = this.props.eventPlot;
+      const node = document.createRange().createContextualFragment(script);
+      document.getElementById("graph").appendChild(node);
+    }
   }
 
   handleStateChangeRunID = (value) => {

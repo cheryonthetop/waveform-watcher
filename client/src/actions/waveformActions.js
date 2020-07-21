@@ -31,8 +31,12 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
     event_id: eventID,
   });
 
+  const url = `${
+    process.env.REACT_APP_FLASK_BACKEND_URL
+  }/api/gw?token=${window.localStorage.getItem("token")}`;
+
   axios
-    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/gw`, body, config)
+    .post(url, body, config)
     .then(function (res) {
       console.log(res.data);
       if (res.data.err_msg) dispatch(errorReported(res.data.err_msg));
@@ -71,8 +75,12 @@ export const getEventPlot = (user, runID) => (dispatch) => {
     run_id: runID,
   });
 
+  const url = `${
+    process.env.REACT_APP_FLASK_BACKEND_URL
+  }/api/ge?token=${window.localStorage.getItem("token")}`;
+
   axios
-    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/ge`, body, config)
+    .post(url, body, config)
     .then(function (res) {
       console.log(res.data);
       dispatch({
@@ -113,8 +121,12 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
     event_id: eventID,
   });
 
+  const url = `${
+    process.env.REACT_APP_FLASK_BACKEND_URL
+  }/api/sw?token=${window.localStorage.getItem("token")}`;
+
   axios
-    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/sw`, body, config)
+    .post(url, body, config)
     .then(function (res) {
       console.log(res.data);
       if (res.status === 200) {
@@ -159,8 +171,12 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
     tag: tag,
   });
 
+  const url = `${
+    process.env.REACT_APP_FLASK_BACKEND_URL
+  }/api/dw?token=${window.localStorage.getItem("token")}`;
+
   axios
-    .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/dw`, body, config)
+    .post(url, body, config)
     .then(function (res) {
       console.log(res.data);
       if (res.status === 200) {
@@ -181,16 +197,16 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
 
 export const loadAppData = (user) => (dispatch) => {
   console.log(user);
-  axios
-    .get(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/data?user=${user}`, {
-      withCredentials: true,
-    })
-    .then((res) =>
-      res.status === 200
-        ? dispatch({
-            type: LOAD_SUCCESS,
-            payload: res.data,
-          })
-        : dispatch({ type: LOAD_FAILURE })
-    );
+  const url = `${
+    process.env.REACT_APP_FLASK_BACKEND_URL
+  }/api/data?user=${user}&token=${window.localStorage.getItem("token")}`;
+
+  axios.get(url).then((res) =>
+    res.status === 200
+      ? dispatch({
+          type: LOAD_SUCCESS,
+          payload: res.data,
+        })
+      : dispatch({ type: LOAD_FAILURE })
+  );
 };

@@ -52,10 +52,14 @@ my_events = my_db["events"]
 available_runs = my_run.find_one({})["runs"]
 print("Available runs are: ", available_runs[:5])
 
-def authenticate():
+def authenticate(func):
     def wrapped():
-        return
-    return
+        token = request.args.get('token')
+        if (my_auth.count_documents({"tokens."+token : {"$exists": True}}, limit=1) == 0):
+            return make_response(jsonify({'error': 'Unauthorized'}), 401)
+        else:
+            return func()
+    return wrapped
 
 @app.errorhandler(404)
 def not_found(error):
@@ -64,10 +68,9 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 ###### API Routes
-
+@authenticate
 @app.route('/api/data')
 def send_data():
-    print(request.cookies)
     user = request.args.get('user')
     print(user)
     document = my_app.find_one({'user': user})
@@ -92,10 +95,12 @@ def get_event_plot():
         run_id = req["run_id"]
         print("RUN ID IS: " , run_id)
         cache_events_request(run_id)
+        my_session_id=generate_session_id()
         # pull a new session from a running Bokeh server
-        with pull_session(url="http://localhost:5006/bokeh-server?run="+run_id) as session:
+        with pull_session(url="http://localhost:5006/bokeh-server", 
+                          arguments={"run": run_id}) as session:
             script = server_session(url="http://localhost:5006/bokeh-server"
-                                    , session_id=generate_session_id())
+                                    , session_id=my_session_id)
             # use the script in the rendered page
             return script
 

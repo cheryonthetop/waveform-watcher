@@ -5,7 +5,16 @@ from bokeh.plotting import figure, curdoc
 from bokeh.models import ColumnDataSource, CustomJS, OpenURL, TapTool, Button, TextInput, MultiSelect, Div
 import holoviews as hv
 import pymongo
+import datetime
+import pickle
+import pandas as pd
+import time
+import threading
+from tornado import gen
+from functools import partial
 
+# Current document
+doc = curdoc()
 hv.extension("bokeh")
 
 # Fixed Parameter in Plots for Event Selections
@@ -84,8 +93,12 @@ def render_events(run_id, events):
         print(inds)
         for i in range(0, len(inds)):
             event = str(source.data['event_number'][inds[i]])
-            if event not in multi_select.options:
-                multi_select.options.append(str(event))
+        doc.add_next_tick_callback(partial(update_options, event=event))
+    
+    @gen.coroutine
+    def update_options(event):
+        if event not in multi_select.options:
+            multi_select.options.append(event)
             
     source.selected.on_change('indices', callback_select)
 
@@ -93,24 +106,13 @@ def render_events(run_id, events):
         print("new value callback")
         value = new
         if len(value) != 0:
-            button.disabled = False
-
-    multi_select.on_change("value", callback_value_selected)
-    plots = []
-    # use the "color" column of the Csource to complete the URL
-    # e.g. if the glyph at index 10 is selected, then @color
-    # will be replaced with source.data['color'][10]
-    url = "{APP_URL}/waveform/{run_id}/@event_number/".format(APP_URL=APP_URL, run_id=run_id)
-    for color,dim in zip(COLORS, DIMS):
-        p = figure(tools=TOOLS, x_axis_label=dim[0], y_axis_label=dim[1])
-        p.circle(dim[0], dim[1], source=source, alpha=0.6, color=color)
-        taptool = p.select(type=TapTool)
-        taptool.callback = OpenURL(url=url)
-        plots.append(p)
-    # make a grid
-    grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
-            
-    # create a callback that will cache waveform
+            doc.add_next_tick_callback(disable_button)
+    
+    @gen.coroutine
+    def disable_button():
+        button.disabled = False
+    
+        # create a callback that will cache waveform
     def callback_button():
         events = multi_select.value
         events = [int(event) for event in events]
@@ -125,24 +127,48 @@ def render_events(run_id, events):
     button.height=40
     button.margin=(10,0,0,0)
 
-    # put the button and plot in a layout and add to the document
-    curdoc().add_root(column(text_input, row(multi_select, button), grid))
+    multi_select.on_change("value", callback_value_selected)
+    
+    plots = []
+    # use the "color" column of the Csource to complete the URL
+    # e.g. if the glyph at index 10 is selected, then @color
+    # will be replaced with source.data['color'][10]
+    url = "{APP_URL}/waveform/{run_id}/@event_number/".format(APP_URL=APP_URL, run_id=run_id)
+    for color,dim in zip(COLORS, DIMS):
+        p = figure(tools=TOOLS, x_axis_label=dim[0], y_axis_label=dim[1])
+        p.circle(dim[0], dim[1], source=source, alpha=0.6, color=color)
+        taptool = p.select(type=TapTool)
+        taptool.callback = OpenURL(url=url)
+        plots.append(p)
+    # make a grid
+    grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
+
+    @gen.coroutine
+    # Genearte layout and add to the document
+    def insert_layout():
+        doc.add_root(column(text_input, row(multi_select, button), grid))
+    
+    doc.add_next_tick_callback(insert_layout)
 
 ###### Appends model to document
 
 # request.arguments is a dict that maps argument names to lists of strings,
 # e.g, the query string ?N=10 will result in {'N': [b'10']}
-args = curdoc().session_context.request.arguments
+args = doc.session_context.request.arguments
 
-run_id = str(args.get('run')[0])
-print("Received run" + run_id)
+run_id = str(args.get('run')[0].decode("utf-8")).split("/")[0]
+print("Received run " + run_id)
 
-events = wait_for_events(run_id)
-if (isinstance(events, str)):
-    # An error string returned
-    div = Div(text=events)
-    div.align="center"
-    div.sizing_mode="stretch_both"
-    curdoc().add_root(column(div))
-else:
-    render_events(run_id, events)
+def blocking_task():
+    events = wait_for_events(run_id)
+    if (isinstance(events, str)):
+        # An error string returned
+        div = Div(text=events)
+        div.align="center"
+        div.sizing_mode="stretch_both"
+        doc.add_root(column(div))
+    else:
+        render_events(run_id, events)
+        
+t = threading.Thread(target=blocking_task)
+t.start()
