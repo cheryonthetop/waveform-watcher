@@ -93,7 +93,7 @@ def render_events(run_id, events):
         print(inds)
         for i in range(0, len(inds)):
             event = str(source.data['event_number'][inds[i]])
-        doc.add_next_tick_callback(partial(update_options, event=event))
+            doc.add_next_tick_callback(partial(update_options, event=event))
     
     @gen.coroutine
     def update_options(event):
@@ -156,7 +156,10 @@ def render_events(run_id, events):
 # e.g, the query string ?N=10 will result in {'N': [b'10']}
 args = doc.session_context.request.arguments
 
-run_id = str(args.get('run')[0].decode("utf-8")).split("/")[0]
+try:
+    run_id = str(args.get('run')[0].decode("utf-8")).split("/")[0]
+except:
+    run_id = "170204_1710"
 print("Received run " + run_id)
 
 def blocking_task():

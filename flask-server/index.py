@@ -96,13 +96,13 @@ def get_event_plot():
         print("RUN ID IS: " , run_id)
         cache_events_request(run_id)
         my_session_id=generate_session_id()
-        # pull a new session from a running Bokeh server
-        with pull_session(url="http://localhost:5006/bokeh-server", 
-                          arguments={"run": run_id}) as session:
-            script = server_session(url="http://localhost:5006/bokeh-server"
-                                    , session_id=my_session_id)
-            # use the script in the rendered page
-            return script
+        # # pull a new session from a running Bokeh server
+        # with pull_session(url="http://localhost:5006/bokeh-server", 
+        #                   arguments={"run": run_id}) as session:
+        script = server_session(url="http://localhost:5006/bokeh-server"
+                                , session_id=my_session_id)
+        # use the script in the rendered page
+        return script
 
     else:
         return make_response(jsonify({"success": False}), 400)
