@@ -51,7 +51,7 @@ def load_events(run_id):
     new_events = pd.DataFrame()
     for dim in dims:
         new_events[dim] = events[dim]
-    return Binary(pickle.dumps(new_events))
+    return Binary(pickle.dumps(new_events, protocol=4))
     
 def cache_events(run_id, events, msg):
     post = {"run_id" : run_id, "events": events, "msg": msg}

@@ -16,8 +16,6 @@ import pymongo
 import json
 import threading
 import datetime
-from holoviews_waveform_display import waveform_display
-from context import xenon1t_dali
 
 ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
 os.environ.update({'ROOT PATH' : ROOT_PATH})
@@ -95,8 +93,8 @@ def get_event_plot():
         print("RUN ID IS: " , run_id)
         cache_events_request(run_id)
         # pull a new session from a running Bokeh server
-        with pull_session(url="http://localhost:5006/bokeh_server") as session:
-            script = server_session(url="http://localhost:5006/bokeh_server"
+        with pull_session(url="http://localhost:5006/bokeh-server?run="+run_id) as session:
+            script = server_session(url="http://localhost:5006/bokeh-server"
                                     , session_id=generate_session_id())
             # use the script in the rendered page
             return script

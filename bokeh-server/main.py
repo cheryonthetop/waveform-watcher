@@ -134,9 +134,8 @@ def render_events(run_id, events):
 # e.g, the query string ?N=10 will result in {'N': [b'10']}
 args = curdoc().session_context.request.arguments
 
-# run_id = args.get('run_id')[0]
-# print(run_id)  
-run_id = "170204_1710"
+run_id = str(args.get('run')[0])
+print("Received run" + run_id)
 
 events = wait_for_events(run_id)
 if (isinstance(events, str)):

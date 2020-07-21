@@ -75,7 +75,6 @@ export const getEventPlot = (user, runID) => (dispatch) => {
     .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/ge`, body, config)
     .then(function (res) {
       console.log(res.data);
-      if (res.data.err_msg) dispatch(errorReported(res.data.err_msg));
       dispatch({
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {

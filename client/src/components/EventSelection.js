@@ -1,13 +1,11 @@
 import React, { Component } from "react";
 import "./stylesheets/body.css";
 import { connect } from "react-redux";
-import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
 import Runs from "./Runs";
 import GetNewEventPlot from "./GetNewEventPlot";
 import { Button } from "react-bootstrap";
 import { withRouter } from "react-router";
-import axios from "axios";
 
 class EventSelection extends Component {
   state = {
@@ -17,66 +15,40 @@ class EventSelection extends Component {
   };
 
   componentDidUpdate() {
-    // this.tryLoadeventPlots();
+    this.tryLoadEventPlots();
   }
 
-  // tryLoadeventPlots() {
-  //   if (this.state.eventPlot !== this.props.eventPlot && this.props.eventPlot) {
-  //     this.setState({ isLoading: false }, () => {
-  //       this.deleteEventPlots();
-  //       this.loadeventPlots();
-  //       this.setState({ eventPlot: this.props.eventPlot });
-  //     });
-  //   }
-  // }
+  tryLoadEventPlots() {
+    const { eventPlot, isLoading } = this.state;
+    const hasNewEventPlots =
+      this.props.eventPlot && eventPlot !== this.props.eventPlot;
+    if (hasNewEventPlots && isLoading) {
+      this.setState({ isLoading: false }, () => {
+        this.deleteEventPlots();
+        this.loadEventPlots();
+        this.setState({ eventPlot: this.props.eventPlot });
+      });
+    }
+  }
+
   deleteEventPlots() {
     var container = document.getElementById("graph");
     while (container && container.hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
-  // loadeventPlots() {
-  //   console.log("loading waveform");
-  //   this.deleteEventPlots();
-  //   if (this.state.eventPlot !== this.props.eventPlot)
-  //     embed.embed_item(this.props.eventPlot, "graph");
-  // }
+  loadEventPlots() {
+    console.log("loading events...");
+    if (this.state.eventPlot !== this.props.eventPlot)
+      document.getElementById("graph").appendChild(this.props.eventPlot);
+  }
 
   handleStateChangeRunID = (value) => {
     this.setState({ runID: value.label });
   };
 
   handleLoading = () => {
-    const self = this;
-    this.setState({ isLoading: true }, () => {
-      // Headers
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          withCredentials: true,
-        },
-      };
-
-      // Request body
-      const body = JSON.stringify({
-        user: "cheryonthetop",
-        run_id: "170204_1710",
-      });
-
-      axios
-        .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/ge`, body, config)
-        .then(function (res) {
-          console.log(res.data);
-          self.setState({ isLoading: false }, () => {
-            const node = document
-              .createRange()
-              .createContextualFragment(res.data);
-            self.deleteEventPlots();
-            document.getElementById("graph").appendChild(node);
-          });
-        })
-        .catch((err) => console.log(err));
-    });
+    this.setState({ isLoading: true });
   };
 
   handleOnClickWaveform = () => {
@@ -118,7 +90,6 @@ const mapStateToProps = (state) => ({
   user: state.waveform.user,
   runID: state.waveform.runID,
   eventPlot: state.waveform.eventPlot,
-  event: state.waveform.event,
 });
 
 export default connect(mapStateToProps, null)(withRouter(EventSelection));
