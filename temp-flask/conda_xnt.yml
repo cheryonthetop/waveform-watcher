@@ -1,9 +1,0 @@
-dependencies:
-  - boost=1.60.0
-  - graphviz
-  - nb_conda
-  - nodejs
-  - pip
-  - python=3.6
-  - pip:
-    - -r file:requirements.txt
