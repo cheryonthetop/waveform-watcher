@@ -1,19 +1,15 @@
 import os
 import sys
 import threading
-import requests    
 import time
-from flask import jsonify, request, make_response, send_from_directory
+from flask import jsonify, request, make_response
 from flask_cors import CORS
+from bokeh.client import pull_session
+from bokeh.embed import server_session
+from bokeh.util.token import generate_session_id
 import numpy as np
 import pandas as pd
 import holoviews as hv
-from holoviews import dim, opts
-import bokeh
-from bokeh.document import Document
-from bokeh.models import ColumnDataSource, CustomJS, OpenURL, TapTool
-from bokeh.plotting import figure, show
-from bokeh.layouts import gridplot
 from bson.json_util import dumps, loads
 import pickle
 import pymongo
@@ -41,32 +37,11 @@ if (not PORT):
     PORT = 4000
     
 hv.extension("bokeh")
-renderer = hv.renderer('bokeh') # Bokeh Server
-# Fixed Parameter in Plots for Event Selections
-DIMS = [
-    ["cs1", "cs2"],
-    ["z","r" ],
-    ["e_light", 'e_charge'],
-    ["e_light", 'e_ces'],
-    ["drift_time", "n_peaks"],
-]
-COLORS = hv.Cycle('Category10').values
-TOOLS=['box_select', 'lasso_select', 'box_zoom', 'pan', 
-       'wheel_zoom', 'hover', 'tap', 'save', 'reset']
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
 if (APP_DB_URI == None):
-    print("MongoDB Connection String Not Set")
-
-# The URL of the app (front-end)
-if os.environ.get("ENV") == "production":
-    APP_URL = os.environ.get("APP_URL", None)  
-else: 
-    APP_URL = "http://localhost:3000"
-if (APP_URL == None):
-    print("Env Variable APP_URL Is Not Set")
-    
+    print("MongoDB Connection String Not Set")    
     
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_auth = my_db["auth"]
@@ -118,26 +93,14 @@ def get_event_plot():
         req = request.get_json()
         run_id = req["run_id"]
         print("RUN ID IS: " , run_id)
-        events = wait_for_events(run_id)
-        if (isinstance(events, str)):
-            return make_response(jsonify({"err_msg" : waveform}), 202)
-        source = ColumnDataSource(events)
-        plots = []
-        # use the "color" column of the CDS to complete the URL
-        # e.g. if the glyph at index 10 is selected, then @color
-        # will be replaced with source.data['color'][10]
-        url = "{APP_URL}/waveform/{run_id}/@event_number/".format(APP_URL=APP_URL, run_id=run_id)
-        for color,dim in zip(COLORS, DIMS):
-            p = figure(tools=TOOLS, x_axis_label=dim[0], y_axis_label=dim[1])
-            p.circle(dim[0], dim[1], source=source, alpha=0.6, color=color)
-            taptool = p.select(type=TapTool)
-            taptool.callback = OpenURL(url=url)
-            plots.append(p)
-        # make a grid
-        grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
-        # Send to client
-        grid = bokeh.embed.json_item(grid)  
-        return json.dumps(grid)
+        cache_events_request(run_id)
+        # pull a new session from a running Bokeh server
+        with pull_session(url="http://localhost:5006/bokeh_server") as session:
+            script = server_session(url="http://localhost:5006/bokeh_server"
+                                    , session_id=generate_session_id())
+            # use the script in the rendered page
+            return script
+
     else:
         return make_response(jsonify({"success": False}), 400)
         
@@ -238,38 +201,12 @@ def wait_for_waveform(run_id, event_id):
         if (datetime.datetime.now() >= endtime):
             return "Get Waveform Timeout. Please Try Again."
     
-def get_events(run_id):
-    events = None
-    document = my_events.find_one({"run_id" : run_id})
-    if (document):
-        if (document["events"]):
-            events = pd.DataFrame(document["events"])
-        else:
-            return document["msg"]
-    else:
-        cache_events_request(run_id)
-    return events
-
 def cache_events_request(run_id):
     document = my_request.find_one({"run_id" : run_id})
     # cache to request if not already in it
     if (document == None):
         post = {"status" : "new", "run_id" : run_id, "request": "events"}
         my_request.insert_one(post) # insert mongo document into 'fetch'
-
-def wait_for_events(run_id):
-    # only wait for 1 minute
-    endtime = datetime.datetime.now() + datetime.timedelta(0, 180)
-    while True:
-        events = get_events(run_id)
-        if (isinstance(events, pd.DataFrame)):
-            print("retrieved events")
-            return events
-        print("Still Getting Events...")
-        # Wait for waveform to be loaded
-        time.sleep(5)
-        if (datetime.datetime.now() >= endtime):
-            return "Get Events Timeout. Please Try Again."
 
 def update_db_from_get(user, run_id, event_id, waveform):
     mongo_document = my_app.find_one({"user": user})
