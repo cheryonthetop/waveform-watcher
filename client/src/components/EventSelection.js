@@ -7,46 +7,76 @@ import Runs from "./Runs";
 import GetNewEventPlot from "./GetNewEventPlot";
 import { Button } from "react-bootstrap";
 import { withRouter } from "react-router";
+import axios from "axios";
 
 class EventSelection extends Component {
   state = {
     runID: this.props.runID,
-    eventPlot: this.props.eventPlot,
+    eventPlot: "",
     isLoading: false,
   };
 
   componentDidUpdate() {
-    this.tryLoadeventPlots();
+    // this.tryLoadeventPlots();
   }
 
-  tryLoadeventPlots() {
-    if (this.state.eventPlot !== this.props.eventPlot && this.props.eventPlot) {
-      this.setState({ isLoading: false }, () => {
-        this.deleteEventPlots();
-        this.loadeventPlots();
-        this.setState({ eventPlot: this.props.eventPlot });
-      });
-    }
-  }
+  // tryLoadeventPlots() {
+  //   if (this.state.eventPlot !== this.props.eventPlot && this.props.eventPlot) {
+  //     this.setState({ isLoading: false }, () => {
+  //       this.deleteEventPlots();
+  //       this.loadeventPlots();
+  //       this.setState({ eventPlot: this.props.eventPlot });
+  //     });
+  //   }
+  // }
   deleteEventPlots() {
     var container = document.getElementById("graph");
     while (container && container.hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
-  loadeventPlots() {
-    console.log("loading waveform");
-    this.deleteEventPlots();
-    if (this.state.eventPlot !== this.props.eventPlot)
-      embed.embed_item(this.props.eventPlot, "graph");
-  }
+  // loadeventPlots() {
+  //   console.log("loading waveform");
+  //   this.deleteEventPlots();
+  //   if (this.state.eventPlot !== this.props.eventPlot)
+  //     embed.embed_item(this.props.eventPlot, "graph");
+  // }
 
   handleStateChangeRunID = (value) => {
     this.setState({ runID: value.label });
   };
 
   handleLoading = () => {
-    this.setState({ isLoading: true });
+    const self = this;
+    this.setState({ isLoading: true }, () => {
+      // Headers
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          withCredentials: true,
+        },
+      };
+
+      // Request body
+      const body = JSON.stringify({
+        user: "cheryonthetop",
+        run_id: "170204_1710",
+      });
+
+      axios
+        .post(`${process.env.REACT_APP_FLASK_BACKEND_URL}/api/ge`, body, config)
+        .then(function (res) {
+          console.log(res.data);
+          self.setState({ isLoading: false }, () => {
+            const node = document
+              .createRange()
+              .createContextualFragment(res.data);
+            self.deleteEventPlots();
+            document.getElementById("graph").appendChild(node);
+          });
+        })
+        .catch((err) => console.log(err));
+    });
   };
 
   handleOnClickWaveform = () => {
