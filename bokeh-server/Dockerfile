@@ -9,4 +9,4 @@ RUN pip install -r /tmp/requirements.txt
 
 EXPOSE 5006
 
-ENTRYPOINT [ "bokeh", "serve", "--allow-websocket-origin", "*", "." ]
+ENTRYPOINT [ "bokeh", "serve", "--allow-websocket-origin", "https://waveform-watcher.azurewebsites.net/", "." ]
