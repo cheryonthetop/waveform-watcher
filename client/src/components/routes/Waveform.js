@@ -6,7 +6,6 @@ import Loading from "react-loading-animation";
 import Tags from "../Tags";
 import Runs from "../Runs";
 import GetNewWaveform from "../GetNewWaveform";
-import { getWaveform } from "../../actions/waveformActions";
 import Param from "../Param";
 import Events from "../Events";
 import { Redirect } from "react-router-dom";
@@ -22,6 +21,7 @@ class Waveform extends Component {
     eventID: this.props.eventID,
     isLoading: this.props.isLoading,
     waveformLoaded: false,
+    renderError: false,
   };
 
   componentDidMount() {
@@ -44,8 +44,14 @@ class Waveform extends Component {
     if ((hasNewWaveform && isLoading) || (!waveformLoaded && hasOldWaveform)) {
       console.log("Tries loading...");
       this.setState({ isLoading: false, waveformLoaded: true }, () => {
-        this.loadWaveform();
-        this.setState({ waveform: this.props.waveform });
+        this.deleteWaveform();
+        try {
+          this.loadWaveform();
+          this.setState({ waveform: this.props.waveform });
+        } catch {
+          this.handleCloseModalRenderError();
+          this.setState({ waveform: undefined });
+        }
       });
     }
   }
@@ -58,7 +64,6 @@ class Waveform extends Component {
 
   loadWaveform() {
     console.log("Loading Waveform...");
-    this.deleteWaveform();
     embed.embed_item(this.props.waveform, "graph");
   }
 
@@ -79,12 +84,20 @@ class Waveform extends Component {
     this.setState({ isLoading: true });
   };
 
+  handleShowModalRenderError = () => {
+    this.setState({ renderError: true });
+  };
+
+  handleCloseModalRenderError = () => {
+    this.setState({ renderError: false });
+  };
+
   render() {
     if (!this.props.isAuthenticated) {
       window.localStorage.setItem("redirect", this.props.location.pathname);
       return <Redirect to="/login" />;
     }
-    const { runID, eventID, isLoading, isNotInt, runNA } = this.state;
+    const { runID, eventID, isLoading, renderError } = this.state;
     return (
       <div>
         <Header />
@@ -123,6 +136,12 @@ class Waveform extends Component {
             </Loading>
           </div>
         </div>
+        <ErrorModal
+          title="Render Waveform Error"
+          body={"An Error Occured While Rendering the Waveform"}
+          show={renderError}
+          handleClose={this.handleCloseModalRenderError}
+        />
       </div>
     );
   }

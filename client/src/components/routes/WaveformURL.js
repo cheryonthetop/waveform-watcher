@@ -10,7 +10,7 @@ import { Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
 import Header from "../Header";
 import axios from "axios";
-import { errorReported } from "../../actions/errorActions";
+import { errorReported, errorServed } from "../../actions/errorActions";
 import ErrorModal from "../ErrorModal";
 
 class WaveformURL extends Component {
@@ -19,6 +19,7 @@ class WaveformURL extends Component {
     runNA: false,
     isNotInt: false,
     waveformLoaded: false,
+    renderError: false,
   };
 
   componentDidMount() {
@@ -48,6 +49,7 @@ class WaveformURL extends Component {
   }
 
   loadWaveform = (user, run, event) => {
+    const self = this;
     this.setState({ waveformLoaded: true }, () => {
       // Headers
       const config = {
@@ -73,8 +75,14 @@ class WaveformURL extends Component {
         .then(function (res) {
           console.log(res.data);
           if (res.data.err_msg)
-            this.props.dispatch(errorReported(res.data.err_msg));
-          else embed.embed_item(res.data, "graph");
+            self.props.dispatch(errorReported(res.data.err_msg));
+          else {
+            try {
+              embed.embed_item(res.data, "graph");
+            } catch {
+              self.handleShowModalRenderError();
+            }
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -98,26 +106,47 @@ class WaveformURL extends Component {
     this.setState({ runNA: false });
   };
 
+  handleShowModalRenderError = () => {
+    this.setState({ renderError: true });
+  };
+
+  handleCloseModalRenderError = () => {
+    this.setState({ renderError: false });
+  };
+
+  handleViewEvents = () => {
+    this.props.history.push("/");
+  };
+
+  handleViewWaveform = () => {
+    this.props.history.push("/waveform");
+  };
+
+  handleCloseError = () => this.props.dispatch(errorServed());
+
   render() {
     if (!this.props.isAuthenticated) {
       window.localStorage.setItem("redirect", this.props.location.pathname);
       return <Redirect to="/login" />;
     }
-    const { isLoading, runNA, isNotInt } = this.state;
+    const { isLoading, runNA, isNotInt, renderError } = this.state;
+    const { error, msg } = this.props;
     return (
       <div>
         <Header />
         <div id="graph-container">
           <div id="control-box">
-            <div id="control">
-              <Tags />
-            </div>
+            <Tags />
+            <br />
+            <Button size="sm" onClick={this.handleViewEvents}>
+              Go to View Events{" "}
+            </Button>
             <Button
-              id="btn-view-events"
               size="sm"
-              onClick={this.handleViewEvents}
+              onClick={this.handleViewWaveform}
+              style={{ marginTop: "10px" }}
             >
-              Go Back to View Events{" "}
+              Go to Waveform{" "}
             </Button>
           </div>
 
@@ -145,6 +174,18 @@ class WaveformURL extends Component {
           }
           show={isNotInt}
           handleClose={this.handleCloseModalIsNotInt}
+        />
+        <ErrorModal
+          title="Get New Waveform Error"
+          body={msg}
+          show={error}
+          handleClose={this.handleCloseError}
+        />
+        <ErrorModal
+          title="Render Waveform Error"
+          body={"An Error Occured While Rendering the Waveform"}
+          show={renderError}
+          handleClose={this.handleCloseModalRenderError}
         />
       </div>
     );
