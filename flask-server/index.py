@@ -55,6 +55,7 @@ print("Available runs are: ", available_runs[:5])
 def authenticate(func):
     def wrapped():
         token = request.args.get('token')
+        print("token", token)
         if (my_auth.count_documents({"tokens."+token : {"$exists": True}}, limit=1) == 0):
             return make_response(jsonify({'error': 'Unauthorized'}), 401)
         else:
@@ -88,6 +89,7 @@ def send_data():
     json_str = dumps(document)
     return make_response(json_str, 200)
 
+@authenticate
 @app.route('/api/ge', methods = ['POST'])
 def get_event_plot():
     if request.is_json:
