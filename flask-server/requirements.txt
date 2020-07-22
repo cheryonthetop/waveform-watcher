@@ -5,6 +5,4 @@ pandas
 holoviews
 bokeh
 bson
-pickle
 pymongo
-datetime
