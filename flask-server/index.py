@@ -35,7 +35,7 @@ if (not PORT):
 
 BOKEH_SERVER_URL = os.environ.get("BOKEH_SERVER_URL", None)
 if BOKEH_SERVER_URL == None:
-    "http://localhost:5006/bokeh-server"
+    BOKEH_SERVER_URL = "http://localhost:5006/bokeh-server"
     
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
@@ -98,6 +98,7 @@ def get_event_plot():
         print("RUN ID IS: " , run_id)
         cache_events_request(run_id)
         my_session_id=generate_session_id()
+        print(BOKEH_SERVER_URL)
         # pull a new session from a running Bokeh server
         with pull_session(url=BOKEH_SERVER_URL, 
                           arguments={"run": run_id}) as session:
