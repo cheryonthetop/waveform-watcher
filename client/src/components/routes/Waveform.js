@@ -22,38 +22,18 @@ class Waveform extends Component {
     eventID: this.props.eventID,
     isLoading: this.props.isLoading,
     waveformLoaded: false,
-    runNA: false,
-    isNotInt: false,
   };
 
   componentDidMount() {
     if (!this.props.isLoading) {
-      this.tryLoadWavefromFromURL();
       this.tryLoadWaveform();
     }
   }
 
   componentDidUpdate() {
     if (!this.props.isLoading) {
-      this.tryLoadWavefromFromURL();
       this.tryLoadWaveform();
     }
-  }
-
-  tryLoadWavefromFromURL() {
-    const {
-      user,
-      availableRuns,
-      match: {
-        params: { run, event },
-      },
-    } = this.props;
-    console.log("URL Params:", run, event);
-    if (!run || !event) return;
-    else if (!availableRuns.find((element) => element == run))
-      this.handleShowModalRunNotAvailable();
-    else if (!Number.isInteger(parseInt(event))) this.handleShowModalIsNotInt();
-    else this.props.dispatch(getWaveform(user, run, event));
   }
 
   tryLoadWaveform() {
@@ -97,22 +77,6 @@ class Waveform extends Component {
 
   handleLoading = () => {
     this.setState({ isLoading: true });
-  };
-
-  handleShowModalIsNotInt = () => {
-    this.setState({ isNotInt: true });
-  };
-
-  handleCloseModalIsNotInt = () => {
-    this.setState({ isNotInt: false });
-  };
-
-  handleShowModalRunNotAvailable = () => {
-    this.setState({ runNA: true });
-  };
-
-  handleCloseModalRunNotAvailable = () => {
-    this.setState({ runNA: false });
   };
 
   render() {
@@ -159,21 +123,6 @@ class Waveform extends Component {
             </Loading>
           </div>
         </div>
-
-        <ErrorModal
-          title="URL Params Error"
-          body={"The Run " + this.props.match.params.run + " Is Not Available"}
-          show={runNA}
-          handleClose={this.handleCloseModalRunNotAvailable}
-        />
-        <ErrorModal
-          title="URL Params Error"
-          body={
-            "The Event " + this.props.match.params.event + " Is Not an Integer"
-          }
-          show={isNotInt}
-          handleClose={this.handleCloseModalIsNotInt}
-        />
       </div>
     );
   }
