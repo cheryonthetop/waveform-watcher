@@ -42,7 +42,7 @@ if (APP_DB_URI == None):
     print("MongoDB Connection String Not Set")    
     
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
-my_auth = my_db["auth"]
+my_auth = my_db["auths"]
 my_app = my_db["app"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
@@ -51,16 +51,11 @@ my_events = my_db["events"]
 
 available_runs = my_run.find_one({})["runs"]
 print("Available runs are: ", available_runs[:5])
-
-def authenticate(func):
-    def wrapped():
-        token = request.args.get('token')
-        print("token", token)
-        if (my_auth.count_documents({"tokens."+token : {"$exists": True}}, limit=1) == 0):
-            return make_response(jsonify({'error': 'Unauthorized'}), 401)
-        else:
-            return func()
-    return wrapped
+def authenticate(token):
+    token = token.replace(" ", "+", -1)
+    key = "tokens."+token
+    match =  my_auth.count_documents({ key: {"$exists": True}}, limit=1)
+    return True if match == 1 else False
 
 @app.errorhandler(404)
 def not_found(error):
@@ -69,9 +64,11 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 ###### API Routes
-@authenticate
 @app.route('/api/data')
 def send_data():
+    token = request.args.get('token')
+    if not authenticate(token):
+        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     user = request.args.get('user')
     print(user)
     document = my_app.find_one({'user': user})
@@ -89,9 +86,11 @@ def send_data():
     json_str = dumps(document)
     return make_response(json_str, 200)
 
-@authenticate
 @app.route('/api/ge', methods = ['POST'])
 def get_event_plot():
+    token = request.args.get('token')
+    if not authenticate(token):
+        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     if request.is_json:
         req = request.get_json()
         run_id = req["run_id"]
@@ -111,6 +110,9 @@ def get_event_plot():
         
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
+    token = request.args.get('token')
+    if not authenticate(token):
+        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     if request.is_json:
         req = request.get_json()
         print(req)
@@ -130,6 +132,9 @@ def get_waveform():
         
 @app.route('/api/sw',  methods = ['POST'])
 def save_waveform():
+    token = request.args.get('token')
+    if not authenticate(token):
+        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     if request.is_json:
         req = request.get_json()
         print(req["user"], req["tag"], req["run_id"])
@@ -151,6 +156,9 @@ def save_waveform():
 
 @app.route('/api/dw',  methods = ['POST'])
 def delete_waveform():
+    token = request.args.get('token')
+    if not authenticate(token):
+        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     if request.is_json:
         req = request.get_json()
         print(req)
