@@ -45,13 +45,7 @@ class Waveform extends Component {
       console.log("Tries loading...");
       this.setState({ isLoading: false, waveformLoaded: true }, () => {
         this.deleteWaveform();
-        try {
-          this.loadWaveform();
-          this.setState({ waveform: this.props.waveform });
-        } catch {
-          this.handleCloseModalRenderError();
-          this.setState({ waveform: undefined });
-        }
+        this.loadWaveform();
       });
     }
   }
@@ -64,7 +58,13 @@ class Waveform extends Component {
 
   loadWaveform() {
     console.log("Loading Waveform...");
-    embed.embed_item(this.props.waveform, "graph");
+    try {
+      embed.embed_item(this.props.waveform, "graph");
+      this.setState({ waveform: this.props.waveform });
+    } catch {
+      this.handleCloseModalRenderError();
+      this.setState({ waveform: undefined });
+    }
   }
 
   handleStateChangeRunID = (value) => {

@@ -74,9 +74,10 @@ class WaveformURL extends Component {
         .post(url, body, config)
         .then(function (res) {
           console.log(res.data);
-          if (res.data.err_msg)
+          if (res.data.err_msg) {
             self.props.dispatch(errorReported(res.data.err_msg));
-          else {
+            self.setState({ isLoading: false });
+          } else {
             try {
               embed.embed_item(res.data, "graph");
             } catch {
