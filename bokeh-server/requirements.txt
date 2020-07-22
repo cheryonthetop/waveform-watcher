@@ -1,0 +1,5 @@
+bokeh
+holoviews
+pymongo
+tornado
+pandas
