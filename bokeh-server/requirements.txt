@@ -3,3 +3,4 @@ holoviews
 pymongo
 tornado
 pandas
+dnspython
