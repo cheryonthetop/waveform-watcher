@@ -9,7 +9,6 @@ from bokeh.embed import server_session
 from bokeh.util.token import generate_session_id
 import numpy as np
 import pandas as pd
-import holoviews as hv
 from bson.json_util import dumps, loads
 import pickle
 import pymongo
@@ -33,9 +32,11 @@ LOG = logger.get_root_logger(os.environ.get(
 PORT = os.environ.get('PORT')
 if (not PORT):
     PORT = 4000
-    
-hv.extension("bokeh")
 
+BOKEH_SERVER_URL = os.environ.get("BOKEH_SERVER_URL", None)
+if BOKEH_SERVER_URL == None:
+    "http://localhost:5006/bokeh-server"
+    
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
 if (APP_DB_URI == None):
@@ -98,9 +99,9 @@ def get_event_plot():
         cache_events_request(run_id)
         my_session_id=generate_session_id()
         # pull a new session from a running Bokeh server
-        with pull_session(url="http://localhost:5006/bokeh-server", 
+        with pull_session(url=BOKEH_SERVER_URL, 
                           arguments={"run": run_id}) as session:
-            script = server_session(url="http://localhost:5006/bokeh-server"
+            script = server_session(url=BOKEH_SERVER_URL
                                     , session_id=session.id)
             # use the script in the rendered page
             return script
