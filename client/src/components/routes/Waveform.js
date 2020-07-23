@@ -114,7 +114,7 @@ class Waveform extends Component {
                 user={this.props.user}
                 handleLoading={this.handleLoading}
               />
-              <Tags />
+              <Tags handleLoading={this.handleLoading} />
             </div>
             <Button
               id="btn-view-events"

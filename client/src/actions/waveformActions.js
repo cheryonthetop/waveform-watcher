@@ -16,6 +16,11 @@ import { errorReported } from "./errorActions";
 
 export const getWaveform = (user, runID, eventID) => (dispatch) => {
   console.log(runID);
+  // Make sure get waveform and switch waveform don't interfere
+  const requestID = (
+    parseInt(window.localStorage.getItem("requestID")) + 1
+  ).toString();
+  window.localStorage.setItem("requestID", requestID);
   // Headers
   const config = {
     headers: {
@@ -39,6 +44,8 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
     .post(url, body, config)
     .then(function (res) {
       console.log(res.data);
+      if (res.data.requestID !== window.localStorage.getItem("requestID"))
+        return;
       if (res.data.err_msg) dispatch(errorReported(res.data.err_msg));
       else
         dispatch({
@@ -46,10 +53,9 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
           payload: {
             runID: runID,
             eventID: eventID,
-            waveform: res.data,
+            waveform: res.data.waveform,
           },
         });
-      return res.data;
     })
     .catch((err) => {
       console.log(err);
@@ -86,7 +92,7 @@ export const getEventPlot = (user, runID) => (dispatch) => {
       dispatch({
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
-          eventPlot: res.data,
+          eventPlot: res.data.eventPlot,
         },
       });
       return res.data;
@@ -102,7 +108,6 @@ export const getEventPlot = (user, runID) => (dispatch) => {
 export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
   dispatch
 ) => {
-  console.log("save waveform action called");
   // Headers
   const config = {
     headers: {
@@ -146,6 +151,11 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
 };
 
 export const switchWaveform = (runID, eventID, waveform) => (dispatch) => {
+  // Make sure get waveform and switch waveform don't interfere
+  const requestID = (
+    parseInt(window.localStorage.getItem("requestID")) + 1
+  ).toString();
+  window.localStorage.setItem("requestID", requestID);
   dispatch({
     type: SWITCH_WAVEFORM,
     payload: {
@@ -196,6 +206,7 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
 };
 
 export const loadAppData = (user) => (dispatch) => {
+  window.localStorage.setItem("requestID", "0");
   console.log(user);
   const url = `${
     process.env.REACT_APP_FLASK_BACKEND_URL

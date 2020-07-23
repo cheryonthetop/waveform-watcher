@@ -71,6 +71,7 @@ class Tags extends Component {
       if (waveform && run_id && event_id) {
         console.log("Switching Waveform...");
         this.props.dispatch(switchWaveform(run_id, event_id, waveform));
+        this.props.handleLoading();
       }
     }
   };
