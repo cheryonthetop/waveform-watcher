@@ -159,13 +159,13 @@ def render_events(run_id, events):
     console.log(events);
     for (event of events) {
         console.log(event);
-        var url = `http://localhost:3000/waveform/${run}/${event}`;
+        var url = `${url}/waveform/${run}/${event}`;
         console.log(url);
         window.open(url)
     }
     """
     # create a callback that will view waveform
-    callback_btn_waveform = CustomJS(args=dict(ms=multi_select, run=run_id), code=code)
+    callback_btn_waveform = CustomJS(args=dict(ms=multi_select, run=run_id, url=APP_URL), code=code)
 
     # add a btn_cache_all widget and configure with the call back
     btn_waveform = Button(label="View Waveform for Chosen Events")
