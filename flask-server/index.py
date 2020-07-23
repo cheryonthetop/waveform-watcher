@@ -28,7 +28,6 @@ CORS(app, supports_credentials=True) # Supports authenticated request
 LOG = logger.get_root_logger(os.environ.get(
     'ROOT_LOGGER', 'root'), filename = os.path.join(ROOT_PATH, 'output.log'))
 
-# PORT = 4000 
 PORT = os.environ.get('PORT')
 if (not PORT):
     PORT = 4000
@@ -41,7 +40,6 @@ if BOKEH_SERVER_URL == None:
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
 if (APP_DB_URI == None):
     print("MongoDB Connection String Not Set")    
-    
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_auth = my_db["auths"]
 my_app = my_db["app"]
@@ -52,25 +50,49 @@ my_events = my_db["events"]
 
 available_runs = my_run.find_one({})["runs"]
 print("Available runs are: ", available_runs[:5])
-def authenticate(token):
+def authenticate(user, token):
+    """
+    Authenticates an API request with a token
+
+    Args:
+        user (str): username
+        token (str): An authentication token
+
+    Returns:
+        boolean: True if the token is issued to the user and false otherwise
+    """
     token = token.replace(" ", "+", -1)
     key = "tokens."+token
-    match =  my_auth.count_documents({ key: {"$exists": True}}, limit=1)
+    match =  my_auth.count_documents({ "username": user, key: {"$exists": True}}, limit=1)
     return True if match == 1 else False
 
 @app.errorhandler(404)
 def not_found(error):
-    """error handler"""
+    """
+    Error Handler
+
+    Args:
+        error (str): Error message
+
+    Returns:
+        Response: An HTTP response with status 404
+    """
     LOG.error(error)
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 ###### API Routes
 @app.route('/api/data')
 def send_data():
+    """
+    Sends user data
+
+    Returns:
+        Response: JSON String containing all the user data
+    """
     token = request.args.get('token')
-    if not authenticate(token):
-        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     user = request.args.get('user')
+    if not authenticate(user, token):
+        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
     print(user)
     document = my_app.find_one({'user': user})
     # print(document)
@@ -89,12 +111,26 @@ def send_data():
 
 @app.route('/api/ge', methods = ['POST'])
 def get_event_plot():
-    token = request.args.get('token')
-    if not authenticate(token):
-        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
+    """
+    Connects the frontend to the Bokeh Server by pulling and
+    returning a sesssion which generates Bokeh plots displaying
+    all the events for a given run
+
+    Returns:
+        str: A script tag that embeds content from a specific 
+        existing session on a Bokeh server.
+    """
     if request.is_json:
+        token = request.args.get('token')
         req = request.get_json()
-        run_id = req["run_id"]
+        run_id, user = None
+        try: 
+            run_id = req["run_id"]
+            user = req["user"]
+        except:
+            return make_response(jsonify({"error": "Bad Request"}), 400)
+        if not authenticate(user, token):
+            return make_response(jsonify({"error": "Unauthorized API request"}), 403)
         print("RUN ID IS: " , run_id)
         cache_events_request(run_id)
         my_session_id=generate_session_id()
@@ -106,21 +142,29 @@ def get_event_plot():
                                     , session_id=session.id)
             # use the script in the rendered page
             return script
-
     else:
-        return make_response(jsonify({"success": False}), 400)
+        return make_response(jsonify({"error": "Bad Request"}), 400)
         
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
-    token = request.args.get('token')
-    if not authenticate(token):
-        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
+    """
+    Retrieves a waveform from the cache and sends to the frontend
+
+    Returns:
+        str: A JSON formatted string representing the waveform
+    """
     if request.is_json:
+        token = request.args.get('token')
         req = request.get_json()
-        print(req)
-        run_id = req["run_id"]
-        user = req["user"]   
-        event_id = req["event_id"]
+        run_id, user, event_id = None
+        try:
+            run_id = req["run_id"]
+            user = req["user"]   
+            event_id = req["event_id"]
+        except:
+            return make_response(jsonify({"error": "Bad Request"}), 400)            
+        if not authenticate(user, token):
+            return make_response(jsonify({"error": "Unauthorized API request"}), 403)
         waveform = wait_for_waveform(run_id, event_id)
         if (isinstance(waveform, str)):
             return make_response(jsonify({"err_msg" : waveform}), 202)
@@ -134,22 +178,30 @@ def get_waveform():
         
 @app.route('/api/sw',  methods = ['POST'])
 def save_waveform():
-    token = request.args.get('token')
-    if not authenticate(token):
-        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
+    """
+    Saves the tag and comments associated with a particular waveform
+
+    Returns:
+        Response: A symbolic 200 response signifying success
+    """
     if request.is_json:
-        req = request.get_json()
-        print(req["user"], req["tag"], req["run_id"])
-        user = req["user"]
-        tag = req["tag"]
-        comments = None
+        token = request.args.get('token')
+        req, user, tag, comments, event_id, run_id, waveform = None
         try:
-            comments = req["comments"]
+            req = request.get_json()
+            user = req["user"]
+            tag = req["tag"]
+            event_id = req["event_id"]
+            run_id = req["run_id"]
+            waveform = req["waveform"]
+        except:
+            return make_response(jsonify({"error": "Bad Request"}), 400)                        
+        if not authenticate(user, token):
+            return make_response(jsonify({"error": "Unauthorized API request"}), 403)
+        try:
+            comments = req["comments"] # Optional
         except KeyError:
             comments = ""
-        event_id = req["event_id"]
-        run_id = req["run_id"]
-        waveform = req["waveform"]
         # Update database in another thread
         threading.Thread(target=update_db_from_save, args=(user, run_id, event_id, waveform, tag, comments)).start()
         return make_response(jsonify({"success": True}), 200)
@@ -158,14 +210,24 @@ def save_waveform():
 
 @app.route('/api/dw',  methods = ['POST'])
 def delete_waveform():
-    token = request.args.get('token')
-    if not authenticate(token):
-        return make_response(jsonify({"error": "Unauthorized API request"}), 403)
+    """
+    Deletes a waveform associated with a tag
+
+    Returns:
+        Response: A symbolic 200 response signifying success
+    """
     if request.is_json:
         req = request.get_json()
         print(req)
-        user = req["user"]  
-        tag = req["tag"]
+        user, tag = None
+        try: 
+            user = req["user"]  
+            tag = req["tag"]
+        except:
+             return make_response(jsonify({"error": "Bad Request"}), 400)                        
+        token = request.args.get('token')
+        if not authenticate(user, token):
+            return make_response(jsonify({"error": "Unauthorized API request"}), 403)
         # Update database
         mongo_document = my_app.find_one({"user": user, "tags_data."+tag: {"$exists": True}})
         if (mongo_document):
@@ -184,6 +246,18 @@ def delete_waveform():
 ###### Helper Routine
 
 def get_waveform(run_id, event_id):
+    """
+    Gets waveform from the cache, and insert a request for
+    the waveform if it does not exist
+
+    Args:
+        run_id (str): Run ID of the waveform
+        event_id (str): Event ID of the waveform
+
+    Returns:
+        dict/str: A dict from the MongoDB Object representing the waveform,
+        or a string with the error message if the waveform is somehow not rendered
+    """
     waveform = None
     document = my_waveform.find_one({"run_id" : run_id, "event_id" : event_id})
     if (document):
@@ -196,6 +270,14 @@ def get_waveform(run_id, event_id):
     return waveform
 
 def cache_waveform_request(run_id, event_id):
+    """
+    Inserts a request into the request collection that
+    asks for a waveform
+
+    Args:
+        run_id (str): Run ID of the waveform
+        event_id (str): Event ID of the waveform
+    """
     document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
     # cache to request if not already in it
     if (document == None):
@@ -203,6 +285,18 @@ def cache_waveform_request(run_id, event_id):
         my_request.insert_one(post) # insert mongo document into 'fetch'
 
 def wait_for_waveform(run_id, event_id):
+    """
+    Repeatedly waits for a waveform to be returned from the cache       
+
+    Args:
+        run_id (str): Run ID of the waveform
+        event_id (str): Event ID of the waveform
+
+    Returns:
+        dict/str: A dict from MongoDB Object representing the waveform, or
+        an error message if the waveform is not rendered, or a timeout message
+        to indicate the waveform has not yet been found in the cache for 5 minutes
+    """
     # only wait for 1 minute
     endtime = datetime.datetime.now() + datetime.timedelta(0, 180)
     while True:
@@ -217,6 +311,13 @@ def wait_for_waveform(run_id, event_id):
             return "Get Waveform Timeout. Please Try Again."
     
 def cache_events_request(run_id):
+    """
+    Inserts a request into the request collection to ask for 
+    the events of a particular run ID
+
+    Args:
+        run_id (str): Run ID for the events
+    """
     ongoing_request = my_request.find_one({"run_id" : run_id})
     events = my_events.find_one({"run_id" : run_id, "events": {"$exists": True}})
     # cache to request if not already in it
@@ -225,6 +326,16 @@ def cache_events_request(run_id):
         my_request.insert_one(post) # insert mongo document into 'fetch'
 
 def update_db_from_get(user, run_id, event_id, waveform):
+    """
+    Updates the database with the latest waveform a user gets
+
+    Args:
+        user (str): username
+        run_id (str): Run ID of the waveform
+        event_id (str): Event ID of the waveform
+        waveform (dict): A dictionary to be converted to MongoDB Object
+        representing the waveform
+    """
     mongo_document = my_app.find_one({"user": user})
     print("updating waveform in the app db from get... ")
     if (mongo_document):
@@ -239,6 +350,17 @@ def update_db_from_get(user, run_id, event_id, waveform):
     print("updating waveform in the app db from get completed!")
     
 def update_db_from_save(user, run_id, event_id, waveform, tag, comments):
+    """
+    Updates the database with the new tag the user created
+
+    Args:
+        user (str): Username
+        run_id (str): Run ID of the waveform
+        event_id (str): Event ID of the waveform
+        waveform (dict): Represents the waveform object
+        tag (str): The tag associated with the waveform
+        comments (str): The comments on the waveform
+    """
     print("updating waveform in the app db from save...")
     my_app.update_one({"user": user}, 
     {"$set": { 
