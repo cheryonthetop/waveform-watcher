@@ -153,11 +153,6 @@ class WaveformURL extends Component {
 
           <div id="graph-box">
             <Loading isLoading={isLoading}>
-              <Param
-                runID={this.props.runID}
-                eventID={this.props.eventID}
-                waveform={this.props.waveform}
-              ></Param>
               <div id="graph" />
             </Loading>
           </div>

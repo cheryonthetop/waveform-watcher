@@ -22,6 +22,7 @@ class Waveform extends Component {
     isLoading: this.props.isLoading,
     waveformLoaded: false,
     renderError: false,
+    paramsHidden: true,
   };
 
   componentDidMount() {
@@ -60,10 +61,10 @@ class Waveform extends Component {
     console.log("Loading Waveform...");
     try {
       embed.embed_item(this.props.waveform, "graph");
-      this.setState({ waveform: this.props.waveform });
+      this.setState({ waveform: this.props.waveform, paramsHidden: false });
     } catch {
       this.handleCloseModalRenderError();
-      this.setState({ waveform: undefined });
+      this.setState({ waveform: this.props.waveform });
     }
   }
 
@@ -81,7 +82,7 @@ class Waveform extends Component {
   };
 
   handleLoading = () => {
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, paramsHidden: true });
   };
 
   handleShowModalRenderError = () => {
@@ -97,7 +98,7 @@ class Waveform extends Component {
       window.localStorage.setItem("redirect", this.props.location.pathname);
       return <Redirect to="/login" />;
     }
-    const { runID, eventID, isLoading, renderError } = this.state;
+    const { runID, eventID, isLoading, renderError, paramsHidden } = this.state;
     return (
       <div>
         <Header />
@@ -131,6 +132,7 @@ class Waveform extends Component {
                 runID={this.props.runID}
                 eventID={this.props.eventID}
                 waveform={this.props.waveform}
+                hidden={paramsHidden}
               ></Param>
               <div id="graph" />
             </Loading>
