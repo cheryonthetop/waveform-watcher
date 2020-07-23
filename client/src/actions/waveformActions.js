@@ -53,7 +53,7 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
           payload: {
             runID: runID,
             eventID: eventID,
-            waveform: res.data.waveform,
+            waveform: res.data,
           },
         });
     })
@@ -92,7 +92,7 @@ export const getEventPlot = (user, runID) => (dispatch) => {
       dispatch({
         type: GET_EVENT_PLOT_SUCCESS,
         payload: {
-          eventPlot: res.data.eventPlot,
+          eventPlot: res.data,
         },
       });
       return res.data;

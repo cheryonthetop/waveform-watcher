@@ -377,14 +377,13 @@ def fetch_request():
         # Sleep the app if no new requests
         time.sleep(10)
 
-if __name__ == "__main__":
-    print("Service starts now: ", datetime.datetime.now())
-    threads = []
-    start_time = datetime.datetime.now()
-    for i in range(0, min(8, cpu_count)):
-        t = Thread(target=fetch_request, daemon=True)
-        threads.append(t)
-        t.start()
-    # Main thread sleeps for 1 day and terminates
-    # Daemonic threads are terminated automatically
-    time.sleep(60 * 60 * 24)
+print("Service starts now: ", datetime.datetime.now())
+threads = []
+start_time = datetime.datetime.now()
+for i in range(0, min(8, cpu_count)):
+    t = Thread(target=fetch_request, daemon=True)
+    threads.append(t)
+    t.start()
+# Main thread sleeps for 1 day and terminates
+# Daemonic threads are terminated automatically
+time.sleep(60 * 60 * 24)
