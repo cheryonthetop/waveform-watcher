@@ -1,3 +1,8 @@
+"""
+Flask App serving API requests for waveform watcher.
+This is the backend for the main functionalities of the app.
+"""
+
 import os
 import sys
 import threading
@@ -148,7 +153,7 @@ def get_event_plot():
 @app.route('/api/gw',  methods = ['POST'])
 def get_waveform():
     """
-    Retrieves a waveform from the cache and sends to the frontend
+    Retrieves a waveform from the cache
 
     Returns:
         str: A JSON formatted string representing the waveform
@@ -245,14 +250,14 @@ def delete_waveform():
 
 ###### Helper Routine
 
-def get_waveform(run_id, event_id):
+def get_waveform_from_cache(run_id, event_id):
     """
     Gets waveform from the cache, and insert a request for
     the waveform if it does not exist
 
     Args:
-        run_id (str): Run ID of the waveform
-        event_id (str): Event ID of the waveform
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
 
     Returns:
         dict/str: A dict from the MongoDB Object representing the waveform,
@@ -275,8 +280,8 @@ def cache_waveform_request(run_id, event_id):
     asks for a waveform
 
     Args:
-        run_id (str): Run ID of the waveform
-        event_id (str): Event ID of the waveform
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
     """
     document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
     # cache to request if not already in it
@@ -289,8 +294,8 @@ def wait_for_waveform(run_id, event_id):
     Repeatedly waits for a waveform to be returned from the cache       
 
     Args:
-        run_id (str): Run ID of the waveform
-        event_id (str): Event ID of the waveform
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
 
     Returns:
         dict/str: A dict from MongoDB Object representing the waveform, or
@@ -300,7 +305,7 @@ def wait_for_waveform(run_id, event_id):
     # only wait for 1 minute
     endtime = datetime.datetime.now() + datetime.timedelta(0, 180)
     while True:
-        waveform = get_waveform(run_id, event_id)
+        waveform = get_waveform_from_cache(run_id, event_id)
         if (waveform != None):
             print("Retrieved Waveform")
             return waveform
@@ -331,8 +336,8 @@ def update_db_from_get(user, run_id, event_id, waveform):
 
     Args:
         user (str): username
-        run_id (str): Run ID of the waveform
-        event_id (str): Event ID of the waveform
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
         waveform (dict): A dictionary to be converted to MongoDB Object
         representing the waveform
     """
@@ -355,8 +360,8 @@ def update_db_from_save(user, run_id, event_id, waveform, tag, comments):
 
     Args:
         user (str): Username
-        run_id (str): Run ID of the waveform
-        event_id (str): Event ID of the waveform
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
         waveform (dict): Represents the waveform object
         tag (str): The tag associated with the waveform
         comments (str): The comments on the waveform

@@ -1,3 +1,6 @@
+"""
+The Bokeh app serving the interactive plots of waveform events
+"""
 
 import os
 from bokeh.layouts import column, gridplot, row
@@ -48,6 +51,14 @@ my_events = my_db["events"]
 
 ##### DB routine helpers
 def cache_waveform_request(run_id, event_id):
+    """
+    Inserts a request into the request collection that
+    asks for a waveform
+
+    Args:
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
+    """
     print("cacheing waveform for run ", run_id, "and event ", event_id)
     document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
     # cache to request if not already in it
@@ -55,7 +66,17 @@ def cache_waveform_request(run_id, event_id):
         post = {"status" : "new", "run_id" : run_id, "event_id" : event_id, "request": "waveform"}
         my_request.insert_one(post) # insert mongo document into 'fetch'
 
-def get_events(run_id):
+def get_events_from_cache(run_id):
+    """
+    Gets events from the cache, and insert a request for
+    the waveform if it does not exist
+
+    Args:
+        run_id (str): Run ID of the run
+
+    Returns:
+        DataFrame: All events from the run with DIMS as the fields
+    """
     events = None
     document = my_events.find_one({"run_id" : run_id})
     if (document):
@@ -66,6 +87,17 @@ def get_events(run_id):
     return events
 
 def wait_for_events(run_id):
+    """
+    Repeatedly waits for events to be returned from the cache       
+
+    Args:
+        run_id (str): Run ID of the run
+
+    Returns:
+        DataFrame/str: A dataframe with all events from the run, or
+        an error message if the events are not retrieved, or a timeout message
+        to indicate the waveform has not yet been found in the cache for 5 minutes
+    """
     # wait for 5 minutes max
     endtime = datetime.datetime.now() + datetime.timedelta(0, 60 * 5)
     while True:
@@ -80,8 +112,31 @@ def wait_for_events(run_id):
             return "Get Events Timeout. Please Try Again."
 
 def render_events(run_id, events):
+    """
+    Renders the plots of events supporting interactive features
+    with Python and Javascript callbacks attached to the data source
+    and widget components
+
+    Args:
+        run_id (str): Run ID of the run
+        events (str): Event ID of the event
+    """
     source = ColumnDataSource(events)
     def callback_select(attr, old, new):
+        """
+        Callback invoked when a user selects data points from
+        the plots. They are synced to the source and trigger
+        updates to the options in the multi_select widget.
+
+        Args:
+            attr (str): Attributes that could be changed. In our case,
+            the attribute is indices. They change when a user selects
+            a datapoint that comes from the ColumnDataSource
+            old (type of the attribute): Old value of the changed attributes.
+            In our case, it is a list
+            new (type of the attribute): New value of the changed attributes. 
+            In our case, it is a list
+        """
         print("selected data")
         inds = new
         print(inds)
@@ -100,11 +155,30 @@ def render_events(run_id, events):
     
     @gen.coroutine
     def update_options(event):
+        """
+        Updates the options in the multi_select widget
+
+        Args:
+            event (str): Event ID of the event
+        """
         if event not in multi_select.options:
             multi_select.options.append(event)
         
     def callback_value_selected(attr, old, new):
-        print("new value callback")
+        """
+        Callback invoked when an option in multi_select is selected (and
+        therefore becomes a value). This enables the buttons that cache
+        and view selected options (our events)
+
+        Args:
+            attr (str): Attributes that could be changed. In our case,
+            the attribute is value. They change when a user selects
+            an option in the multi_select widget
+            old (type of the attribute): Old value of the changed attributes.
+            In our case, it is a list
+            new (type of the attribute): New value of the changed attributes. 
+            In our case, it is a list
+        """
         value = new
         if len(value) != 0:
             doc.add_next_tick_callback(enable_btn_cache_selected)
@@ -114,10 +188,17 @@ def render_events(run_id, events):
     
     @gen.coroutine
     def enable_btn_cache_selected():
+        """
+        Enables btn_cache_selected
+        """
         btn_cache_selected.disabled = False
     
     # create a callback that will cache waveform
     def callback_btn_cache_selected():
+        """
+        Callback invoked when a user clicks the button that
+        caches selected events.
+        """
         events = multi_select.value
         events = [int(event) for event in events]
         for event in events:
@@ -133,10 +214,17 @@ def render_events(run_id, events):
 
     @gen.coroutine
     def enable_btn_cache_all():
+        """
+        Enables btn_cache_all
+        """
         btn_cache_all.disabled = False
     
     # create a callback that will cache all waveform
     def callback_btn_cache_all():
+        """
+        Callback invoked when a user clicks the button
+        to cache all events.
+        """
         events = multi_select.options
         events = [int(event) for event in events]
         for event in events:
@@ -152,6 +240,9 @@ def render_events(run_id, events):
     
     @gen.coroutine
     def enable_btn_waveform():
+        """
+        Enables btn_waveform
+        """
         btn_waveform.disabled = False
     
     code = """
@@ -164,10 +255,10 @@ def render_events(run_id, events):
         window.open(url)
     }
     """
-    # create a callback that will view waveform
+    # create a Javascript callback that will open an URL to view waveform
     callback_btn_waveform = CustomJS(args=dict(ms=multi_select, run=run_id, url=APP_URL), code=code)
 
-    # add a btn_cache_all widget and configure with the call back
+    # add a btn_cache_all widget and configure the call back
     btn_waveform = Button(label="View Waveform for Chosen Events")
     btn_waveform.js_on_click(callback_btn_waveform)
     btn_waveform.disabled = len(multi_select.value) == 0
@@ -175,7 +266,7 @@ def render_events(run_id, events):
     btn_waveform.height=30
     btn_waveform.margin=(10,0,0,0)
 
-    
+    # Create the plots with a TapTool URL callback
     plots = []
     # use the "color" column of the Csource to complete the URL
     # e.g. if the glyph at index 10 is selected, then @color
@@ -222,6 +313,16 @@ except:
 print("Received run " + run_id)
 
 def blocking_task():
+    """
+    Performs the blocking task of rendering the plots. 
+    This is carried out in a separate thread because 
+    the main thread has to be "free" to respond to the 
+    pull_session call from the Flask app with a script tag 
+    to establish a websocket connection to the frontend,
+    which is the whole point of this server. If we don't
+    perform this task in a separate thread, pull_session
+    won't be receiving the response due to timeout
+    """
     events = wait_for_events(run_id)
     if (isinstance(events, str)):
         # An error string returned
