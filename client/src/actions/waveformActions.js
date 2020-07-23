@@ -44,8 +44,7 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
     .post(url, body, config)
     .then(function (res) {
       console.log(res.data);
-      if (res.data.requestID !== window.localStorage.getItem("requestID"))
-        return;
+      if (requestID !== window.localStorage.getItem("requestID")) return;
       if (res.data.err_msg) dispatch(errorReported(res.data.err_msg));
       else
         dispatch({
