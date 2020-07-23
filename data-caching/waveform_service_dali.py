@@ -385,6 +385,6 @@ if __name__ == "__main__":
         t = Thread(target=fetch_request, daemon=True)
         threads.append(t)
         t.start()
-    # Main thread sleeps for 1 hour and terminates
+    # Main thread sleeps for 1 day and terminates
     # Daemonic threads are terminated automatically
-    time.sleep(60 * 60)
+    time.sleep(60 * 60 * 24)
