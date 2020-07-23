@@ -100,7 +100,7 @@ def get_event_plot():
         my_session_id=generate_session_id()
         print(BOKEH_SERVER_URL)
         # pull a new session from a running Bokeh server
-        with pull_session(url=BOKEH_SERVER_URL, 
+        with pull_session(url=BOKEH_SERVER_URL, session_id=my_session_id,
                           arguments={"run": run_id}) as session:
             script = server_session(url=BOKEH_SERVER_URL
                                     , session_id=session.id)
@@ -217,9 +217,10 @@ def wait_for_waveform(run_id, event_id):
             return "Get Waveform Timeout. Please Try Again."
     
 def cache_events_request(run_id):
-    document = my_request.find_one({"run_id" : run_id})
+    ongoing_request = my_request.find_one({"run_id" : run_id})
+    events = my_events.find_one({"run_id" : run_id, "events": {"$exists": True}})
     # cache to request if not already in it
-    if (document == None):
+    if (ongoing_request == None and events == None):
         post = {"status" : "new", "run_id" : run_id, "request": "events"}
         my_request.insert_one(post) # insert mongo document into 'fetch'
 

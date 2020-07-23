@@ -77,8 +77,9 @@ def process_waveform(run_id, event_id):
             cache_waveform(run_id, event_id, None, e.message)
         else:
             cache_waveform(run_id, event_id, None, "Data Not Available")
-    my_request.delete_one({"status": "use", "event_id": event_id, "run_id": run_id})
-    print("Just cached the waveform for run ", run_id, "and event ", event_id)
+    finally:
+        document = my_request.delete_one({"status": "use", "run_id": run_id, "event_id": event_id})
+        print("Just cached the waveform for run ", run_id, "and event ", event_id)
     
 def process_events(run_id):
     print("starts processing events for run ", run_id)
@@ -92,8 +93,9 @@ def process_events(run_id):
             cache_events(run_id, None, e.message)
         else:
             cache_events(run_id, None, "Data Not Available")
-    my_request.delete_one({"status": "use", "run_id": run_id})
-    print("Just cached the events for run ", run_id)
+    finally:  
+        document = my_request.delete_one({"status": "use", "run_id": run_id})
+        print("Just cached the events for run ", run_id)
     
 def fetch_request():
     while True:
