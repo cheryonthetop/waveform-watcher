@@ -1,0 +1,8 @@
+With Caching
+ Getting Events at  2020-7-24 13:19:36
+ Events loaded at  2020-7-24 13:19:37
+
+ Getting Waveform at  2020-7-24 13:22:40
+ Waveform embedded at  2020-7-24 13:22:46
+
+Without Caching

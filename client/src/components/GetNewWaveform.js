@@ -20,7 +20,7 @@ class GetNewWaveform extends Component {
       if (runID === currRunID && eventID === currEventID)
         this.handleShowModalRep();
       else if (isNaN(parseInt(eventID)) || !Number.isInteger(parseInt(eventID)))
-        this.handleShowModalIsNotInt();
+        this.handleShowModalEventIsNotInt();
       else if (eventID < 0) this.handleShowModalEventIsNeg();
       else {
         this.props.handleLoading();
@@ -76,7 +76,7 @@ class GetNewWaveform extends Component {
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => this.handleGetWaveform(runID, eventID)}
+          onClick={() => this.handleGetWaveform(runID, parseInt(eventID))}
           active
         >
           Get New Waveform

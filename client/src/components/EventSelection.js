@@ -10,7 +10,7 @@ import { withRouter } from "react-router";
 class EventSelection extends Component {
   state = {
     runID: this.props.runID,
-    eventPlot: "",
+    eventPlot: undefined,
     isLoading: false,
   };
 
@@ -19,10 +19,10 @@ class EventSelection extends Component {
   }
 
   tryLoadEventPlots() {
-    const { eventPlot, isLoading } = this.state;
+    const { eventPlot } = this.state;
     const hasNewEventPlots =
       this.props.eventPlot && eventPlot !== this.props.eventPlot;
-    if (hasNewEventPlots && isLoading) {
+    if (hasNewEventPlots) {
       this.setState({ isLoading: false }, () => {
         this.deleteEventPlots();
         this.loadEventPlots();

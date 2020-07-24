@@ -44,10 +44,10 @@ class WaveformURL extends Component {
     if (!run || !event) return;
     else if (!availableRuns.find((element) => element == run))
       this.handleShowModalRunNotAvailable();
-    else if (isNaN(event) || !Number.isInteger(parseInt(event)))
+    else if (isNaN(parseInt(event)) || !Number.isInteger(parseInt(event)))
       this.handleShowModalIsNotInt();
     else if (parseInt(event) < 0) this.handleShowModalEventIsNeg();
-    else this.loadWaveform(user, run, event);
+    else this.loadWaveform(user, run, parseInt(event));
   }
 
   loadWaveform = (user, run, event) => {

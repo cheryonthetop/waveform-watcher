@@ -14,6 +14,7 @@ const initialState = {
   runID: "",
   eventID: "",
   waveform: undefined,
+  eventPlot: undefined,
   tagsData: [],
   availableRuns: [],
   isLoading: true,
