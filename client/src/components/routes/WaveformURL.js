@@ -44,7 +44,7 @@ class WaveformURL extends Component {
     // We want to try load waveform once and only once
     // for the purpose of this page
     this.setState({ waveformLoaded: true }, () => {
-      eventInt = parseInt(event);
+      const eventInt = parseInt(event);
       if (!run || !event) return;
       else if (!availableRuns.find((element) => element === run))
         this.handleShowModalRunNotAvailable();
