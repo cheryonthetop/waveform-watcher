@@ -44,14 +44,14 @@ class WaveformURL extends Component {
     // We want to try load waveform once and only once
     // for the purpose of this page
     this.setState({ waveformLoaded: true }, () => {
-      event = parseInt(event);
+      eventInt = parseInt(event);
       if (!run || !event) return;
       else if (!availableRuns.find((element) => element === run))
         this.handleShowModalRunNotAvailable();
-      else if (isNaN(event) || !Number.isInteger(event))
+      else if (isNaN(eventInt) || !Number.isInteger(eventInt))
         this.handleShowModalIsNotInt();
       else if (event < 0) this.handleShowModalEventIsNeg();
-      else this.loadWaveform(user, run, event);
+      else this.loadWaveform(user, run, eventInt);
     });
   }
 
