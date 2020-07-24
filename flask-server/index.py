@@ -175,7 +175,7 @@ def get_waveform():
             return make_response(jsonify({"err_msg" : waveform}), 202)
         print("Retrieved waveform from cache")
         # Update database in another thread
-        threading.Thread(target=update_db_from_get, args=(user, run_id, event_id, waveform)).start()
+        threading.Thread(target=update_db_new_waveform, args=(user, run_id, event_id, waveform)).start()
         print("returning waveform...")
         return json.dumps(waveform)
     else:
@@ -208,7 +208,7 @@ def save_waveform():
         except KeyError:
             comments = ""
         # Update database in another thread
-        threading.Thread(target=update_db_from_save, args=(user, run_id, event_id, waveform, tag, comments)).start()
+        threading.Thread(target=update_db_new_tag, args=(user, run_id, event_id, waveform, tag, comments)).start()
         return make_response(jsonify({"success": True}), 200)
     else:
         return make_response(jsonify({"success": False}), 400)
@@ -243,6 +243,34 @@ def delete_waveform():
                     }
                 }
             ) 
+        return make_response(jsonify({"success": True}), 200)
+    else:
+        return make_response(jsonify({"success": False}), 400)
+    
+
+@app.route('/api/switch',  methods = ['POST'])
+def get_waveform():
+    """
+    Switches a waveform and updates db with the new waveform
+
+    Returns:
+        Response: A symbolic 200 response signifying success
+    """
+    if request.is_json:
+        token = request.args.get('token')
+        req = request.get_json()
+        run_id, user, event_id, waveform = None
+        try:
+            run_id = req["run_id"]
+            user = req["user"]   
+            event_id = req["event_id"]
+            waveform = req["waveform"]
+        except:
+            return make_response(jsonify({"error": "Bad Request"}), 400)            
+        if not authenticate(user, token):
+            return make_response(jsonify({"error": "Unauthorized API request"}), 403)
+        # Update database in another thread
+        threading.Thread(target=update_db_new_waveform, args=(user, run_id, event_id, waveform)).start()
         return make_response(jsonify({"success": True}), 200)
     else:
         return make_response(jsonify({"success": False}), 400)
@@ -330,7 +358,7 @@ def cache_events_request(run_id):
         post = {"status" : "new", "run_id" : run_id, "request": "events"}
         my_request.insert_one(post) # insert mongo document into 'fetch'
 
-def update_db_from_get(user, run_id, event_id, waveform):
+def update_db_new_waveform(user, run_id, event_id, waveform):
     """
     Updates the database with the latest waveform a user gets
 
@@ -354,7 +382,7 @@ def update_db_from_get(user, run_id, event_id, waveform):
         )
     print("updating waveform in the app db from get completed!")
     
-def update_db_from_save(user, run_id, event_id, waveform, tag, comments):
+def update_db_new_tag(user, run_id, event_id, waveform, tag, comments):
     """
     Updates the database with the new tag the user created
 
@@ -362,7 +390,7 @@ def update_db_from_save(user, run_id, event_id, waveform, tag, comments):
         user (str): Username
         run_id (str): Run ID of the run
         event_id (str): Event ID of the event
-        waveform (dict): Represents the waveform object
+        waveform (dict): Represents the waveform object associated with the tag
         tag (str): The tag associated with the waveform
         comments (str): The comments on the waveform
     """

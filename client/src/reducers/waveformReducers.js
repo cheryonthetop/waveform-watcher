@@ -59,11 +59,16 @@ export default function (state = initialState, action) {
         ...state,
         eventPlot: action.payload,
       };
+    case GET_WAVEFORM_FAILURE:
+      return {
+        ...state,
+        runID: action.payload.runID,
+        eventID: action.payload.eventID,
+      };
     case LOAD_FAILURE:
     case DELETE_WAVEFORM_FAILURE:
     case GET_EVENT_PLOT_FAILURE:
     case SAVE_WAVEFORM_FAILURE:
-    case GET_WAVEFORM_FAILURE:
     default:
       return state;
   }

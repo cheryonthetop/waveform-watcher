@@ -8,7 +8,7 @@ import "../stylesheets/index.css";
 
 class Home extends Component {
   componentDidMount() {
-    console.log("Waveform rendered");
+    console.log("Home Mounted");
   }
 
   render() {

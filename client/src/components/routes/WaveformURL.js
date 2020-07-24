@@ -41,56 +41,59 @@ class WaveformURL extends Component {
       },
     } = this.props;
     console.log("URL Params:", run, event);
-    if (!run || !event) return;
-    else if (!availableRuns.find((element) => element == run))
-      this.handleShowModalRunNotAvailable();
-    else if (isNaN(parseInt(event)) || !Number.isInteger(parseInt(event)))
-      this.handleShowModalIsNotInt();
-    else if (parseInt(event) < 0) this.handleShowModalEventIsNeg();
-    else this.loadWaveform(user, run, parseInt(event));
+    // We want to try load waveform once and only once
+    // for the purpose of this page
+    this.setState({ waveformLoaded: true }, () => {
+      event = parseInt(event);
+      if (!run || !event) return;
+      else if (!availableRuns.find((element) => element === run))
+        this.handleShowModalRunNotAvailable();
+      else if (isNaN(event) || !Number.isInteger(event))
+        this.handleShowModalIsNotInt();
+      else if (event < 0) this.handleShowModalEventIsNeg();
+      else this.loadWaveform(user, run, event);
+    });
   }
 
   loadWaveform = (user, run, event) => {
     const self = this;
-    this.setState({ waveformLoaded: true }, () => {
-      // Headers
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          withCredentials: true,
-        },
-      };
+    // Headers
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        withCredentials: true,
+      },
+    };
 
-      // Request body
-      const body = JSON.stringify({
-        user: user,
-        run_id: run,
-        event_id: event,
-      });
-
-      const url = `${
-        process.env.REACT_APP_FLASK_BACKEND_URL
-      }/api/gw?token=${window.localStorage.getItem("token")}`;
-
-      axios
-        .post(url, body, config)
-        .then(function (res) {
-          console.log(res.data);
-          if (res.data.err_msg) {
-            self.props.dispatch(errorReported(res.data.err_msg));
-            self.setState({ isLoading: false });
-          } else {
-            try {
-              embed.embed_item(res.data, "graph");
-            } catch {
-              self.handleShowModalRenderError();
-            }
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    // Request body
+    const body = JSON.stringify({
+      user: user,
+      run_id: run,
+      event_id: event,
     });
+
+    const url = `${
+      process.env.REACT_APP_FLASK_BACKEND_URL
+    }/api/gw?token=${window.localStorage.getItem("token")}`;
+
+    axios
+      .post(url, body, config)
+      .then(function (res) {
+        console.log(res.data);
+        if (res.data.err_msg) {
+          self.props.dispatch(errorReported(res.data.err_msg));
+          self.setState({ isLoading: false });
+        } else {
+          try {
+            embed.embed_item(res.data, "graph");
+          } catch {
+            self.handleShowModalRenderError();
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   handleShowModalIsNotInt = () => {

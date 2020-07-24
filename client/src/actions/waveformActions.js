@@ -59,8 +59,16 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
     .then(function (res) {
       console.log(res.data);
       if (requestID !== window.localStorage.getItem("requestID")) return;
-      if (res.data.err_msg) dispatch(errorReported(res.data.err_msg));
-      else
+      if (res.data.err_msg) {
+        dispatch(errorReported(res.data.err_msg));
+        dispatch({
+          type: GET_WAVEFORM_FAILURE,
+          payload: {
+            runID: runID,
+            eventID: eventID,
+          },
+        });
+      } else
         dispatch({
           type: GET_WAVEFORM_SUCCESS,
           payload: {
@@ -74,6 +82,10 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
       console.log(err);
       dispatch({
         type: GET_WAVEFORM_FAILURE,
+        payload: {
+          runID: runID,
+          eventID: eventID,
+        },
       });
     });
 };
@@ -191,6 +203,33 @@ export const switchWaveform = (runID, eventID, waveform) => (dispatch) => {
       waveform: waveform,
     },
   });
+  // Headers
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      withCredentials: true,
+    },
+  };
+
+  // Request body
+  const body = JSON.stringify({
+    run_id: runID,
+    event_id: eventID,
+    waveform: waveform,
+  });
+
+  const url = `${
+    process.env.REACT_APP_FLASK_BACKEND_URL
+  }/api/switch?token=${window.localStorage.getItem("token")}`;
+
+  axios
+    .post(url, body, config)
+    .then(function (res) {
+      console.log(res.data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 export const deleteWaveform = (user, tag) => (dispatch) => {
