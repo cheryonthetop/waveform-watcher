@@ -1,3 +1,8 @@
+"""
+Fetches run and waveform data and caches them into the DB
+according to the user requests
+"""
+
 import pickle
 import threading
 from threading import Thread
@@ -34,6 +39,16 @@ dims = ["cs1", "cs2", "z", "r", "e_light", "e_charge",
 st = straxen.contexts.xenon1t_dali()
 
 def load_waveform(run_id, event_id):
+    """
+    Renders a waveform
+
+    Args:
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
+
+    Returns:
+        JSON-like str: The waveform of the event
+    """
     df = st.get_array(run_id, "event_info")
     event = df[int(event_id)]
     waveform = waveform_display(context=st, run_id=run_id, time_within=event)
@@ -47,6 +62,15 @@ def load_waveform(run_id, event_id):
     return waveform
 
 def load_events(run_id):
+    """
+    Loads the events for a run
+
+    Args:
+        run_id (str): Run ID of the run
+
+    Returns:
+        Binary: The binary data of the pickled dataframe
+    """
     events = st.get_df(run_id, 'event_info')
     new_events = pd.DataFrame()
     for dim in dims:
@@ -54,18 +78,42 @@ def load_events(run_id):
     return Binary(pickle.dumps(new_events, protocol=4))
     
 def cache_events(run_id, events, msg):
+    """
+    Caches the events into MongoDB
+
+    Args:
+        run_id (str): Run ID of the run
+        events (Binary): Binary data of a pickled DataFrame
+        msg (str): Error message, empty string if no error
+    """
     post = {"run_id" : run_id, "events": events, "msg": msg}
     document = my_events.find_one(post)
     if (document == None):
         my_events.insert_one(post)
 
 def cache_waveform(run_id, event_id, waveform, msg):
+    """
+    Caches the waveform into MongoDB
+
+    Args:
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
+        waveform (JSON-like str): The waveform
+        msg (str): Error message, empty string if no error
+    """
     post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}
     document = my_waveform.find_one(post)
     if (document == None):
         my_waveform.insert_one(post)
 
 def process_waveform(run_id, event_id):
+    """
+    Fetches/loads and caches waveform
+
+    Args:
+        run_id (str): Run ID of the run
+        event_id (str): Event ID of the event
+    """
     print("starts processing waveform for run ", run_id, " and ", event_id)
     try:
         waveform = load_waveform(run_id, event_id)
@@ -82,6 +130,12 @@ def process_waveform(run_id, event_id):
         print("Just cached the waveform for run ", run_id, "and event ", event_id)
     
 def process_events(run_id):
+    """
+    Fetches/loads the events from a run
+
+    Args:
+        run_id (str): Run ID of the run
+    """
     print("starts processing events for run ", run_id)
     try:
         events = load_events(run_id)
@@ -98,6 +152,9 @@ def process_events(run_id):
         print("Just cached the events for run ", run_id)
     
 def fetch_request():
+    """
+    Fetches and process requests
+    """
     while True:
         document = my_request.find_one_and_update({"status": "new"}, 
                                                   {"$set" : {"status": "use"}})
