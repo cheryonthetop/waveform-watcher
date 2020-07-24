@@ -43,6 +43,20 @@ class EventSelection extends Component {
       const script = this.props.eventPlot;
       const node = document.createRange().createContextualFragment(script);
       document.getElementById("graph").appendChild(node);
+      var tempDate = new Date();
+      var date =
+        tempDate.getFullYear() +
+        "-" +
+        (tempDate.getMonth() + 1) +
+        "-" +
+        tempDate.getDate() +
+        " " +
+        tempDate.getHours() +
+        ":" +
+        tempDate.getMinutes() +
+        ":" +
+        tempDate.getSeconds();
+      console.log("Events loaded at ", date);
     }
   }
 

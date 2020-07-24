@@ -15,6 +15,20 @@ import axios from "axios";
 import { errorReported } from "./errorActions";
 
 export const getWaveform = (user, runID, eventID) => (dispatch) => {
+  var tempDate = new Date();
+  var date =
+    tempDate.getFullYear() +
+    "-" +
+    (tempDate.getMonth() + 1) +
+    "-" +
+    tempDate.getDate() +
+    " " +
+    tempDate.getHours() +
+    ":" +
+    tempDate.getMinutes() +
+    ":" +
+    tempDate.getSeconds();
+  console.log("Getting Waveform at ", date);
   console.log(runID);
   // Make sure get waveform and switch waveform don't interfere
   const requestID = (
@@ -65,6 +79,20 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
 };
 
 export const getEventPlot = (user, runID) => (dispatch) => {
+  var tempDate = new Date();
+  var date =
+    tempDate.getFullYear() +
+    "-" +
+    (tempDate.getMonth() + 1) +
+    "-" +
+    tempDate.getDate() +
+    " " +
+    tempDate.getHours() +
+    ":" +
+    tempDate.getMinutes() +
+    ":" +
+    tempDate.getSeconds();
+  console.log("Getting Events at ", date);
   console.log(runID);
   // Headers
   const config = {

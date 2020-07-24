@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { embed } from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
 import Tags from "../Tags";
-import Param from "../Param";
 import { Redirect } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
@@ -20,6 +19,7 @@ class WaveformURL extends Component {
     isNotInt: false,
     waveformLoaded: false,
     renderError: false,
+    eventIsNeg: false,
   };
 
   componentDidMount() {
@@ -44,7 +44,9 @@ class WaveformURL extends Component {
     if (!run || !event) return;
     else if (!availableRuns.find((element) => element == run))
       this.handleShowModalRunNotAvailable();
-    else if (!Number.isInteger(parseInt(event))) this.handleShowModalIsNotInt();
+    else if (isNaN(event) || !Number.isInteger(parseInt(event)))
+      this.handleShowModalIsNotInt();
+    else if (parseInt(event) < 0) this.handleShowModalEventIsNeg();
     else this.loadWaveform(user, run, event);
   }
 
@@ -115,6 +117,10 @@ class WaveformURL extends Component {
     this.setState({ renderError: false });
   };
 
+  handleCloseEventIsNeg = () => this.setState({ eventIsNeg: false });
+
+  handleShowModalEventIsNeg = () => this.setState({ eventIsNeg: true });
+
   handleViewEvents = () => {
     this.props.history.push("/");
   };
@@ -130,7 +136,7 @@ class WaveformURL extends Component {
       window.localStorage.setItem("redirect", this.props.location.pathname);
       return <Redirect to="/login" />;
     }
-    const { isLoading, runNA, isNotInt, renderError } = this.state;
+    const { isLoading, runNA, isNotInt, renderError, eventIsNeg } = this.state;
     const { error, msg } = this.props;
     return (
       <div>
@@ -172,11 +178,18 @@ class WaveformURL extends Component {
           handleClose={this.handleCloseModalIsNotInt}
         />
         <ErrorModal
+          show={eventIsNeg}
+          handleClose={this.handleCloseEventIsNeg}
+          title="Input Error"
+          body="Event ID Must Not Be Negative"
+        />
+        <ErrorModal
           title="Get New Waveform Error"
           body={msg}
           show={error}
           handleClose={this.handleCloseError}
         />
+
         <ErrorModal
           title="Render Waveform Error"
           body={"An Error Occured While Rendering the Waveform"}

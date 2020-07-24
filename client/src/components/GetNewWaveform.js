@@ -11,6 +11,7 @@ class GetNewWaveform extends Component {
     noEvent: false,
     repetitive: false,
     eventIsNotInt: false,
+    eventIsNeg: false,
   };
 
   handleGetWaveform = (runID, eventID) => {
@@ -18,6 +19,9 @@ class GetNewWaveform extends Component {
     if (runID && eventID) {
       if (runID === currRunID && eventID === currEventID)
         this.handleShowModalRep();
+      else if (isNaN(parseInt(eventID)) || !Number.isInteger(parseInt(eventID)))
+        this.handleShowModalIsNotInt();
+      else if (eventID < 0) this.handleShowModalEventIsNeg();
       else {
         this.props.handleLoading();
         console.log(user, runID, eventID);
@@ -48,6 +52,10 @@ class GetNewWaveform extends Component {
 
   handleShowModalEventIsNotInt = () => this.setState({ eventIsNotInt: true });
 
+  handleCloseEventIsNeg = () => this.setState({ eventIsNeg: false });
+
+  handleShowModalEventIsNeg = () => this.setState({ eventIsNeg: true });
+
   handleCloseRep = () => this.setState({ repetitive: false });
 
   handleShowModalRep = () => this.setState({ repetitive: true });
@@ -55,7 +63,13 @@ class GetNewWaveform extends Component {
   handleCloseError = () => this.props.dispatch(errorServed());
 
   render() {
-    const { noRun, noEvent, repetitive, eventIsNotInt } = this.state;
+    const {
+      noRun,
+      noEvent,
+      repetitive,
+      eventIsNotInt,
+      eventIsNeg,
+    } = this.state;
     const { msg, error, runID, eventID, currRunID, currEventID } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
@@ -72,7 +86,7 @@ class GetNewWaveform extends Component {
           size="sm"
           onClick={() => {
             const previous = currEventID ? parseInt(currEventID) - 1 : "";
-            this.handleGetWaveform(currRunID, previous.toString());
+            this.handleGetWaveform(currRunID, previous);
           }}
           active
           style={{ marginTop: "10px" }}
@@ -83,8 +97,8 @@ class GetNewWaveform extends Component {
           variant="secondary"
           size="sm"
           onClick={() => {
-            const previous = currEventID ? parseInt(currEventID) + 1 : "";
-            this.handleGetWaveform(currRunID, previous.toString());
+            const next = currEventID ? parseInt(currEventID) + 1 : "";
+            this.handleGetWaveform(currRunID, next);
           }}
           active
           style={{ marginTop: "10px" }}
@@ -120,6 +134,12 @@ class GetNewWaveform extends Component {
           handleClose={this.handleCloseEventIsNotInt}
           title="Input Error"
           body="Event ID Must Be Integer"
+        />
+        <ErrorModal
+          show={eventIsNeg}
+          handleClose={this.handleCloseEventIsNeg}
+          title="Input Error"
+          body="Event ID Must Not Be Negative"
         />
         <ErrorModal
           title="Get New Waveform Error"
