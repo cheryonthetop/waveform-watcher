@@ -57,7 +57,7 @@ export default function (state = initialState, action) {
     case GET_EVENT_PLOT_SUCCESS:
       return {
         ...state,
-        eventPlot: action.payload,
+        eventPlot: action.payload.eventPlot,
       };
     case GET_WAVEFORM_FAILURE:
       return {
