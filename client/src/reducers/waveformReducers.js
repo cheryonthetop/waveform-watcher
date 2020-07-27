@@ -64,6 +64,7 @@ export default function (state = initialState, action) {
         ...state,
         runID: action.payload.runID,
         eventID: action.payload.eventID,
+        waveform: null,
       };
     case LOAD_FAILURE:
     case DELETE_WAVEFORM_FAILURE:

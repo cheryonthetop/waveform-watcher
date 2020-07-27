@@ -16,7 +16,7 @@ class GetNewWaveform extends Component {
 
   handleGetWaveform = (runID, eventID) => {
     const { user, currRunID, currEventID } = this.props;
-    if (runID && eventID) {
+    if (runID && (eventID || eventID === 0)) {
       eventID = parseInt(eventID);
       if (runID === currRunID && eventID === currEventID)
         this.handleShowModalRep();
