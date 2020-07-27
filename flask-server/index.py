@@ -128,7 +128,8 @@ def get_event_plot():
     if request.is_json:
         token = request.args.get('token')
         req = request.get_json()
-        run_id, user = None
+        run_id = None
+        user = None
         try: 
             run_id = req["run_id"]
             user = req["user"]
@@ -137,7 +138,7 @@ def get_event_plot():
         if not authenticate(user, token):
             return make_response(jsonify({"error": "Unauthorized API request"}), 403)
         print("RUN ID IS: " , run_id)
-        cache_events_request(run_id)
+        threading.Thread(target = cache_events_request, args=[run_id]).start()
         my_session_id=generate_session_id()
         print(BOKEH_SERVER_URL)
         # pull a new session from a running Bokeh server

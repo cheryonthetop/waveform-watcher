@@ -102,7 +102,7 @@ def wait_for_events(run_id):
     # wait for 5 minutes max
     endtime = datetime.datetime.now() + datetime.timedelta(0, 60 * 5)
     while True:
-        events = get_events(run_id)
+        events = get_events_from_cache(run_id)
         if (isinstance(events, pd.DataFrame)):
             print("retrieved events")
             return events
@@ -325,7 +325,7 @@ try:
     wait_msg.align = "center"
     wait_msg.sizing_mode = "stretch_both"
     wait_msg.margin = (200, 0, 0, 300)
-    # doc.add_root(wait_msg)
+    doc.add_root(wait_msg)
 except:
     pass
 
@@ -342,7 +342,9 @@ def blocking_task():
     perform this task in a separate thread, pull_session
     won't be receiving the response due to timeout
     """
+    print("waiting")
     events = wait_for_events(run_id)
+    print("done waiting")
     if (isinstance(events, str)):
         # An error string returned
         div = Div(text=events)
