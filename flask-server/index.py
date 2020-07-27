@@ -249,7 +249,7 @@ def delete_waveform():
     
 
 @app.route('/api/switch',  methods = ['POST'])
-def get_waveform():
+def switch_waveform():
     """
     Switches a waveform and updates db with the new waveform
 

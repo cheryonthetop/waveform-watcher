@@ -325,7 +325,7 @@ try:
     wait_msg.align = "center"
     wait_msg.sizing_mode = "stretch_both"
     wait_msg.margin = (200, 0, 0, 300)
-    doc.add_root(wait_msg)
+    # doc.add_root(wait_msg)
 except:
     pass
 
