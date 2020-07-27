@@ -48,6 +48,7 @@ if (APP_DB_URI == None):
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_events = my_db["events"]
+my_waveform = my_db["waveform"]
 
 ##### DB routine helpers
 def cache_waveform_request(run_id, event_id):
@@ -60,16 +61,16 @@ def cache_waveform_request(run_id, event_id):
         event_id (str): Event ID of the event
     """
     print("cacheing waveform for run ", run_id, "and event ", event_id)
-    document = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
+    request = my_request.find_one({"run_id" : run_id, "event_id" : event_id})
+    waveform = my_waveform.find_one({"run_id": run_id, "event_id": event_id})
     # cache to request if not already in it
-    if (document == None):
+    if (request == None and waveform == None):
         post = {"status" : "new", "run_id" : run_id, "event_id" : event_id, "request": "waveform"}
         my_request.insert_one(post) # insert mongo document into 'fetch'
 
 def get_events_from_cache(run_id):
     """
-    Gets events from the cache, and insert a request for
-    the waveform if it does not exist
+    Gets events from the cache
 
     Args:
         run_id (str): Run ID of the run
@@ -183,6 +184,10 @@ def render_events(run_id, events):
         if len(value) != 0:
             doc.add_next_tick_callback(enable_btn_cache_selected)
             doc.add_next_tick_callback(enable_btn_waveform)
+        else:
+            doc.add_next_tick_callback(disable_btn_cache_selected)
+            doc.add_next_tick_callback(disable_btn_waveform)
+
     
     multi_select.on_change("value", callback_value_selected)
     
@@ -192,6 +197,13 @@ def render_events(run_id, events):
         Enables btn_cache_selected
         """
         btn_cache_selected.disabled = False
+        
+    @gen.coroutine
+    def disable_btn_cache_selected():
+        """
+        Disables btn_cache_selected
+        """
+        btn_cache_selected.disabled = True
     
     # create a callback that will cache waveform
     def callback_btn_cache_selected():
@@ -244,19 +256,26 @@ def render_events(run_id, events):
         Enables btn_waveform
         """
         btn_waveform.disabled = False
+        
+    @gen.coroutine
+    def disable_btn_waveform():
+        """
+        Disables btn_waveform
+        """
+        btn_waveform.disabled = True
     
     code = """
     var events = ms.value;
     console.log(events);
     for (event of events) {
         console.log(event);
-        var url = `${url}/waveform/${run}/${event}`;
+        var url = `${app}/waveform/${run}/${event}`;
         console.log(url);
         window.open(url)
     }
     """
     # create a Javascript callback that will open an URL to view waveform
-    callback_btn_waveform = CustomJS(args=dict(ms=multi_select, run=run_id, url=APP_URL), code=code)
+    callback_btn_waveform = CustomJS(args=dict(ms=multi_select, run=run_id, app=APP_URL), code=code)
 
     # add a btn_cache_all widget and configure the call back
     btn_waveform = Button(label="View Waveform for Chosen Events")

@@ -71,7 +71,15 @@ class GetNewWaveform extends Component {
       eventIsNotInt,
       eventIsNeg,
     } = this.state;
-    const { msg, error, runID, eventID, currRunID, currEventID } = this.props;
+    const {
+      msg,
+      error,
+      runID,
+      eventID,
+      currRunID,
+      currEventID,
+      waveform,
+    } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
         <Button
@@ -91,6 +99,7 @@ class GetNewWaveform extends Component {
           }}
           active
           style={{ marginTop: "10px" }}
+          disabled={!waveform}
         >
           Get Previous Event
         </Button>
@@ -103,6 +112,7 @@ class GetNewWaveform extends Component {
           }}
           active
           style={{ marginTop: "10px" }}
+          disabled={!waveform}
         >
           Get Next Event
         </Button>
@@ -154,6 +164,7 @@ class GetNewWaveform extends Component {
 }
 
 const mapStateToProps = (state) => ({
+  waveform: state.waveform.waveform,
   currRunID: state.waveform.runID,
   currEventID: state.waveform.eventID,
   error: state.error.error,

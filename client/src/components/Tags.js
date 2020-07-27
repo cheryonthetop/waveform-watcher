@@ -149,7 +149,7 @@ class Tags extends Component {
     const newOptions = options.filter((option) => option.label !== value.label);
     console.log(value);
     console.log(newOptions);
-    this.setState({ options: newOptions, value: {} }, () =>
+    this.setState({ options: newOptions, value: undefined }, () =>
       console.log(this.state.value)
     );
     this.props.dispatch(deleteWaveform(user, tag));
