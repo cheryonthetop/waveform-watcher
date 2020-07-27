@@ -14,6 +14,10 @@ class EventSelection extends Component {
     isLoading: false,
   };
 
+  componentDidMount() {
+    this.tryLoadEventPlots();
+  }
+
   componentDidUpdate() {
     this.tryLoadEventPlots();
   }
