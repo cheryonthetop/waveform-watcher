@@ -2,7 +2,12 @@ import { AUTH_SUCCESS, AUTH_ERROR, LOGOUT } from "./types";
 import { loadAppData } from "./waveformActions";
 import axios from "axios";
 
-// Check token & load user
+/**
+ * Authenticate the user with an API request to the express
+ * server, appending the token in the query string. Loads
+ * app data if authentication succeeds
+ * @type {Function}
+ */
 export const authenticate = () => (dispatch) => {
   console.log("authenticate action called");
   const url =
@@ -38,6 +43,10 @@ export const authenticate = () => (dispatch) => {
     });
 };
 
+/**
+ * Logs out the user
+ * @type {Function}
+ */
 export const logout = () => (dispatch) => {
   console.log("logout action called");
   window.localStorage.removeItem("token");

@@ -5,7 +5,17 @@ import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
 import ErrorModal from "./ErrorModal";
 
+/**
+ * A get waveform button
+ */
 class GetNewWaveform extends Component {
+  /**
+   * @property {Boolean} noRun - if no run ID is supplied
+   * @property {Boolean} noEvent - if no event ID is supplied
+   * @property {Boolean} repetitve - if the asked waveform is already in the page
+   * @property {Boolean} eventIsNotInt - if the event ID is not integer
+   * @property {Boolean} eventIsNeg - if the event ID is negative
+   */
   state = {
     noRun: false,
     noEvent: false,
@@ -14,6 +24,11 @@ class GetNewWaveform extends Component {
     eventIsNeg: false,
   };
 
+  /**
+   * Gets a waveform by dispatching a redux action
+   * @param {String} runID The run ID
+   * @param {Number} eventID The event ID
+   */
   handleGetWaveform = (runID, eventID) => {
     const { user, currRunID, currEventID } = this.props;
     if (runID && (eventID || eventID === 0)) {
@@ -35,34 +50,76 @@ class GetNewWaveform extends Component {
     }
   };
 
+  /**
+   * Close the no run error
+   */
   handleCloseNoRun = () => this.setState({ noRun: false });
 
+  /**
+   * Shows the no run error
+   */
   handleShowModalNoRun = () => this.setState({ noRun: true });
 
+  /**
+   * Close the no event error
+   */
   handleCloseNoEvent = () => this.setState({ noEvent: false });
 
+  /**
+   * Shows the no event error
+   */
   handleShowModalNoEvent = () => this.setState({ noEvent: true });
 
+  /**
+   * Close the no run and no event error
+   */
   handleCloseNoRunNoEvent = () =>
     this.setState({ noRun: false, noEvent: false });
 
+  /**
+   * Shows the no run and no event error
+   */
   handleShowModalNoRunNoEvent = () =>
     this.setState({ noRun: true, noEvent: true });
 
+  /**
+   * Closes the event ID is not integer error
+   */
   handleCloseEventIsNotInt = () => this.setState({ eventIsNotInt: false });
 
+  /**
+   *  Shows the event ID is not integer error
+   */
   handleShowModalEventIsNotInt = () => this.setState({ eventIsNotInt: true });
 
+  /**
+   * Closes the event ID is negative error
+   */
   handleCloseEventIsNeg = () => this.setState({ eventIsNeg: false });
 
+  /**
+   *  Shows the event ID is negative error
+   */
   handleShowModalEventIsNeg = () => this.setState({ eventIsNeg: true });
 
+  /**
+   * Closes the repeated waveform error
+   */
   handleCloseRep = () => this.setState({ repetitive: false });
 
+  /**
+   * Shows the repeated waveform error
+   */
   handleShowModalRep = () => this.setState({ repetitive: true });
 
+  /**
+   * Closes the error served from the central state
+   */
   handleCloseError = () => this.props.dispatch(errorServed());
 
+  /**
+   * renders the button
+   */
   render() {
     const {
       noRun,
@@ -95,7 +152,7 @@ class GetNewWaveform extends Component {
           size="sm"
           onClick={() => {
             const previous = currEventID ? parseInt(currEventID) - 1 : "";
-            this.handleGetWaveform(currRunID, previous);
+            this.handleGetWaveform(currRunID, previous.toString());
           }}
           active
           style={{ marginTop: "10px" }}
@@ -108,7 +165,7 @@ class GetNewWaveform extends Component {
           size="sm"
           onClick={() => {
             const next = currEventID ? parseInt(currEventID) + 1 : "";
-            this.handleGetWaveform(currRunID, next);
+            this.handleGetWaveform(currRunID, next.toString());
           }}
           active
           style={{ marginTop: "10px" }}
@@ -163,6 +220,11 @@ class GetNewWaveform extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   waveform: state.waveform.waveform,
   currRunID: state.waveform.runID,
@@ -170,4 +232,9 @@ const mapStateToProps = (state) => ({
   error: state.error.error,
   msg: state.error.msg,
 });
+
+/**
+ * Connects the component to redux store.
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(GetNewWaveform);

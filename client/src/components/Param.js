@@ -1,6 +1,12 @@
 import React, { Component } from "react";
 
+/**
+ * Shows the run ID and event ID of the waveform being shown
+ */
 export default class Param extends Component {
+  /**
+   * Renders the parameter input boxes
+   */
   render() {
     return (
       <div id="param" style={{ paddingTop: "20px" }} hidden={this.props.hidden}>

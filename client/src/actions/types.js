@@ -1,4 +1,8 @@
-// Bring these types to reducers
+/**
+ * Action types dispatched from actions and received in reducers
+ * @type {String}
+ */
+
 export const AUTHENTICATE = "AUTHENTICATE";
 export const AUTH_ERROR = "AUTH_ERROR";
 export const AUTH_SUCCESS = "AUTH_SUCCESS";

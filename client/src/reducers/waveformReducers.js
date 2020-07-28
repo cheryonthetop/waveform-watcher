@@ -10,6 +10,17 @@ import {
   DELETE_WAVEFORM_FAILURE,
 } from "../actions/types";
 
+/**
+ * The redux initial state for user reducer
+ * @property {String} - The run ID
+ * @property {Number} - The event ID
+ * @property {Object} - The waveform
+ * @property {String} - A script tag string that embeds event plots
+ * @property {Array<Object>} - The array of object {tag: comments, runID, waveform}
+ * @property {Array<String>} - The array of runs
+ * @property {Boolean} - If the app data is loading
+ * @type {Object}
+ */
 const initialState = {
   runID: "",
   eventID: "",
@@ -20,6 +31,12 @@ const initialState = {
   isLoading: true,
 };
 
+/**
+ * Evaluates the action type and changes the state accordingly
+ * @param {Object} state Defaults to initialState
+ * @param {Object} action Usually has properties type and payload
+ * @type {Function}
+ */
 export default function (state = initialState, action) {
   action.payload
     ? console.log(

@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import { Button, Modal } from "react-bootstrap";
 
+/**
+ * The generic Error Modal
+ */
 export default class ErrorModal extends Component {
+  /**
+   * Renders the modal
+   */
   render() {
     const { title, body, show, handleClose } = this.props;
     return (

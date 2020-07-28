@@ -2,13 +2,13 @@ import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
+/**
+ * Shows the login failure message
+ */
 class Failure extends Component {
-  componentDidMount() {
-    setTimeout(() => {
-      this.render();
-    }, 10000);
-  }
-
+  /**
+   * Renders the failure messge
+   */
   render() {
     if (!this.props.isAuthenticated) {
       return <Redirect to="/login" />;

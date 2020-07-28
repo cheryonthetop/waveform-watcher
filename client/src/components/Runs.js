@@ -2,36 +2,60 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
 
+/**
+ * Creates an option object. The label property is
+ * necessary for react-select component
+ * @param {String} label The label of the option
+ * @type {Function}
+ */
 const createOption = (label) => ({
   label,
 });
 
+/**
+ * The select box with all the available runs
+ */
 class Runs extends Component {
+  /**
+   * @property {Array} options - all the runs
+   * @property {Boolean} options - if the app data is loaded
+   */
   state = {
     options: [],
     dataLoaded: !this.props.isLoading,
   };
 
+  /**
+   * Tries loading available runs
+   */
   componentDidMount() {
-    this.loadAvailableRuns();
+    this.tryLoadAvailableRuns();
   }
 
+  /**
+   * Tries loading available runs
+   */
   componentDidUpdate() {
-    this.loadAvailableRuns();
+    this.tryLoadAvailableRuns();
   }
 
-  loadAvailableRuns() {
+  /**
+   * Loads available runs if there are any
+   */
+  tryLoadAvailableRuns() {
     const { availableRuns } = this.props;
-    const { options } = this.state;
-    // console.log("available runs: " + availableRuns);
-    // console.log("data loaded is " + dataLoaded);
-    // console.log("options are " + options);
-    if (availableRuns.length !== 0 && options.length === 0) {
+    const { dataLoaded } = this.state;
+    if (availableRuns.length !== 0 && !dataLoaded) {
       const runs = availableRuns.map((run) => createOption(run));
       this.setState({ options: runs, dataLoaded: true });
     }
   }
 
+  /**
+   * Changes the state in the parent page through props
+   * @param {String} value the run selected
+   * @param {Any} param1 the action and removed value
+   */
   handleStateChangeRunID = (value, { action, removedValue }) => {
     switch (action) {
       case "select-option":
@@ -39,6 +63,9 @@ class Runs extends Component {
     }
   };
 
+  /**
+   * Renders the select box
+   */
   render() {
     return (
       <div>
@@ -54,9 +81,18 @@ class Runs extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   availableRuns: state.waveform.availableRuns,
   isLoading: state.waveform.isLoading,
 });
 
+/**
+ * Connects the component to redux store.
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(Runs);

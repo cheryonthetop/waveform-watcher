@@ -13,6 +13,14 @@ import { errorReported, errorServed } from "../../actions/errorActions";
 import ErrorModal from "../ErrorModal";
 
 class WaveformURL extends Component {
+  /**
+   * @property {Boolean} isLoading - if the user app data is loaded
+   * @property {Boolean} runNA - if the run is not available
+   * @property {Boolean} isNotInt - if the event ID is not integer
+   * @property {Boolean} waveformLoaded - if a waveform has been loaded
+   * @property {Boolean} renderError - if there is a rendering error
+   * @property {Boolean} eventIsNeg - if the event ID is negative
+   */
   state = {
     isLoading: true,
     runNA: false,
@@ -22,16 +30,25 @@ class WaveformURL extends Component {
     eventIsNeg: false,
   };
 
+  /**
+   * Tries to load waveform
+   */
   componentDidMount() {
     if (!this.state.waveformLoaded && !this.props.isLoading)
       this.tryLoadWaveformFromURL();
   }
 
+  /**
+   * Tries to load waveform
+   */
   componentDidUpdate() {
     if (!this.state.waveformLoaded && !this.props.isLoading)
       this.tryLoadWaveformFromURL();
   }
 
+  /**
+   * Loads waveform if the url parameters are valid
+   */
   tryLoadWaveformFromURL() {
     const {
       user,
@@ -55,6 +72,13 @@ class WaveformURL extends Component {
     });
   }
 
+  /**
+   * Loads the waveform directly into this page with an API
+   * request to the flask server
+   * @param {String} user The username
+   * @param {String} run The run ID
+   * @param {Number} event The event ID
+   */
   loadWaveform = (user, run, event) => {
     const self = this;
     // Headers
@@ -96,44 +120,80 @@ class WaveformURL extends Component {
       });
   };
 
+  /**
+   * Shows the not integer error
+   */
   handleShowModalIsNotInt = () => {
     this.setState({ isNotInt: true });
   };
 
+  /**
+   * Closes the not integer error
+   */
   handleCloseModalIsNotInt = () => {
     this.setState({ isNotInt: false });
   };
 
+  /**
+   * Shows the run not available error
+   */
   handleShowModalRunNotAvailable = () => {
     this.setState({ runNA: true });
   };
 
+  /**
+   * Closes the run not available error
+   */
   handleCloseModalRunNotAvailable = () => {
     this.setState({ runNA: false });
   };
 
+  /**
+   * Shows the render error
+   */
   handleShowModalRenderError = () => {
     this.setState({ renderError: true });
   };
 
+  /**
+   * Closes the render error
+   */
   handleCloseModalRenderError = () => {
     this.setState({ renderError: false });
   };
 
-  handleCloseEventIsNeg = () => this.setState({ eventIsNeg: false });
-
+  /**
+   * Shows the event is negative error
+   */
   handleShowModalEventIsNeg = () => this.setState({ eventIsNeg: true });
 
+  /**
+   * Closes the event is negative error
+   */
+  handleCloseEventIsNeg = () => this.setState({ eventIsNeg: false });
+
+  /**
+   * Redirects the user to the home page
+   */
   handleViewEvents = () => {
     this.props.history.push("/");
   };
 
+  /**
+   * Redirects the user to the waveform page
+   */
   handleViewWaveform = () => {
     this.props.history.push("/waveform");
   };
 
+  /**
+   * Closes the error served from the central state
+   */
   handleCloseError = () => this.props.dispatch(errorServed());
 
+  /**
+   * Renders the page
+   */
   render() {
     if (!this.props.isAuthenticated) {
       window.localStorage.setItem("redirect", this.props.location.pathname);
@@ -204,6 +264,11 @@ class WaveformURL extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   user: state.auth.user,
   isAuthenticated: state.auth.isAuthenticated,
@@ -216,4 +281,9 @@ const mapStateToProps = (state) => ({
   msg: state.error.msg,
 });
 
+/**
+ * Connects the component to redux store. Exposes the component
+ * to react router dom to allow redirecting through history
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(withRouter(WaveformURL));

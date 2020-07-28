@@ -3,12 +3,21 @@ import { logout } from "../actions/userActions";
 import { connect } from "react-redux";
 import "./stylesheets/header.css";
 
+/**
+ * The header of the web pages with a title and logout link
+ */
 class Header extends Component {
+  /**
+   * Logs out the user by dispatching to a redux action
+   */
   handleOnClick = () => {
     this.props.dispatch(logout());
     console.log("clicked logout");
   };
 
+  /**
+   * Renders the header
+   */
   render() {
     return (
       <div id="header">
@@ -31,6 +40,9 @@ class Header extends Component {
   }
 }
 
-const mapStateToProps = (state) => ({});
-
-export default connect(mapStateToProps, null)(Header);
+/**
+ * Connects the component to redux store. This allows
+ * the action to be accessed in the component
+ * @type {Component}
+ */
+export default connect(null, null)(Header);

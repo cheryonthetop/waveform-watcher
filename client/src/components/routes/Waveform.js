@@ -15,6 +15,16 @@ import ErrorModal from "../ErrorModal";
 import Header from "../Header";
 
 class Waveform extends Component {
+  /**
+   * @property {Number} runID - The run ID in the select box
+   * @property {Object} waveform - the waveform on this page
+   * @property {String} eventID - The event ID in the input box
+   * @property {Boolean} isLoading - if the waveform is loading
+   * @property {Boolean} waveformLoaded - if a waveform has been loaded
+   * @property {Boolean} renderError - if there is a bokeh render error
+   * @property {Boolean}  paramsHidden - if the parameters for the waveform
+   *                                      should be hidden
+   */
   state = {
     runID: this.props.runID,
     waveform: this.props.waveform,
@@ -25,18 +35,28 @@ class Waveform extends Component {
     paramsHidden: true,
   };
 
+  /**
+   * Tries loading waveform if app data is loaded
+   */
   componentDidMount() {
     if (!this.props.isLoading) {
       this.tryLoadWaveform();
     }
   }
 
+  /**
+   * Tries loading waveform if app data is loaded
+   */
   componentDidUpdate() {
     if (!this.props.isLoading) {
       this.tryLoadWaveform();
     }
   }
 
+  /**
+   * Loads waveform if there is a new waveform, or if the user
+   * browsed waveform last time it uses this app
+   */
   tryLoadWaveform() {
     const { waveform, waveformLoaded, isLoading } = this.state;
     const hasOldWaveform = waveform && waveform !== undefined;
@@ -51,12 +71,18 @@ class Waveform extends Component {
     }
   }
 
+  /**
+   * Deletes waveforms in the page
+   */
   deleteWaveform() {
     var container = document.getElementById("graph");
     while (container && document.getElementById("graph").hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
+  /**
+   * Loads the waveform with BokehJS API call embed
+   */
   loadWaveform() {
     console.log("Loading Waveform...");
     try {
@@ -82,31 +108,54 @@ class Waveform extends Component {
     }
   }
 
+  /**
+   * Changes run ID when a user selects one
+   * @param {Object} value The selected entry
+   */
   handleStateChangeRunID = (value) => {
     this.setState({ runID: value.label });
   };
 
+  /**
+   * Changes event ID when a user inputs one
+   * @param {String} value User input
+   */
   handleStateChangeEvent = (value) => {
     console.log("Changing event ID to: ", value);
     this.setState({ eventID: value });
   };
 
+  /**
+   * Redirects the user to home page
+   */
   handleViewEvents = () => {
     this.props.history.push("/");
   };
 
+  /**
+   * Triggers the spinning wheel and hides the parameters
+   */
   handleLoading = () => {
     this.setState({ isLoading: true, paramsHidden: true });
   };
 
+  /**
+   * Shows the modal of waveform render error
+   */
   handleShowModalRenderError = () => {
     this.setState({ renderError: true });
   };
 
+  /**
+   * Closes the modal of waveform render error
+   */
   handleCloseModalRenderError = () => {
     this.setState({ renderError: false });
   };
 
+  /**
+   * Renders the page
+   */
   render() {
     if (!this.props.isAuthenticated) {
       window.localStorage.setItem("redirect", this.props.location.pathname);
@@ -163,6 +212,11 @@ class Waveform extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   user: state.auth.user,
   isAuthenticated: state.auth.isAuthenticated,
@@ -175,4 +229,9 @@ const mapStateToProps = (state) => ({
   msg: state.error.msg,
 });
 
+/**
+ * Connects the component to redux store. Exposes the component
+ * to react router dom to allow redirecting through history
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(withRouter(Waveform));

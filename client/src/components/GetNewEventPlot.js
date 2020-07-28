@@ -4,11 +4,20 @@ import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
 import ErrorModal from "./ErrorModal";
 
+/**
+ * A get event plots button
+ */
 class GetNewEventPlot extends Component {
+  /**
+   * @property {Boolean} if the sole error modal should be shown
+   */
   state = {
     show: false,
   };
 
+  /**
+   * Gets the event plot (a script string) with redux action
+   */
   handleGetEventPlot = () => {
     const { user, runID } = this.props;
 
@@ -21,10 +30,19 @@ class GetNewEventPlot extends Component {
     }
   };
 
+  /**
+   * Close the error modal
+   */
   handleClose = () => this.setState({ show: false });
 
+  /**
+   * Shows the error modal
+   */
   handleShow = () => this.setState({ show: true });
 
+  /**
+   * Renders the button
+   */
   render() {
     const { show } = this.state;
     return (
@@ -48,4 +66,9 @@ class GetNewEventPlot extends Component {
   }
 }
 
+/**
+ * Connects the component to redux store. This allows
+ * the action to be accessed in the component
+ * @type {Component}
+ */
 export default connect(null, null)(GetNewEventPlot);

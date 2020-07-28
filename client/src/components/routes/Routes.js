@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
 import { BrowserRouter, Route } from "react-router-dom";
 import Home from "./Home";
 import Login from "./Login";
@@ -8,11 +7,11 @@ import Failure from "./Failure";
 import Waveform from "./Waveform";
 import WaveformURL from "./WaveformURL";
 
-class Routes extends Component {
-  componentDidMount() {}
-
+export default class Routes extends Component {
+  /**
+   * Renders the routes with react router
+   */
   render() {
-    console.log("Routes props", this.props.isAuthenticated);
     return (
       <BrowserRouter>
         <div style={{ height: "100vh" }}>
@@ -27,8 +26,3 @@ class Routes extends Component {
     );
   }
 }
-const mapStateToProps = (state) => ({
-  isAuthenticated: state.auth.isAuthenticated,
-});
-
-export default connect(mapStateToProps, null)(Routes);

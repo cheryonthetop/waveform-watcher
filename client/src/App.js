@@ -6,11 +6,21 @@ import { authenticate } from "./actions/userActions";
 import store from "./store";
 import Routes from "./components/routes/Routes";
 
+/**
+ * The App Component to be embedded to the root div
+ */
 class App extends Component {
+  /**
+   * Authenticates the user, loading the data
+   * if authenticated
+   */
   componentDidMount() {
-    // remember me
     store.dispatch(authenticate());
   }
+
+  /**
+   * Renders the app
+   */
   render() {
     return (
       <Provider store={store}>

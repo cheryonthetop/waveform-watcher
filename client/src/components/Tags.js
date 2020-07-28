@@ -9,14 +9,37 @@ import { Button } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
 import ErrorModal from "./ErrorModal";
 
+/**
+ * Creates a tag option
+ * @param {String} label The displayed tag
+ * @param {Object} data Has comments, run ID, waveform
+ * @type {Function}
+ */
 const createOption = (label, data) => ({
   label,
   data: data,
 });
 
+/**
+ * Empty array of options as default
+ * @type {Array}
+ */
 const defaultOptions = [];
 
+/**
+ * The tag and comment box
+ */
 class Tags extends Component {
+  /**
+   * @property {Boolean} isLoading - if the tag is being created; for animation only
+   * @property {Boolean} dataLoaded - if app data is loaded
+   * @property {Boolean} noTag - if there is no tag supplied
+   * @property {Boolean} noWaveform - if there is no waveform supplied
+   * @property {Boolean} noAnything - if there is no tag or waveform supplied
+   * @property {Array} options - tags
+   * @property {Object} value - A selected option object from createOption
+   * @property {String} comments - The displayed comments
+   */
   state = {
     isLoading: this.props.isLoading,
     dataLoaded: false,
@@ -28,22 +51,24 @@ class Tags extends Component {
     comments: " ",
   };
 
+  /**
+   * Tries load options if the app data is being loaded
+   */
   componentDidMount() {
-    if (!this.props.isLoading && !this.state.dataLoaded) this.tryLoadOptions();
-  }
-
-  componentDidUpdate() {
-    if (!this.props.isLoading && !this.state.dataLoaded) this.tryLoadOptions();
-  }
-
-  tryLoadOptions() {
-    if (this.state.options) {
+    if (!this.state.dataLoaded)
       this.setState({ dataLoaded: true }, () => this.loadOptions());
-    } else {
-      console.log("There is no tags to load. The user has no data");
-    }
   }
 
+  /**
+   * Tries load options if the app data is being loaded
+   */
+  componentDidUpdate() {
+    if (!this.state.dataLoaded)
+      this.setState({ dataLoaded: true }, () => this.loadOptions());
+  }
+  /**
+   * Loads tags if there are any
+   */
   loadOptions = () => {
     let newOptions = [];
     this.props.tagsData.map((tag_data) =>
@@ -56,7 +81,11 @@ class Tags extends Component {
       console.log("state is now:", this.state.options);
     });
   };
-
+  /**
+   * Changes comments and switches waveform when a tag is selected
+   * @param {Object} newValue new tag option from creatOption
+   * @param {Object} actionMeta metadata of action
+   */
   handleChangeSelect = (newValue, actionMeta) => {
     console.group("Value Changed");
     console.log(newValue);
@@ -76,6 +105,10 @@ class Tags extends Component {
     }
   };
 
+  /**
+   * Updates the comments and options state
+   * @param {Object} event The event triggered with user input
+   */
   handleChangeTextArea = (event) => {
     const { value, options } = this.state;
     if (value) {
@@ -98,6 +131,10 @@ class Tags extends Component {
     }
   };
 
+  /**
+   * Creates a new tag option
+   * @param {String} inputValue new tag
+   */
   handleCreateOption = (inputValue) => {
     this.setState({ isLoading: true });
     console.group("Option created");
@@ -116,6 +153,10 @@ class Tags extends Component {
     }, 1000);
   };
 
+  /**
+   * Saves a tag with the comments and waveform by
+   * dispatching to a redux action
+   */
   handleSave = () => {
     const { value, options } = this.state;
     const { user, waveform, runID, eventID } = this.props;
@@ -141,6 +182,9 @@ class Tags extends Component {
     }
   };
 
+  /**
+   * Deletes a tag by dispatching to a redux action
+   */
   handleDelete = () => {
     const { value, options } = this.state;
     const { user } = this.props;
@@ -155,18 +199,39 @@ class Tags extends Component {
     this.props.dispatch(deleteWaveform(user, tag));
   };
 
+  /**
+   * Closes the no tag error
+   */
   handleCloseModalNoTag = () => this.setState({ noTag: false });
 
+  /**
+   * Shows the no tag error
+   */
   handleShowModalNoTag = () => this.setState({ noTag: true });
 
+  /**
+   * Closes the no waveform error
+   */
   handleCloseModalNoWaveform = () => this.setState({ noWaveform: false });
 
+  /**
+   * Shows the no waveform error
+   */
   handleShowModalNoWaveform = () => this.setState({ noWaveform: true });
 
+  /**
+   * Closes the no waveform or tag error
+   */
   handleCloseModalNoAnything = () => this.setState({ noAnything: false });
 
+  /**
+   * Shows the no waveform or tag error
+   */
   handleShowModalNoAnything = () => this.setState({ noAnything: true });
 
+  /**
+   * Renders the create-select box of tags
+   */
   render() {
     const {
       options,
@@ -243,6 +308,11 @@ class Tags extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   user: state.waveform.user,
   tagsData: state.waveform.tagsData,
@@ -252,4 +322,8 @@ const mapStateToProps = (state) => ({
   isLoading: state.waveform.isLoading,
 });
 
+/**
+ * Connects the component to redux store.
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(Tags);

@@ -6,6 +6,9 @@ const initialState = {};
 
 const middleware = [thunk];
 
+/**
+ * Redux store (with chrome dev tool if in development)
+ */
 let store;
 if (process.env.NODE_ENV === "development") {
   store = createStore(

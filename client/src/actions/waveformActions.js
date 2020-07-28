@@ -14,6 +14,14 @@ import {
 import axios from "axios";
 import { errorReported } from "./errorActions";
 
+/**
+ * Gets waveform with an API request to the flask server and
+ * dispatches the data to the waveform reducer
+ * @type {Function}
+ * @param {String} user the username
+ * @param {String} runID The run ID
+ * @param {Number} eventID The event ID
+ */
 export const getWaveform = (user, runID, eventID) => (dispatch) => {
   var tempDate = new Date();
   var date =
@@ -90,6 +98,13 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
     });
 };
 
+/**
+ * Gets events with an API request to the flask server and
+ * dispatches the data to the waveform reducer
+ * @type {Function}
+ * @param {String} user The username
+ * @param {Number} runID The run ID
+ */
 export const getEventPlot = (user, runID) => (dispatch) => {
   var tempDate = new Date();
   var date =
@@ -144,6 +159,17 @@ export const getEventPlot = (user, runID) => (dispatch) => {
     });
 };
 
+/**
+ * Saves tags and comments along with the waveform
+ * with an API request to the flask server
+ * @type {Function}
+ * @param {String} user The username
+ * @param {String} tag The tag
+ * @param {String} comments The comments
+ * @param {Object} waveform The waveform
+ * @param {String} runID The run ID
+ * @param {Number} eventID The event ID
+ */
 export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
   dispatch
 ) => {
@@ -189,6 +215,14 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
     });
 };
 
+/**
+ * Switches waveform with an API request to the flask server and
+ * dispatches the data to the waveform reducer
+ * @type {Function}
+ * @param {String} runID The run ID
+ * @param {Number} eventID The event ID
+ * @param {Object} waveform The waveform
+ */
 export const switchWaveform = (runID, eventID, waveform) => (dispatch) => {
   // Make sure get waveform and switch waveform don't interfere
   const requestID = (
@@ -232,6 +266,13 @@ export const switchWaveform = (runID, eventID, waveform) => (dispatch) => {
     });
 };
 
+/**
+ * Deletes the tag (and therefore the waveform associated with it)
+ * with an API request to the flask server
+ * @type {Function}
+ * @param {String} user The username
+ * @param {String} tag The tag to delete
+ */
 export const deleteWaveform = (user, tag) => (dispatch) => {
   // Headers
   const config = {
@@ -271,6 +312,12 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
     });
 };
 
+/**
+ * Loads app data with an API request to the flask server and
+ * dispatches the data to the waveform reducer
+ * @type {Function}
+ * @param {String} user The username
+ */
 export const loadAppData = (user) => (dispatch) => {
   window.localStorage.setItem("requestID", "0");
   console.log(user);

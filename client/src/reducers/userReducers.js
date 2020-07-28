@@ -6,12 +6,25 @@ import {
   LOGOUT,
 } from "../actions/types";
 
+/**
+ * The redux initial state for user reducer
+ * @property {String} id - The user id
+ * @property {Boolean} isAuthenticated - If the user is authenticated
+ * @property {String} user - The username
+ * @type {Object}
+ */
 const initialState = {
   id: "",
-  isAuthenticated: null,
+  isAuthenticated: false,
   user: "",
 };
 
+/**
+ * Evaluates the action type and changes the state accordingly
+ * @param {Object} state Defaults to initialState
+ * @param {Object} action Usually has properties type and payload
+ * @type {Function}
+ */
 export default function (state = initialState, action) {
   action.payload
     ? console.log(

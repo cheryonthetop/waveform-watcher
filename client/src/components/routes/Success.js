@@ -4,6 +4,10 @@ import { connect } from "react-redux";
 import queryString from "query-string";
 
 class Success extends Component {
+  /**
+   * Redirects the user to the URL it asks for before
+   * being redirected to login
+   */
   componentDidMount() {
     var query = queryString.parse(this.props.location.search);
     if (query.token) {
@@ -12,6 +16,9 @@ class Success extends Component {
     }
   }
 
+  /**
+   * Renders the login success message
+   */
   render() {
     if (this.props.isAuthenticated) {
       return <Redirect to="/" />;
@@ -25,8 +32,17 @@ class Success extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
 });
 
+/**
+ * Connects the component to redux store
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(Success);

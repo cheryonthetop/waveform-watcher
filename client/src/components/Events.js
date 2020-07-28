@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import { Form } from "react-bootstrap";
 
+/**
+ * The input box for event ID
+ */
 export default class Events extends Component {
+  /**
+   * Renders the events input box
+   */
   render() {
     return (
       <div>

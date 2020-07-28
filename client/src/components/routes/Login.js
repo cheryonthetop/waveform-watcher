@@ -3,7 +3,14 @@ import { connect } from "react-redux";
 import "../stylesheets/login.css";
 import { Redirect } from "react-router-dom";
 
+/**
+ * The Login page
+ */
 class Login extends Component {
+  /**
+   * Renders the page. Redirects to the URL the user asks for
+   * if it is redirected to this page to login
+   */
   render() {
     if (this.props.isAuthenticated) {
       const pathname = window.localStorage.getItem("redirect");
@@ -40,7 +47,17 @@ class Login extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStatetoProps = (state) => ({
   isAuthenticated: state.auth.isAuthenticated,
 });
+
+/**
+ * Connects the component to redux store
+ * @type {Component}
+ */
 export default connect(mapStatetoProps, null)(Login);

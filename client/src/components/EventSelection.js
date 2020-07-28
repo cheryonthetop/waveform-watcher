@@ -7,21 +7,39 @@ import GetNewEventPlot from "./GetNewEventPlot";
 import { Button } from "react-bootstrap";
 import { withRouter } from "react-router";
 
+/**
+ * The plots of all the events for users to choose from
+ */
 class EventSelection extends Component {
+  /**
+   * @property {String} The run ID
+   * @property {String} A script tag that embeds the interactive plots
+   * @property {Boolean} If the script tag is being loaded
+   */
   state = {
     runID: this.props.runID,
     eventPlot: undefined,
     isLoading: false,
   };
 
+  /**
+   * Tries loading the plots
+   */
   componentDidMount() {
     this.tryLoadEventPlots();
   }
 
+  /**
+   * Tries loading the plots
+   */
   componentDidUpdate() {
     this.tryLoadEventPlots();
   }
 
+  /**
+   * Loads the plots if there is a new script tag not
+   * loaded into this page's state
+   */
   tryLoadEventPlots() {
     const { eventPlot } = this.state;
     const hasNewEventPlots =
@@ -35,12 +53,19 @@ class EventSelection extends Component {
     }
   }
 
+  /**
+   * Deletes the event plots if there are any before loading
+   */
   deleteEventPlots() {
     var container = document.getElementById("graph");
     while (container && container.hasChildNodes())
       container.removeChild(container.childNodes[0]);
   }
 
+  /**
+   * Load the events plots by creating a node tag from the script string
+   * and append the node to the specified div tag
+   */
   loadEventPlots() {
     console.log("loading events...");
     const script = this.props.eventPlot;
@@ -62,18 +87,31 @@ class EventSelection extends Component {
     console.log("Events loaded at ", date);
   }
 
+  /**
+   * Changes run ID when a user selects one
+   * @param {Object} value The selected entry
+   */
   handleStateChangeRunID = (value) => {
     this.setState({ runID: value.label });
   };
 
+  /**
+   * Starts the spinning wheel
+   */
   handleLoading = () => {
     this.setState({ isLoading: true });
   };
 
+  /**
+   * Redirects the user to the waveform page
+   */
   handleOnClickWaveform = () => {
     this.props.history.push("/waveform");
   };
 
+  /**
+   * Renders the page
+   */
   render() {
     const { runID, event, isLoading } = this.state;
     return (
@@ -105,10 +143,20 @@ class EventSelection extends Component {
   }
 }
 
+/**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
 const mapStateToProps = (state) => ({
   user: state.waveform.user,
   runID: state.waveform.runID,
   eventPlot: state.waveform.eventPlot,
 });
 
+/**
+ * Connects the component to redux store. Exposes the component
+ * to react router dom to allow redirecting through history
+ * @type {Component}
+ */
 export default connect(mapStateToProps, null)(withRouter(EventSelection));
