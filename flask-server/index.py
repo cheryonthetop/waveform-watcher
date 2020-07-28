@@ -15,7 +15,7 @@ from bokeh.util.token import generate_session_id
 import numpy as np
 import pandas as pd
 from bson.json_util import dumps, loads
-from bson.son import son
+from bson.son import SON
 import pickle
 import pymongo
 import json
@@ -42,7 +42,7 @@ BOKEH_SERVER_URL = os.environ.get("BOKEH_SERVER_URL", None)
 if BOKEH_SERVER_URL == None:
     BOKEH_SERVER_URL = "http://localhost:5006/bokeh-server"
     
-RECODE_DB_URI = os.environ.get("RECODE_KEY", None)
+RECODE_DB_URI = os.environ.get("RECODE_DB_URI", None)
 if RECODE_DB_URI == None:
     print("Recode DB Connection String Not Set")
     
@@ -58,9 +58,6 @@ my_waveform = my_db["waveform"]
 my_run = my_db["run"]
 my_events = my_db["events"]
 
-available_runs = get_runs()
-print("Available runs are: ", available_runs[:5])
-
 def get_runs():
     """
     Gets the available runs
@@ -75,7 +72,10 @@ def get_runs():
     {"$sort": SON([("time", -1)])}
     ]
     return [x for x in pymongo.MongoClient(RECODE_DB_URI)['run']['runs_new'].aggregate(pipeline)]
-    
+
+available_runs = my_run.find_one({})["runs"]
+print("Available runs are: ", available_runs[:5])
+
 def authenticate(user, token):
     """
     Authenticates an API request with a token
