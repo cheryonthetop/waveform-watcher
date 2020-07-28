@@ -162,7 +162,9 @@ def get_waveform():
     if request.is_json:
         token = request.args.get('token')
         req = request.get_json()
-        run_id, user, event_id = None
+        run_id = None
+        user = None
+        event_id = None
         try:
             run_id = req["run_id"]
             user = req["user"]   
@@ -180,7 +182,7 @@ def get_waveform():
         print("returning waveform...")
         return json.dumps(waveform)
     else:
-        return make_response(jsonify({"success": False}), 400)
+        return make_response(jsonify({"error": "Bad Request"}), 400)                        
         
 @app.route('/api/sw',  methods = ['POST'])
 def save_waveform():
@@ -192,7 +194,13 @@ def save_waveform():
     """
     if request.is_json:
         token = request.args.get('token')
-        req, user, tag, comments, event_id, run_id, waveform = None
+        req = None
+        user = None
+        tag = None
+        comments = None
+        event_id = None
+        run_id = None
+        waveform = None
         try:
             req = request.get_json()
             user = req["user"]
@@ -212,7 +220,7 @@ def save_waveform():
         threading.Thread(target=update_db_new_tag, args=(user, run_id, event_id, waveform, tag, comments)).start()
         return make_response(jsonify({"success": True}), 200)
     else:
-        return make_response(jsonify({"success": False}), 400)
+        return make_response(jsonify({"error": "Bad Request"}), 400)                        
 
 @app.route('/api/dw',  methods = ['POST'])
 def delete_waveform():
@@ -225,7 +233,8 @@ def delete_waveform():
     if request.is_json:
         req = request.get_json()
         print(req)
-        user, tag = None
+        user = None
+        tag = None
         try: 
             user = req["user"]  
             tag = req["tag"]
@@ -246,7 +255,7 @@ def delete_waveform():
             ) 
         return make_response(jsonify({"success": True}), 200)
     else:
-        return make_response(jsonify({"success": False}), 400)
+        return make_response(jsonify({"error": "Bad Request"}), 400)                        
     
 
 @app.route('/api/switch',  methods = ['POST'])
@@ -260,7 +269,10 @@ def switch_waveform():
     if request.is_json:
         token = request.args.get('token')
         req = request.get_json()
-        run_id, user, event_id, waveform = None
+        run_id = None
+        user = None
+        event_id = None
+        waveform = None
         try:
             run_id = req["run_id"]
             user = req["user"]   
@@ -274,7 +286,7 @@ def switch_waveform():
         threading.Thread(target=update_db_new_waveform, args=(user, run_id, event_id, waveform)).start()
         return make_response(jsonify({"success": True}), 200)
     else:
-        return make_response(jsonify({"success": False}), 400)
+        return make_response(jsonify({"error": "Bad Request"}), 400)                        
 
 
 ###### Helper Routine
