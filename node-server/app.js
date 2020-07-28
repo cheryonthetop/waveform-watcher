@@ -1,24 +1,25 @@
 var createError = require("http-errors");
 var cookieSession = require("cookie-session");
 var express = require("express");
-var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var passport = require("passport");
-var bodyParser = require("body-parser");
 var session = require("express-session");
-var flash = require("connect-flash");
 var cors = require("cors");
-// set up mongodb
 var model = require("./model/db-setup");
 
 var logoutRouter = require("./routes/logout");
 var authRouter = require("./routes/auth");
 
+/**
+ * Creates an express applicaton
+ * @type {Express}
+ */
 var app = express();
 
-// Every incoming request
-// set up cors to allow us to accept requests from our client
+/**
+ * set up cors to allow us to accept requests from our client
+ */
 app.use(
   cors({
     origin: process.env.HOMEPAGE, // allow to server to accept request from different origin
@@ -26,6 +27,10 @@ app.use(
     credentials: true, // allow session cookie from browser to pass through
   })
 );
+
+/**
+ * Configure cookie session
+ */
 app.use(
   cookieSession({
     name: "session",
@@ -33,13 +38,30 @@ app.use(
     maxAge: 24 * 60 * 60 * 100,
   })
 );
+
+/**
+ * Parses cookies in HTTP requests
+ */
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+/**
+ * Log output for development use
+ */
 app.use(logger("dev"));
+
+/**
+ * Parses JSON
+ */
 app.use(express.json());
+
+/**
+ * Parses urlencoded bodies with qs library
+ */
 app.use(express.urlencoded({ extended: false }));
 
-// required for passport session
+/**
+ * Configure passport session
+ */
 app.use(
   session({
     secret: process.env.PASSPORT_SESSION_SECRET,
@@ -47,34 +69,54 @@ app.use(
     resave: false,
   })
 );
-app.use(flash());
+
+/**
+ * Sets up the passport model, establishes connection to DB,
+ * load required routine functions
+ */
 require("./model/passport");
+
+/**
+ * Initializes passport
+ */
 app.use(passport.initialize());
+
+/**
+ * Alter the req object and change the 'user' value that is
+ * currently the session id (from the client cookie) into the
+ * true deserialized user object. Supports persistent login
+ */
 app.use(passport.session());
-app.use(passport.authenticate("remember-me"));
 
-app.use(express.static(path.join(__dirname, "public")));
-
-// Make our db accessible to our router
+/**
+ * Make the db model and user token accessible to routers
+ */
 app.use(function (req, res, next) {
   req.model = model;
   req.token = req.query.token;
-  // console.log("request token here:" + req.token);
-  // console.log("request user here:" + req.user);
-  // if (req.user.id) res.json(req.user.id);
   next();
 });
 
-// Specific routes
+/**
+ * Use logoutRouter for requests to /logout
+ */
 app.use("/logout", logoutRouter);
+
+/**
+ * Use authRouter for requests to /auth
+ */
 app.use("/auth", authRouter);
 
-// catch 404 and forward to error handler
+/**
+ * Catches 404 and forward to error handler
+ */
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
+/**
+ * The error handler. Simply sends a 404 status
+ */
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
@@ -82,4 +124,7 @@ app.use(function (err, req, res, next) {
   res.sendStatus(404);
 });
 
+/**
+ * Exported to server.js where the app listesn to a port
+ */
 module.exports = app;

@@ -1,7 +1,9 @@
 var express = require("express");
 var router = express.Router();
 
-/* Returns to homepage */
+/**
+ * Clears cookie and redirects the user to home page
+ */
 router.get("/", function (req, res) {
   res.clearCookie("remember_me");
   req.logout();

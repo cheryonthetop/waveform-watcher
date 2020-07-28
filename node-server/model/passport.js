@@ -6,38 +6,44 @@ var randomString = require("./helpers/random-string");
 var MongoClient = require("mongodb").MongoClient;
 var { Octokit } = require("@octokit/rest");
 
+/**
+ * Initializes octokit which makes it easier to access Github API
+ * @type {Octokit}
+ */
 const octokit = new Octokit({
   auth: process.env.GITHUB_PERSONAL_TOKEN,
   baseUrl: "https://api.github.com",
 });
 
-var CALLBACK_URL = process.env.CALLBACK_URL;
+/**
+ * Model for the user collection storing token and user info.
+ * Used for authentication. Separate from the collection variable
+ * @type {mongoose.Model}
+ */
+const model = mongoose.model("auth");
 
-// users data for sign-in backend only (serialization, remember-me cookie)
-// separate from the users below for verification
-var model = mongoose.model("auth");
-
-// for another db, separate from the model above
+/**
+ * Collection storing list of allowed users. Used for verification.
+ * Separte from the model constant
+ * @type {import("mongodb").Collection}
+ */
 var collection;
 
+/**
+ * Initializes collection after establishing connection
+ */
 MongoClient.connect(
   process.env.USERS_DB_URI,
   { useUnifiedTopology: true },
   (err, client) => {
     if (err) console.log(err);
     collection = client.db("run").collection("users");
-    // collection.find({}).toArray().then(items => console.log(items)).catch(err => console.log(err))
-    // collection.findOne({ github_id: "nupole" }, function (err, user) {
-    // console.log(user);
-    // });
   }
 );
 
-// Passport session setup.
-//   To support persistent login sessions, Passport needs to be able to
-//   serialize users into and deserialize users out of the session.  Typically,
-//   this will be as simple as storing the user ID when serializing, and finding
-//   the user by ID when deserializing.
+/**
+ * Serializes user by storing only the user ID
+ */
 passport.serializeUser(function (user, done) {
   model.findOrCreate({ id: user.id }, function (e, docs) {
     console.log("Serializing user:" + user.id);
@@ -45,6 +51,9 @@ passport.serializeUser(function (user, done) {
   });
 });
 
+/**
+ * Deserializes the user by finding the user with specified ID
+ */
 passport.deserializeUser(function (id, done) {
   model.find({ id: id }, function (e, user) {
     console.log("Deserializing user: ", user);
@@ -52,24 +61,24 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
+/**
+ * Verifies a Github user by its membership
+ */
 passport.use(
   new GitHubStrategy(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: CALLBACK_URL,
+      callbackURL: process.env.CALLBACK_URL,
       scope: ["read:user", "read: user"],
     },
 
     function verify(accessToken, refreshToken, profile, done) {
-      // console.log("access token: ", accessToken);
-      // console.log("refresh token: " + refreshToken);
-      // console.log("profile: " + JSON.stringify(profile));
       // github organization membership verification
       user = profile.username;
       checkMembershipForUser(octokit, user, "XENON1T")
         .then((value) => {
-          console.log("user " + user + "is in " + "XENON1T");
+          console.log("user " + user + " is in " + "XENON1T");
           model.findOrCreate({ id: profile.id }, { username: user });
           return done(null, profile);
         })
@@ -77,7 +86,7 @@ passport.use(
           console.log(err);
           checkMembershipForUser(octokit, user, "XENONnT")
             .then((value) => {
-              console.log("user " + user + "is in " + "XENONnT");
+              console.log("user " + user + " is in " + "XENONnT");
               model.findOrCreate({ id: profile.id }, { username: user });
               return done(null, profile);
             })
@@ -92,10 +101,12 @@ passport.use(
   )
 );
 
-// Remember Me cookie strategy
-//   This strategy consumes a remember me token, supplying the user the
-//   token was originally issued to.  The token is single-use, so a new
-//   token is then issued to replace it.
+/**
+ * Remember Me cookie strategy
+ * This strategy consumes a remember me token, supplying the user the
+ * token was originally issued to.  The token is single-use, so a new
+ * token is then issued to replace it.
+ */
 passport.use(
   new RememberMeStrategy(function (token, done) {
     consumeRememberMeToken(token, function (err, uid) {
@@ -114,9 +125,11 @@ passport.use(
   }, issueToken)
 );
 
-/* Passport-remember-me helpers */
-/* Fake, in-memory database of remember me tokens */
-
+/**
+ * Consumes a token by checking if it exists in the model variable
+ * @param {string} token The token to be consumed
+ * @param {Function} fn Gets the user id for deserialization
+ */
 function consumeRememberMeToken(token, fn) {
   console.log("token is: " + token);
   var uid;
@@ -139,8 +152,13 @@ function consumeRememberMeToken(token, fn) {
   });
 }
 
-/* Unlike the exported function, this does not need to take a model as argument. 
-   The passport-remember-me strategy only recognizes such method signature as well*/
+/**
+ * Unlike the exported function, this does not need to take a model as argument.
+ * This is used by passport-remember-me, not github login. This issues a token
+ * to the db
+ * @param {Object} user The deserialized remembered user
+ * @param {Function} done Passes the token to passport session for future consumption
+ */
 function issueToken(user, done) {
   var token = randomString(64);
   if (token === undefined) return done(null, false);
@@ -154,6 +172,12 @@ function issueToken(user, done) {
   return done(null, token);
 }
 
+/**
+ * Checks if a user is in the given organization
+ * @param {Octokit} octokit An Octokit instance
+ * @param {Object} user An user object
+ * @param {String} org The name of the the Github organization
+ */
 function checkMembershipForUser(octokit, user, org) {
   return octokit.orgs.checkMembershipForUser({
     org: org,
@@ -161,6 +185,10 @@ function checkMembershipForUser(octokit, user, org) {
   });
 }
 
+/**
+ * Checks if a user is in the collection object
+ * @param {Object} profile Github profile
+ */
 function checkMembershipForUserInDB(profile) {
   // rundb verification
   process.nextTick(function () {
