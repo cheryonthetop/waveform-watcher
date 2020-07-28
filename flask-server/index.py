@@ -15,6 +15,7 @@ from bokeh.util.token import generate_session_id
 import numpy as np
 import pandas as pd
 from bson.json_util import dumps, loads
+from bson.son import son
 import pickle
 import pymongo
 import json
@@ -41,6 +42,10 @@ BOKEH_SERVER_URL = os.environ.get("BOKEH_SERVER_URL", None)
 if BOKEH_SERVER_URL == None:
     BOKEH_SERVER_URL = "http://localhost:5006/bokeh-server"
     
+RECODE_DB_URI = os.environ.get("RECODE_KEY", None)
+if RECODE_DB_URI == None:
+    print("Recode DB Connection String Not Set")
+    
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
 if (APP_DB_URI == None):
@@ -53,8 +58,24 @@ my_waveform = my_db["waveform"]
 my_run = my_db["run"]
 my_events = my_db["events"]
 
-available_runs = my_run.find_one({})["runs"]
+available_runs = get_runs()
 print("Available runs are: ", available_runs[:5])
+
+def get_runs():
+    """
+    Gets the available runs
+    """
+    pipeline = [
+    {'$match' : {"tags.name" : '_sciencerun1'}},
+    {'$match' : {"detector": "tpc"}},
+    {"$project": {'name' : 1,
+                  'number' : 1,
+                  'trigger.events_built' : 1,
+                  'time' : 1}},
+    {"$sort": SON([("time", -1)])}
+    ]
+    return [x for x in pymongo.MongoClient(RECODE_DB_URI)['run']['runs_new'].aggregate(pipeline)]
+    
 def authenticate(user, token):
     """
     Authenticates an API request with a token
