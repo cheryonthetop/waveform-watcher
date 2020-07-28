@@ -1,5 +1,5 @@
 var createError = require("http-errors");
-const cookieSession = require("cookie-session");
+var cookieSession = require("cookie-session");
 var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
@@ -8,20 +8,14 @@ var passport = require("passport");
 var bodyParser = require("body-parser");
 var session = require("express-session");
 var flash = require("connect-flash");
-require("https").globalAgent.options.rejectUnauthorized = false;
 var cors = require("cors");
 // set up mongodb
 var model = require("./model/db-setup");
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+var logoutRouter = require("./routes/logout");
 var authRouter = require("./routes/auth");
 
 var app = express();
-
-// view engine setup
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
 
 // Every incoming request
 // set up cors to allow us to accept requests from our client
@@ -35,7 +29,7 @@ app.use(
 app.use(
   cookieSession({
     name: "session",
-    keys: ["secrettexthere"],
+    keys: [process.env.COOKIE_SECRET_KEY],
     maxAge: 24 * 60 * 60 * 100,
   })
 );
@@ -48,7 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 // required for passport session
 app.use(
   session({
-    secret: "secrettexthere",
+    secret: process.env.PASSPORT_SESSION_SECRET,
     saveUninitialized: false,
     resave: false,
   })
@@ -65,15 +59,14 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(function (req, res, next) {
   req.model = model;
   req.token = req.query.token;
-  console.log("request token here:" + req.token);
-  console.log("request user here:" + req.user);
+  // console.log("request token here:" + req.token);
+  // console.log("request user here:" + req.user);
   // if (req.user.id) res.json(req.user.id);
   next();
 });
 
 // Specific routes
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/logout", logoutRouter);
 app.use("/auth", authRouter);
 
 // catch 404 and forward to error handler
@@ -86,10 +79,6 @@ app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render("error");
 });
 
 module.exports = app;

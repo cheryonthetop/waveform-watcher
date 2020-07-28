@@ -1,5 +1,4 @@
 var express = require("express");
-var url = require("url");
 var passport = require("passport");
 var router = express.Router();
 var issueToken = require("../model/helpers/issue-token");
@@ -75,7 +74,6 @@ router.get(
     });
   },
   function (req, res) {
-    // model.findOneAndUpdate({ id: req.user.id }, { cb_complete: true });
     console.log("updated");
     // Successful authentication, respond with success.
     res.redirect(process.env.HOMEPAGE + "/login/success?token=" + req.token);
