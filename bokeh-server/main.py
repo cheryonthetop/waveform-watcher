@@ -307,7 +307,7 @@ def render_events(run_id, events):
             doc.remove_root(doc.roots[0])
         doc.add_root(column(text_input, row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform)), grid))
     
-    doc.add_next_tick_callback(insert_layout)
+    insert_layout()
 
 ###### Appends model to document
 
