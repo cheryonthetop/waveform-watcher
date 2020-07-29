@@ -40,12 +40,12 @@ class Runs extends Component {
   }
 
   /**
-   * Loads available runs if there are any
+   * Loads available runs if there are any and not yet loaded
    */
   tryLoadAvailableRuns() {
     const { availableRuns } = this.props;
-    const { dataLoaded } = this.state;
-    if (availableRuns.length !== 0 && !dataLoaded) {
+    const { options } = this.state;
+    if (availableRuns.length !== 0 && options.length === 0) {
       const runs = availableRuns.map((run) => createOption(run));
       this.setState({ options: runs, dataLoaded: true });
     }
