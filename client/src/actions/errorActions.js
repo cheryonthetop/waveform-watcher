@@ -18,9 +18,9 @@ export const errorServed = () => (dispatch) => {
  * @type {Function}
  * @param {string} msg The message to be reported
  */
-export const errorReported = (msg) => (dispatch) => {
+export const errorReported = (title, msg) => (dispatch) => {
   dispatch({
     type: ERROR_MESSAGE_REPORTED,
-    payload: msg,
+    payload: { title: title, msg: msg },
   });
 };

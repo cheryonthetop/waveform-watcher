@@ -1,7 +1,6 @@
 import {
   LOAD_SUCCESS,
   GET_WAVEFORM_SUCCESS,
-  SWITCH_WAVEFORM,
   LOAD_FAILURE,
   GET_EVENT_PLOT_FAILURE,
   SAVE_WAVEFORM_FAILURE,
@@ -62,8 +61,6 @@ export default function (state = initialState, action) {
         isLoading: false,
       };
     }
-
-    case SWITCH_WAVEFORM:
     case GET_WAVEFORM_SUCCESS:
       return {
         ...state,

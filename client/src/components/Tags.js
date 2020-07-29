@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import {
   saveWaveform,
-  switchWaveform,
   deleteWaveform,
+  getWaveform,
 } from "../actions/waveformActions";
 import { Button } from "react-bootstrap";
 import CreatableSelect from "react-select/creatable";
@@ -52,18 +52,20 @@ class Tags extends Component {
   };
 
   /**
-   * Tries load options if the app data is being loaded
+   * Tries load options if the app data finishes loading
+   * and options are not updated
    */
   componentDidMount() {
-    if (!this.state.dataLoaded)
+    if (!this.props.isLoading && !this.state.dataLoaded)
       this.setState({ dataLoaded: true }, () => this.loadOptions());
   }
 
   /**
-   * Tries load options if the app data is being loaded
+   * Tries load options if the app data finishes loading
+   * and options are not updated
    */
   componentDidUpdate() {
-    if (!this.state.dataLoaded)
+    if (!this.props.isLoading && !this.state.dataLoaded)
       this.setState({ dataLoaded: true }, () => this.loadOptions());
   }
   /**
@@ -95,11 +97,12 @@ class Tags extends Component {
     if (actionMeta.action === "select-option") {
       this.setState({ comments: newValue.data.comments });
       // Data comes from Mongo DB, hence the _ in variable name below
-      const { run_id, event_id, waveform } = newValue.data;
-      console.log(run_id, event_id, waveform);
-      if (waveform && run_id && event_id) {
+      const { run_id, event_id } = newValue.data;
+      if (run_id === this.props.runID && event_id === this.props.event_id)
+        console.log("Same waveform. No need to switch");
+      else if (run_id && event_id) {
         console.log("Switching Waveform...");
-        this.props.dispatch(switchWaveform(run_id, event_id, waveform));
+        this.props.dispatch(getWaveform(this.props.user, run_id, event_id));
         this.props.handleLoading();
       }
     }
@@ -159,17 +162,19 @@ class Tags extends Component {
    */
   handleSave = () => {
     const { value, options } = this.state;
-    const { user, waveform, runID, eventID } = this.props;
-    if (value && waveform) {
+    const { user, runID, eventID, waveform } = this.props;
+    if (value) {
       const tag = value.label;
       const comments = value.data.comments;
-      this.props.dispatch(
-        saveWaveform(user, tag, comments, waveform, runID, eventID)
-      );
+      this.props.dispatch(saveWaveform(user, tag, comments, runID, eventID));
       const newOptions = options.map((option) => {
         if (option === value) {
-          option.waveform = { data: waveform };
-          return option;
+          const newOption = createOption(value.label, {
+            ...value.data,
+            runID: runID,
+            eventID: eventID,
+          });
+          return newOption;
         } else {
           return option;
         }
@@ -271,13 +276,13 @@ class Tags extends Component {
           onClick={this.handleSave}
           type="submit"
           active
+          style={{ whiteSpace: "normal" }}
         >
-          Save Waveform
-          {value ? " under Tag " + value.label : ""}
+          Save Tag {value ? value.label : ""}
         </Button>
         <br />
         <Button
-          style={{ marginTop: "10px" }}
+          style={{ marginTop: "10px", whiteSpace: "normal" }}
           variant="danger"
           size="sm"
           onClick={this.handleDelete}

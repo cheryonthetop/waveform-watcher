@@ -276,39 +276,7 @@ def delete_waveform():
             ) 
         return make_response(jsonify({"success": True}), 200)
     else:
-        return make_response(jsonify({"error": "Bad Request"}), 400)                        
-    
-
-@app.route('/api/switch',  methods = ['POST'])
-def switch_waveform():
-    """
-    Switches a waveform and updates db with the new waveform
-
-    Returns:
-        Response: A symbolic 200 response signifying success
-    """
-    if request.is_json:
-        token = request.args.get('token')
-        req = request.get_json()
-        run_id = None
-        user = None
-        event_id = None
-        waveform = None
-        try:
-            run_id = req["run_id"]
-            user = req["user"]   
-            event_id = req["event_id"]
-            waveform = req["waveform"]
-        except:
-            return make_response(jsonify({"error": "Bad Request"}), 400)            
-        if not authenticate(user, token):
-            return make_response(jsonify({"error": "Unauthorized API request"}), 403)
-        # Update database in another thread
-        threading.Thread(target=update_db_new_waveform, args=(user, run_id, event_id, waveform)).start()
-        return make_response(jsonify({"success": True}), 200)
-    else:
-        return make_response(jsonify({"error": "Bad Request"}), 400)                        
-
+        return make_response(jsonify({"error": "Bad Request"}), 400)                                    
 
 ###### Helper Routine
 

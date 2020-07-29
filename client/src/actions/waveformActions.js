@@ -5,7 +5,6 @@ import {
   SAVE_WAVEFORM_FAILURE,
   LOAD_SUCCESS,
   LOAD_FAILURE,
-  SWITCH_WAVEFORM,
   DELETE_WAVEFORM_FAILURE,
   DELETE_WAVEFORM_SUCCESS,
   GET_EVENT_PLOT_SUCCESS,
@@ -68,7 +67,8 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
       console.log(res.data);
       if (requestID !== window.localStorage.getItem("requestID")) return;
       if (res.data.err_msg) {
-        dispatch(errorReported(res.data.err_msg));
+        const title = "Get Waveform Failure";
+        dispatch(errorReported(title, res.data.err_msg));
         dispatch({
           type: GET_WAVEFORM_FAILURE,
           payload: {
@@ -95,6 +95,19 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
           eventID: eventID,
         },
       });
+      const title = "Get Waveform Failure";
+      if (err.response) {
+        if (err.response.status === 403) {
+          const msg = `Get Waveform of Run ${runID} and Event ${eventID} 
+          Failed. Make sure you are not logged in from another device or browser`;
+          dispatch(errorReported(title, msg));
+        } else {
+          const msg = `Get Waveform of Run ${runID} and Event ${eventID} Failed. 
+          This could be an internal server error. Please try again or contact
+          Rice Astroparticle group for help`;
+          dispatch(errorReported(title, msg));
+        }
+      }
     });
 };
 
@@ -156,6 +169,19 @@ export const getEventPlot = (user, runID) => (dispatch) => {
       dispatch({
         type: GET_EVENT_PLOT_FAILURE,
       });
+      const title = "Get Events Failure";
+      if (err.response) {
+        if (err.response.status === 403) {
+          const msg = `Get Events of Run ${runID} Failed. Make sure 
+          you are not logged in from another device or browser`;
+          dispatch(errorReported(title, msg));
+        } else {
+          const msg = `Get Events of Run ${runID} Failed. This 
+          could be an internal server error. Please try again or contact
+          Rice Astroparticle group for help`;
+          dispatch(errorReported(title, msg));
+        }
+      }
     });
 };
 
@@ -216,57 +242,6 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
 };
 
 /**
- * Switches waveform with an API request to the flask server and
- * dispatches the data to the waveform reducer
- * @type {Function}
- * @param {String} runID The run ID
- * @param {Number} eventID The event ID
- * @param {Object} waveform The waveform
- */
-export const switchWaveform = (runID, eventID, waveform) => (dispatch) => {
-  // Make sure get waveform and switch waveform don't interfere
-  const requestID = (
-    parseInt(window.localStorage.getItem("requestID")) + 1
-  ).toString();
-  window.localStorage.setItem("requestID", requestID);
-  dispatch({
-    type: SWITCH_WAVEFORM,
-    payload: {
-      runID: runID,
-      eventID: eventID,
-      waveform: waveform,
-    },
-  });
-  // Headers
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-      withCredentials: true,
-    },
-  };
-
-  // Request body
-  const body = JSON.stringify({
-    run_id: runID,
-    event_id: eventID,
-    waveform: waveform,
-  });
-
-  const url = `${
-    process.env.REACT_APP_FLASK_BACKEND_URL
-  }/api/switch?token=${window.localStorage.getItem("token")}`;
-
-  axios
-    .post(url, body, config)
-    .then(function (res) {
-      console.log(res.data);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-};
-
-/**
  * Deletes the tag (and therefore the waveform associated with it)
  * with an API request to the flask server
  * @type {Function}
@@ -300,8 +275,6 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
         dispatch({
           type: DELETE_WAVEFORM_SUCCESS,
         });
-      } else {
-        dispatch({ type: DELETE_WAVEFORM_FAILURE });
       }
     })
     .catch((err) => {
@@ -309,6 +282,19 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
       dispatch({
         type: DELETE_WAVEFORM_FAILURE,
       });
+      const title = "Delete Tag Failure";
+      if (err.response) {
+        if (err.response.status === 403) {
+          const msg = `Delete Tag ${tag} Failed. Make sure you
+          are not logged in from another device or browser`;
+          dispatch(errorReported(title, msg));
+        } else {
+          const msg = `Delete Tag ${tag} Failed. This could 
+          be an internal server error. Please try again or contact
+          Rice Astroparticle group for help`;
+          dispatch(errorReported(title, msg));
+        }
+      }
     });
 };
 
@@ -325,12 +311,28 @@ export const loadAppData = (user) => (dispatch) => {
     process.env.REACT_APP_FLASK_BACKEND_URL
   }/api/data?user=${user}&token=${window.localStorage.getItem("token")}`;
 
-  axios.get(url).then((res) =>
-    res.status === 200
-      ? dispatch({
-          type: LOAD_SUCCESS,
-          payload: res.data,
-        })
-      : dispatch({ type: LOAD_FAILURE })
-  );
+  axios
+    .get(url)
+    .then((res) =>
+      dispatch({
+        type: LOAD_SUCCESS,
+        payload: res.data,
+      })
+    )
+    .catch((err) => {
+      dispatch({ type: LOAD_FAILURE });
+      if (err.response) {
+        const title = "Load User Data Failure";
+        if (err.response.status === 403) {
+          const msg = `Load User Data Failed. Make sure you
+        are not logged in from another device or browser`;
+          dispatch(errorReported(title, msg));
+        } else {
+          const msg = `Load User Data Failed. This could 
+        be an internal server error. Please try again or contact
+        Rice Astroparticle group for help`;
+          dispatch(errorReported(title, msg));
+        }
+      }
+    });
 };

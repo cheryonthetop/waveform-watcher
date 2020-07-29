@@ -5,6 +5,7 @@ import { Redirect } from "react-router-dom";
 import Header from "../Header";
 import EventSelection from "../EventSelection";
 import "../stylesheets/index.css";
+import ErrorModal from "../ErrorModal";
 
 /**
  * The home page where user can view, cache and select
@@ -32,6 +33,7 @@ class Home extends Component {
           {/* Body */}
           <div className="body" style={{ textAlign: "center" }}>
             <EventSelection />
+            <ErrorModal></ErrorModal>
           </div>
         </div>
       </div>

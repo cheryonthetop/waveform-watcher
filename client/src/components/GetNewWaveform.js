@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { getWaveform } from "../actions/waveformActions";
-import { errorServed } from "../actions/errorActions";
 import { Button } from "react-bootstrap";
 import { connect } from "react-redux";
 import ErrorModal from "./ErrorModal";
@@ -31,7 +30,8 @@ class GetNewWaveform extends Component {
    */
   handleGetWaveform = (runID, eventID) => {
     const { user, currRunID, currEventID } = this.props;
-    if (runID && (eventID || eventID === 0)) {
+    eventID = parseInt(eventID);
+    if (runID && Number.isInteger(eventID)) {
       eventID = parseInt(eventID);
       if (runID === currRunID && eventID === currEventID)
         this.handleShowModalRep();
@@ -113,11 +113,6 @@ class GetNewWaveform extends Component {
   handleShowModalRep = () => this.setState({ repetitive: true });
 
   /**
-   * Closes the error served from the central state
-   */
-  handleCloseError = () => this.props.dispatch(errorServed());
-
-  /**
    * renders the button
    */
   render() {
@@ -128,15 +123,7 @@ class GetNewWaveform extends Component {
       eventIsNotInt,
       eventIsNeg,
     } = this.state;
-    const {
-      msg,
-      error,
-      runID,
-      eventID,
-      currRunID,
-      currEventID,
-      waveform,
-    } = this.props;
+    const { runID, eventID, currRunID, currEventID } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
         <Button
@@ -151,12 +138,14 @@ class GetNewWaveform extends Component {
           variant="secondary"
           size="sm"
           onClick={() => {
-            const previous = currEventID ? parseInt(currEventID) - 1 : "";
+            const previous = Number.isInteger(currEventID)
+              ? parseInt(currEventID) - 1
+              : "";
             this.handleGetWaveform(currRunID, previous.toString());
           }}
           active
           style={{ marginTop: "10px" }}
-          disabled={!waveform}
+          disabled={!currRunID || !Number.isInteger(currEventID)}
         >
           Get Previous Event
         </Button>
@@ -164,12 +153,14 @@ class GetNewWaveform extends Component {
           variant="secondary"
           size="sm"
           onClick={() => {
-            const next = currEventID ? parseInt(currEventID) + 1 : "";
+            const next = Number.isInteger(currEventID)
+              ? parseInt(currEventID) + 1
+              : "";
             this.handleGetWaveform(currRunID, next.toString());
           }}
           active
           style={{ marginTop: "10px" }}
-          disabled={!waveform}
+          disabled={!currRunID || !Number.isInteger(currEventID)}
         >
           Get Next Event
         </Button>
@@ -209,12 +200,6 @@ class GetNewWaveform extends Component {
           title="Input Error"
           body="Event ID Must Not Be Negative"
         />
-        <ErrorModal
-          title="Get New Waveform Error"
-          body={msg}
-          show={error}
-          handleClose={this.handleCloseError}
-        />
       </div>
     );
   }
@@ -229,8 +214,6 @@ const mapStateToProps = (state) => ({
   waveform: state.waveform.waveform,
   currRunID: state.waveform.runID,
   currEventID: state.waveform.eventID,
-  error: state.error.error,
-  msg: state.error.msg,
 });
 
 /**

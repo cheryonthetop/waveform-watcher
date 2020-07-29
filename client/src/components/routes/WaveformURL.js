@@ -9,7 +9,7 @@ import { Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
 import Header from "../Header";
 import axios from "axios";
-import { errorReported, errorServed } from "../../actions/errorActions";
+import { errorReported } from "../../actions/errorActions";
 import ErrorModal from "../ErrorModal";
 
 class WaveformURL extends Component {
@@ -105,7 +105,8 @@ class WaveformURL extends Component {
       .then(function (res) {
         console.log(res.data);
         if (res.data.err_msg) {
-          self.props.dispatch(errorReported(res.data.err_msg));
+          const title = "Get Waveform Failure";
+          self.props.dispatch(errorReported(title, res.data.err_msg));
           self.setState({ isLoading: false });
         } else {
           try {
@@ -187,11 +188,6 @@ class WaveformURL extends Component {
   };
 
   /**
-   * Closes the error served from the central state
-   */
-  handleCloseError = () => this.props.dispatch(errorServed());
-
-  /**
    * Renders the page
    */
   render() {
@@ -200,7 +196,6 @@ class WaveformURL extends Component {
       return <Redirect to="/login" />;
     }
     const { isLoading, runNA, isNotInt, renderError, eventIsNeg } = this.state;
-    const { error, msg } = this.props;
     return (
       <div>
         <Header />
@@ -246,12 +241,6 @@ class WaveformURL extends Component {
           title="Input Error"
           body="Event ID Must Not Be Negative"
         />
-        <ErrorModal
-          title="Get New Waveform Error"
-          body={msg}
-          show={error}
-          handleClose={this.handleCloseError}
-        />
 
         <ErrorModal
           title="Render Waveform Error"
@@ -277,8 +266,6 @@ const mapStateToProps = (state) => ({
   waveform: state.waveform.waveform,
   eventID: state.waveform.eventID,
   isLoading: state.waveform.isLoading,
-  error: state.error.error,
-  msg: state.error.msg,
 });
 
 /**

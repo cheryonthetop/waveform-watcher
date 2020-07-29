@@ -23,13 +23,15 @@ export default function (state = initialState, action) {
       return {
         ...state,
         error: true,
-        msg: action.payload,
+        msg: action.payload.msg,
+        title: action.payload.title,
       };
     case ERROR_MESSAGE_SERVED:
       return {
         ...state,
         error: false,
         msg: "",
+        title: "",
       };
     default:
       return state;

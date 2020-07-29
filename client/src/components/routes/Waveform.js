@@ -225,8 +225,6 @@ const mapStateToProps = (state) => ({
   waveform: state.waveform.waveform,
   eventID: state.waveform.eventID,
   isLoading: state.waveform.isLoading,
-  error: state.error.error,
-  msg: state.error.msg,
 });
 
 /**
