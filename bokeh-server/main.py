@@ -317,6 +317,7 @@ args = doc.session_context.request.arguments
 
 try:
     run_id = str(args.get('run')[0].decode("utf-8")).split("/")[0]
+    print("Received run " + run_id)
     div = Div(text="Connected to Bokeh Server, please wait for the plots to be rendered")
     div.align = "center"
     div.default_size = 500
@@ -328,8 +329,6 @@ try:
     doc.add_root(wait_msg)
 except:
     pass
-
-print("Received run " + run_id)
 
 def blocking_task():
     """
