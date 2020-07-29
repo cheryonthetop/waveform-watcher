@@ -221,14 +221,12 @@ def save_waveform():
         comments = None
         event_id = None
         run_id = None
-        waveform = None
         try:
             req = request.get_json()
             user = req["user"]
             tag = req["tag"]
             event_id = req["event_id"]
             run_id = req["run_id"]
-            waveform = req["waveform"]
         except:
             return make_response(jsonify({"error": "Bad Request"}), 400)                        
         if not authenticate(user, token):
@@ -238,7 +236,7 @@ def save_waveform():
         except KeyError:
             comments = ""
         # Update database in another thread
-        threading.Thread(target=update_db_new_tag, args=(user, run_id, event_id, waveform, tag, comments)).start()
+        threading.Thread(target=update_db_new_tag, args=(user, run_id, event_id, tag, comments)).start()
         return make_response(jsonify({"success": True}), 200)
     else:
         return make_response(jsonify({"error": "Bad Request"}), 400)                        
@@ -384,7 +382,7 @@ def update_db_new_waveform(user, run_id, event_id, waveform):
         )
     print("updating waveform in the app db from get completed!")
     
-def update_db_new_tag(user, run_id, event_id, waveform, tag, comments):
+def update_db_new_tag(user, run_id, event_id, tag, comments):
     """
     Updates the database with the new tag the user created
 
@@ -392,7 +390,6 @@ def update_db_new_tag(user, run_id, event_id, waveform, tag, comments):
         user (str): Username
         run_id (str): Run ID of the run
         event_id (str): Event ID of the event
-        waveform (dict): Represents the waveform object associated with the tag
         tag (str): The tag associated with the waveform
         comments (str): The comments on the waveform
     """
@@ -400,8 +397,7 @@ def update_db_new_tag(user, run_id, event_id, waveform, tag, comments):
     my_app.update_one({"user": user}, 
     {"$set": { 
         "run_id": run_id, 
-        "event_id" : event_id,
-        "waveform": waveform,
+        "event_id" : event_id
         }
     })
     mongo_document = my_app.find_one({"user": user, "tags_data."+tag: {"$exists": True}})
@@ -413,7 +409,6 @@ def update_db_new_tag(user, run_id, event_id, waveform, tag, comments):
                     "tags_data.$."+tag+".comments": comments,
                     "tags_data.$."+tag+".run_id": run_id,
                     "tags_data.$."+tag+".event_id": event_id,
-                    "tags_data.$."+tag+".waveform": waveform
                 }
             }
         )
@@ -427,7 +422,6 @@ def update_db_new_tag(user, run_id, event_id, waveform, tag, comments):
                             "run_id": run_id,
                             "event_id": event_id,
                             "comments": comments,
-                            "waveform": waveform,
                         }
                     }
                 }

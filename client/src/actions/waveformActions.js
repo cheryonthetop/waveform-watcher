@@ -196,7 +196,7 @@ export const getEventPlot = (user, runID) => (dispatch) => {
  * @param {String} runID The run ID
  * @param {Number} eventID The event ID
  */
-export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
+export const saveWaveform = (user, tag, comments, runID, eventID) => (
   dispatch
 ) => {
   // Headers
@@ -212,7 +212,6 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
     user: user,
     tag: tag,
     comments: comments,
-    waveform: waveform,
     run_id: runID,
     event_id: eventID,
   });
@@ -229,8 +228,6 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
         dispatch({
           type: SAVE_WAVEFORM_SUCCESS,
         });
-      } else {
-        dispatch({ type: SAVE_WAVEFORM_FAILURE });
       }
     })
     .catch((err) => {
@@ -238,6 +235,19 @@ export const saveWaveform = (user, tag, comments, waveform, runID, eventID) => (
       dispatch({
         type: SAVE_WAVEFORM_FAILURE,
       });
+      const title = "Delete Tag Failure";
+      if (err.response) {
+        if (err.response.status === 403) {
+          const msg = `Delete Tag ${tag} Failed. Make sure you
+          are not logged in from another device or browser`;
+          dispatch(errorReported(title, msg));
+        } else {
+          const msg = `Delete Tag ${tag} Failed. This could 
+          be an internal server error. Please try again or contact
+          Rice Astroparticle group for help`;
+          dispatch(errorReported(title, msg));
+        }
+      }
     });
 };
 

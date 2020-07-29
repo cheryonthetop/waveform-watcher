@@ -98,7 +98,7 @@ class Tags extends Component {
       this.setState({ comments: newValue.data.comments });
       // Data comes from Mongo DB, hence the _ in variable name below
       const { run_id, event_id } = newValue.data;
-      if (run_id === this.props.runID && event_id === this.props.event_id)
+      if (run_id === this.props.runID && event_id === this.props.eventID)
         console.log("Same waveform. No need to switch");
       else if (run_id && event_id) {
         console.log("Switching Waveform...");
@@ -168,13 +168,11 @@ class Tags extends Component {
       const comments = value.data.comments;
       this.props.dispatch(saveWaveform(user, tag, comments, runID, eventID));
       const newOptions = options.map((option) => {
-        if (option === value) {
-          const newOption = createOption(value.label, {
-            ...value.data,
-            runID: runID,
-            eventID: eventID,
-          });
-          return newOption;
+        if (option.label === value.label) {
+          return {
+            ...value,
+            data: { ...value.data, run_id: runID, event_id: eventID },
+          };
         } else {
           return option;
         }
