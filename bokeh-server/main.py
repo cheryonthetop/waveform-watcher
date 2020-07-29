@@ -301,13 +301,21 @@ def render_events(run_id, events):
     grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
 
     @gen.coroutine
+    def remove_layout():
+        """
+        # Remove roots before inserting
+        """
+        if (len(doc.roots) != 0):
+            doc.remove_root(doc.roots[0])
+            
+    @gen.coroutine
     # Genearte layout and add to the document
     def insert_layout():
-        while (len(doc.roots) != 0):
-            doc.remove_root(doc.roots[0])
         doc.add_root(column(text_input, row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform)), grid))
     
-    insert_layout()
+    doc.add_next_tick_callback(remove_layout)
+    doc.add_next_tick_callback(insert_layout)
+
 
 ###### Appends model to document
 
