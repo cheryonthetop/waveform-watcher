@@ -48,10 +48,20 @@ class EventSelection extends Component {
       this.setState({ isLoading: false }, () => {
         this.deleteEventPlots();
         this.loadEventPlots();
-        this.setState({ eventPlot: this.props.eventPlot });
+        this.setState({ eventPlot: this.props.eventPlot }, () => {
+          this.reloadScript();
+        });
       });
     }
   }
+
+  /**
+   * Reloads the script to ensure script is executed after the script tag
+   * is inserted
+   */
+  reloadScript = () => {
+    const ignored = document.createRange().createContextualFragment(scriptTag);
+  };
 
   /**
    * Deletes the event plots if there are any before loading
@@ -74,8 +84,6 @@ class EventSelection extends Component {
       .createRange()
       .createContextualFragment(scriptStr);
     parent.appendChild(scriptTag);
-    // Reloading it to make sure it executes again after the tag is inserted
-    document.createRange().createContextualFragment(scriptTag);
     var tempDate = new Date();
     var date =
       tempDate.getFullYear() +
