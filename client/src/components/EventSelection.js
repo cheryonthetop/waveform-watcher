@@ -48,21 +48,20 @@ class EventSelection extends Component {
     if (hasNewEventPlots) {
       this.setState(
         { isLoading: false, eventPlot: this.props.eventPlot },
-        () => {
-          this.executeSript();
-        }
+        () => this.loadScript
       );
     }
   }
 
   /**
-   * Reloads the script to ensure script is executed after the script tag
-   * is inserted
+   * Loads the script that embeds the plots
    */
-  executeSript = () => {
-    const ignored = document
+  loadScript = () => {
+    this.deleteEventPlots();
+    const script = document
       .createRange()
       .createContextualFragment(this.state.eventPlot);
+    document.getElementById("graph").appendChild(script);
   };
 
   /**
@@ -72,19 +71,6 @@ class EventSelection extends Component {
     var container = document.getElementById("graph");
     while (container && container.hasChildNodes())
       container.removeChild(container.childNodes[0]);
-  }
-
-  /**
-   * Load the events plots by creating a node tag from the script string
-   * and append the node to the specified div tag
-   */
-  loadEventPlots() {
-    // console.log("loading events...");
-    // // const scriptStr = this.props.eventPlot;
-    // // const parent = document.getElementById("graph");
-    // // const scriptTag = ;
-    // // parent.appendChild(scriptTag);
-    // console.log("Events loaded at ", date);
   }
 
   /**
