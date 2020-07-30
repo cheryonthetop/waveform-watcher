@@ -46,9 +46,9 @@ class EventSelection extends Component {
     const hasNewEventPlots =
       this.props.eventPlot && eventPlot !== this.props.eventPlot;
     if (hasNewEventPlots) {
-      this.setState(
-        { isLoading: false, eventPlot: this.props.eventPlot },
-        () => this.loadScript
+      // this.deleteEventPlots();
+      this.setState({ isLoading: false, eventPlot: this.props.eventPlot }, () =>
+        this.loadScript()
       );
     }
   }
@@ -57,7 +57,6 @@ class EventSelection extends Component {
    * Loads the script that embeds the plots
    */
   loadScript = () => {
-    this.deleteEventPlots();
     const script = document
       .createRange()
       .createContextualFragment(this.state.eventPlot);
