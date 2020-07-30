@@ -120,7 +120,7 @@ class EventSelection extends Component {
 
         <div id="graph-box">
           <Loading isLoading={isLoading}>
-            <div id="graph">{eventPlot ? parse(eventPlot) : ""}</div>
+            <div id="graph"></div>
           </Loading>
         </div>
       </div>
