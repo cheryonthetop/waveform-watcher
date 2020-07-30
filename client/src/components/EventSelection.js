@@ -60,7 +60,9 @@ class EventSelection extends Component {
    * is inserted
    */
   reloadScript = () => {
-    const ignored = document.createRange().createContextualFragment(scriptTag);
+    const ignored = document
+      .createRange()
+      .createContextualFragment(this.state.eventPlot);
   };
 
   /**
