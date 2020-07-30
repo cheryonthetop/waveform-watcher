@@ -16,9 +16,10 @@ import threading
 from tornado import gen
 from functools import partial
 
+hv.extension("bokeh")
 # Current document
 doc = curdoc()
-hv.extension("bokeh")
+run_id = None
 
 # Fixed Parameter in Plots for Event Selections
 DIMS = [
@@ -307,6 +308,7 @@ def render_events(run_id, events):
         """
         if (len(doc.roots) != 0):
             doc.remove_root(doc.roots[0])
+        print("Removed layout")
             
     @gen.coroutine
     def insert_layout():
@@ -314,6 +316,7 @@ def render_events(run_id, events):
         Genearte layout and add to the document
         """
         doc.add_root(column(text_input, row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform)), grid))
+        print("Inserted layout")
     
     doc.add_next_tick_callback(remove_layout)
     doc.add_next_tick_callback(insert_layout)
@@ -338,7 +341,7 @@ try:
     wait_msg.margin = (200, 0, 0, 300)
     doc.add_root(wait_msg)
 except:
-    pass
+    print("no run id")
 
 def blocking_task():
     """
@@ -367,4 +370,3 @@ def blocking_task():
         
 t = threading.Thread(target=blocking_task)
 t.start()
-t.join()
