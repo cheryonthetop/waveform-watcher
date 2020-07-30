@@ -46,7 +46,12 @@ class EventSelection extends Component {
     const hasNewEventPlots =
       this.props.eventPlot && eventPlot !== this.props.eventPlot;
     if (hasNewEventPlots) {
-      this.setState({ isLoading: false, eventPlot: this.props.eventPlot });
+      this.setState(
+        { isLoading: false, eventPlot: this.props.eventPlot },
+        () => {
+          this.executeSript();
+        }
+      );
     }
   }
 
@@ -54,7 +59,7 @@ class EventSelection extends Component {
    * Reloads the script to ensure script is executed after the script tag
    * is inserted
    */
-  reloadScript = () => {
+  executeSript = () => {
     const ignored = document
       .createRange()
       .createContextualFragment(this.state.eventPlot);
@@ -79,19 +84,6 @@ class EventSelection extends Component {
     // const parent = document.getElementById("graph");
     // const scriptTag = ;
     // parent.appendChild(scriptTag);
-    var tempDate = new Date();
-    var date =
-      tempDate.getFullYear() +
-      "-" +
-      (tempDate.getMonth() + 1) +
-      "-" +
-      tempDate.getDate() +
-      " " +
-      tempDate.getHours() +
-      ":" +
-      tempDate.getMinutes() +
-      ":" +
-      tempDate.getSeconds();
     console.log("Events loaded at ", date);
   }
 
@@ -121,7 +113,7 @@ class EventSelection extends Component {
    * Renders the page
    */
   render() {
-    const { runID, event, isLoading } = this.state;
+    const { runID, event, isLoading, eventPlot } = this.state;
     return (
       <div id="graph-container">
         <div id="control-box">
@@ -143,9 +135,7 @@ class EventSelection extends Component {
 
         <div id="graph-box">
           <Loading isLoading={isLoading}>
-            <div id="graph">
-              {!isLoading ? parse(this.state.eventPlot) : ""}
-            </div>
+            <div id="graph">{eventPlot ? parse(eventPlot) : ""}</div>
           </Loading>
         </div>
       </div>
