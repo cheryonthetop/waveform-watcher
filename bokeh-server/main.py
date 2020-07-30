@@ -309,8 +309,10 @@ def render_events(run_id, events):
             doc.remove_root(doc.roots[0])
             
     @gen.coroutine
-    # Genearte layout and add to the document
     def insert_layout():
+        """
+        Genearte layout and add to the document
+        """
         doc.add_root(column(text_input, row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform)), grid))
     
     doc.add_next_tick_callback(remove_layout)
@@ -365,3 +367,4 @@ def blocking_task():
         
 t = threading.Thread(target=blocking_task)
 t.start()
+t.join()
