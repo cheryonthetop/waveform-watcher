@@ -68,9 +68,14 @@ class EventSelection extends Component {
    */
   loadEventPlots() {
     console.log("loading events...");
-    const script = this.props.eventPlot;
-    const node = document.createRange().createContextualFragment(script);
-    document.getElementById("graph").appendChild(node);
+    const scriptStr = this.props.eventPlot;
+    const parent = document.getElementById("graph");
+    const scriptTag = document
+      .createRange()
+      .createContextualFragment(scriptStr);
+    parent.appendChild(scriptTag);
+    // Reloading it to make sure it executes again after the tag is inserted
+    document.createRange().createContextualFragment(script);
     var tempDate = new Date();
     var date =
       tempDate.getFullYear() +
