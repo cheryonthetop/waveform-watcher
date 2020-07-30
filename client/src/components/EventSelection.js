@@ -143,7 +143,9 @@ class EventSelection extends Component {
 
         <div id="graph-box">
           <Loading isLoading={isLoading}>
-            <div id="graph">{parse(this.state.eventPlot)}</div>
+            <div id="graph">
+              {!isLoading ? parse(this.state.eventPlot) : ""}
+            </div>
           </Loading>
         </div>
       </div>
