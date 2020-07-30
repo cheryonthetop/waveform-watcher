@@ -369,5 +369,6 @@ def blocking_task():
     else:
         render_events(run_id, events)
         
-t = threading.Thread(target=blocking_task)
-t.start()
+# t = threading.Thread(target=blocking_task)
+# t.start()
+blocking_task()
