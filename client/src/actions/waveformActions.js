@@ -105,7 +105,6 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
  * @param {Number} runID The run ID
  */
 export const getEventPlot = (user, runID) => (dispatch) => {
-  console.log("Getting Events at ", date);
   console.log(runID);
   // Headers
   const config = {

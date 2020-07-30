@@ -57,10 +57,10 @@ class EventSelection extends Component {
    * Loads the script that embeds the plots
    */
   loadScript = () => {
-    const script = document
-      .createRange()
-      .createContextualFragment(this.state.eventPlot);
-    document.getElementById("graph").appendChild(script);
+    const container = document.getElementById("graph");
+    var range = document.createRange();
+    range.setStart(container, 0);
+    container.appendChild(range.createContextualFragment(this.state.eventPlot));
   };
 
   /**
