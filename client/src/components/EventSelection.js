@@ -46,13 +46,7 @@ class EventSelection extends Component {
     const hasNewEventPlots =
       this.props.eventPlot && eventPlot !== this.props.eventPlot;
     if (hasNewEventPlots) {
-      this.setState({ isLoading: false }, () => {
-        this.deleteEventPlots();
-        this.loadEventPlots();
-        this.setState({ eventPlot: this.props.eventPlot }, () => {
-          this.reloadScript();
-        });
-      });
+      this.setState({ isLoading: false, eventPlot: this.props.eventPlot });
     }
   }
 
@@ -81,10 +75,10 @@ class EventSelection extends Component {
    */
   loadEventPlots() {
     console.log("loading events...");
-    const scriptStr = this.props.eventPlot;
-    const parent = document.getElementById("graph");
-    const scriptTag = parse(scriptStr);
-    parent.appendChild(scriptTag);
+    // const scriptStr = this.props.eventPlot;
+    // const parent = document.getElementById("graph");
+    // const scriptTag = ;
+    // parent.appendChild(scriptTag);
     var tempDate = new Date();
     var date =
       tempDate.getFullYear() +
@@ -149,7 +143,7 @@ class EventSelection extends Component {
 
         <div id="graph-box">
           <Loading isLoading={isLoading}>
-            <div id="graph" />
+            <div id="graph">{parse(this.state.eventPlot)}</div>
           </Loading>
         </div>
       </div>
