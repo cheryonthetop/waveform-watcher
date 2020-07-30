@@ -19,7 +19,7 @@ class EventSelection extends Component {
    */
   state = {
     runID: this.props.runID,
-    eventPlot: undefined,
+    eventPlot: "",
     isLoading: false,
   };
 
