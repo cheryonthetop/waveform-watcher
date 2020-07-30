@@ -87,20 +87,6 @@ class Waveform extends Component {
     console.log("Loading Waveform...");
     try {
       embed.embed_item(this.props.waveform, "graph");
-      var tempDate = new Date();
-      var date =
-        tempDate.getFullYear() +
-        "-" +
-        (tempDate.getMonth() + 1) +
-        "-" +
-        tempDate.getDate() +
-        " " +
-        tempDate.getHours() +
-        ":" +
-        tempDate.getMinutes() +
-        ":" +
-        tempDate.getSeconds();
-      console.log("Waveform embedded at ", date);
       this.setState({ waveform: this.props.waveform, paramsHidden: false });
     } catch {
       this.handleCloseModalRenderError();
