@@ -6,6 +6,7 @@ import Runs from "./Runs";
 import GetNewEventPlot from "./GetNewEventPlot";
 import { Button } from "react-bootstrap";
 import { withRouter } from "react-router";
+import parse from "html-react-parser";
 
 /**
  * The plots of all the events for users to choose from
@@ -82,10 +83,7 @@ class EventSelection extends Component {
     console.log("loading events...");
     const scriptStr = this.props.eventPlot;
     const parent = document.getElementById("graph");
-    const scriptTag = document
-      .createRange()
-      .createContextualFragment(scriptStr);
-    parent.appendChild(scriptTag);
+    const scriptTag = parse(scriptStr);
     parent.appendChild(scriptTag);
     var tempDate = new Date();
     var date =
