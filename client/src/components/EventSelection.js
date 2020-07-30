@@ -86,6 +86,7 @@ class EventSelection extends Component {
       .createRange()
       .createContextualFragment(scriptStr);
     parent.appendChild(scriptTag);
+    parent.appendChild(scriptTag);
     var tempDate = new Date();
     var date =
       tempDate.getFullYear() +
