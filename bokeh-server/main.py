@@ -318,9 +318,8 @@ def render_events(run_id, events):
         doc.add_root(column(text_input, row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform)), grid))
         print("Inserted layout")
     
-    # doc.add_next_tick_callback(remove_layout)
-    # doc.add_next_tick_callback(insert_layout)
-    doc.add_root(column(text_input, row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform)), grid))
+    doc.add_next_tick_callback(remove_layout)
+    doc.add_next_tick_callback(insert_layout)
 
 
 ###### Appends model to document
@@ -332,15 +331,15 @@ args = doc.session_context.request.arguments
 try:
     run_id = str(args.get('run')[0].decode("utf-8")).split("/")[0]
     print("Received run " + run_id)
-    # div = Div(text="Connected to Bokeh Server, please wait for the plots to be rendered")
-    # div.align = "center"
-    # div.default_size = 500
-    # wait_msg = row(div)
-    # wait_msg.height = 1000
-    # wait_msg.align = "center"
-    # wait_msg.sizing_mode = "stretch_both"
-    # wait_msg.margin = (200, 0, 0, 300)
-    # doc.add_root(wait_msg)
+    div = Div(text="Connected to Bokeh Server, please wait for the plots to be rendered")
+    div.align = "center"
+    div.default_size = 500
+    wait_msg = row(div)
+    wait_msg.height = 1000
+    wait_msg.align = "center"
+    wait_msg.sizing_mode = "stretch_both"
+    wait_msg.margin = (200, 0, 0, 300)
+    doc.add_root(wait_msg)
 except:
     print("no run id")
 
@@ -363,12 +362,11 @@ def blocking_task():
         div = Div(text=events)
         div.align="center"
         div.sizing_mode="stretch_both"
-        # while (len(doc.roots) != 0):
-        #     doc.remove_root(doc.roots[0])
+        while (len(doc.roots) != 0):
+            doc.remove_root(doc.roots[0])
         doc.add_root(column(div))
     else:
         render_events(run_id, events)
         
-# t = threading.Thread(target=blocking_task)
-# t.start()
-blocking_task()
+t = threading.Thread(target=blocking_task)
+t.start()
