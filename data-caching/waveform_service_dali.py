@@ -24,6 +24,7 @@ import pandas as pd
 
 import straxen
 
+
 def seconds_from(t, t_reference):
     return (t - t_reference) / int(1e9)
 
@@ -31,48 +32,46 @@ def seconds_from(t, t_reference):
 # Custom wheel zoom tool that only zooms in one dimension
 def x_zoom_wheel():
     import bokeh.models
-    return bokeh.models.WheelZoomTool(dimensions='width')
+
+    return bokeh.models.WheelZoomTool(dimensions="width")
 
 
-@straxen.mini_analysis(requires=['records'], hv_bokeh=True)
-def hvdisp_plot_pmt_pattern(*, config, records, to_pe, array='bottom'):
+@straxen.mini_analysis(requires=["records"], hv_bokeh=True)
+def hvdisp_plot_pmt_pattern(*, config, records, to_pe, array="bottom"):
     """Plot a PMT array, with colors showing the intensity
     of light observed in the time range
     :param array: 'top' or 'bottom', array to show
     """
     import holoviews as hv
 
-    pmts = straxen.pmt_positions(xenon1t=config['n_tpc_pmts'] < 300)
-    areas = np.bincount(records['channel'],
-                        weights=records['area'] * to_pe[records['channel']],
-                        minlength=len(pmts))
+    pmts = straxen.pmt_positions(xenon1t=config["n_tpc_pmts"] < 300)
+    areas = np.bincount(
+        records["channel"],
+        weights=records["area"] * to_pe[records["channel"]],
+        minlength=len(pmts),
+    )
 
     # Which PMTs should we include?
-    m = pmts['array'] == array
+    m = pmts["array"] == array
     pmts = pmts[m].copy()
-    pmts['area'] = areas[m]
+    pmts["area"] = areas[m]
 
     f = 1.08
     pmts = hv.Dataset(
         pmts,
-        kdims=[hv.Dimension('x',
-                            unit='cm',
-                            range=(-straxen.tpc_r * f, straxen.tpc_r * f)),
-               hv.Dimension('y',
-                            unit='cm',
-                            range=(-straxen.tpc_r * f, straxen.tpc_r * f)),
-               hv.Dimension('i', range=(0, 248), label='PMT number'),
-               hv.Dimension('area', label='Area', unit='PE')])
+        kdims=[
+            hv.Dimension("x", unit="cm", range=(-straxen.tpc_r * f, straxen.tpc_r * f)),
+            hv.Dimension("y", unit="cm", range=(-straxen.tpc_r * f, straxen.tpc_r * f)),
+            hv.Dimension("i", range=(0, 248), label="PMT number"),
+            hv.Dimension("area", label="Area", unit="PE"),
+        ],
+    )
     pmts = pmts.to(
-        hv.Points,
-        vdims=['area', 'i'],
-        group='PMTPattern',
-        label=array.capitalize()).opts(
-        plot=dict(color_index=2,
-                  tools=['hover'],
-                  show_grid=False),
-        style=dict(size=17,
-                   cmap='plasma'))
+        hv.Points, vdims=["area", "i"], group="PMTPattern", label=array.capitalize()
+    ).opts(
+        plot=dict(color_index=2, tools=["hover"], show_grid=False),
+        style=dict(size=17, cmap="plasma"),
+    )
 
     return pmts
 
@@ -82,31 +81,38 @@ def _records_to_points(*, records, to_pe, t_reference, config):
     """
     import holoviews as hv
 
-    areas_r = records['area'] * to_pe[records['channel']]
+    areas_r = records["area"] * to_pe[records["channel"]]
 
     # Create dataframe with record metadata
-    df = pd.DataFrame(dict(
-        area=areas_r,
-        time=seconds_from(records['time']
-                          + records['dt'] * records['length'] // 2,
-                          t_reference),
-        channel=records['channel']))
+    df = pd.DataFrame(
+        dict(
+            area=areas_r,
+            time=seconds_from(
+                records["time"] + records["dt"] * records["length"] // 2, t_reference
+            ),
+            channel=records["channel"],
+        )
+    )
 
     rec_points = hv.Points(
         df,
-        kdims=[hv.Dimension('time', label='Time', unit='sec'),
-               hv.Dimension('channel',
-                            label='PMT number',
-                            range=(0, config['n_tpc_pmts']))],
-        vdims=[hv.Dimension('area', label='Area', unit='pe')])
+        kdims=[
+            hv.Dimension("time", label="Time", unit="sec"),
+            hv.Dimension(
+                "channel", label="PMT number", range=(0, config["n_tpc_pmts"])
+            ),
+        ],
+        vdims=[hv.Dimension("area", label="Area", unit="pe")],
+    )
 
     time_stream = hv.streams.RangeX(source=rec_points)
     return rec_points, time_stream
 
 
-@straxen.mini_analysis(requires=['records'], hv_bokeh=True)
-def hvdisp_plot_records_2d(records, to_pe, config,
-                           t_reference, width=600, time_stream=None):
+@straxen.mini_analysis(requires=["records"], hv_bokeh=True)
+def hvdisp_plot_records_2d(
+    records, to_pe, config, t_reference, width=600, time_stream=None
+):
     """Plot records in a dynamic 2D histogram of (time, pmt)
     :param width: Plot width in pixels
     :param time_stream: holoviews rangex stream to use. If provided,
@@ -119,32 +125,32 @@ def hvdisp_plot_records_2d(records, to_pe, config,
     if time_stream is None:
         # Records are still a dataframe, convert it to points
         records, time_stream = _records_to_points(
-            records=records, to_pe=to_pe, t_reference=t_reference,
-            config=config)
-        
-    
+            records=records, to_pe=to_pe, t_reference=t_reference, config=config
+        )
+
     # TODO: weigh by area?
-    return hv.operation.datashader.dynspread(
+    return (
+        hv.operation.datashader.dynspread(
             hv.operation.datashader.datashade(
-                records,
-                y_range=(0, config['n_tpc_pmts']),
-                streams=[time_stream])).opts(
-        plot=dict(width=width,
-                  tools=[x_zoom_wheel(), 'xpan'],
-                  default_tools=['save', 'pan', 'box_zoom', 'save', 'reset'],
-                  show_grid=False)).opts(title="Time vs. Channel")
+                records, y_range=(0, config["n_tpc_pmts"]), streams=[time_stream]
+            )
+        )
+        .opts(
+            plot=dict(
+                width=width,
+                tools=[x_zoom_wheel(), "xpan"],
+                default_tools=["save", "pan", "box_zoom", "save", "reset"],
+                show_grid=False,
+            )
+        )
+        .opts(title="Time vs. Channel")
+    )
 
 
-@straxen.mini_analysis(
-    requires=['peaks', 'peak_basics'],
-    hv_bokeh=True)
+@straxen.mini_analysis(requires=["peaks", "peak_basics"], hv_bokeh=True)
 def hvdisp_plot_peak_waveforms(
-        t_reference,
-        time_range,
-        peaks,
-        width=600,
-        show_largest=None,
-        time_dim=None):
+    t_reference, time_range, peaks, width=600, show_largest=None, time_dim=None
+):
     """Plot the sum waveforms of peaks
     :param width: Plot width in pixels
     :param show_largest: Maximum number of peaks to show
@@ -154,21 +160,20 @@ def hvdisp_plot_peak_waveforms(
     import holoviews as hv
 
     if show_largest is not None and len(peaks) > show_largest:
-        show_i = np.argsort(peaks['area'])[-show_largest::]
+        show_i = np.argsort(peaks["area"])[-show_largest::]
         peaks = peaks[show_i]
 
     curves = []
     for p in peaks:
         # label = {1: 's1', 2: 's2'}.get(
         #     p['type'], 'unknown')
-        color = {1: 'b', 2: 'g'}.get(
-            p['type'], 'k')
+        color = {1: "b", 2: "g"}.get(p["type"], "k")
 
         # It's better to plot amplitude /time than per bin, since
         # sampling times are now variable
-        y = p['data'][:p['length']] / p['dt']
-        t_edges = np.arange(p['length'] + 1, dtype=np.int64)
-        t_edges = t_edges * p['dt'] + p['time']
+        y = p["data"][: p["length"]] / p["dt"]
+        t_edges = np.arange(p["length"] + 1, dtype=np.int64)
+        t_edges = t_edges * p["dt"] + p["time"]
         t_edges = seconds_from(t_edges, t_reference)
 
         # Make a 'step' plot. Unlike matplotlib's steps-mid,
@@ -181,14 +186,16 @@ def hvdisp_plot_peak_waveforms(
         y_[1::2] = y
 
         if time_dim is None:
-            time_dim = hv.Dimension('time', label='Time', unit='sec')
+            time_dim = hv.Dimension("time", label="Time", unit="sec")
 
         curves.append(
-            hv.Curve(dict(time=t_, amplitude=y_),
-                     kdims=time_dim,
-                     vdims=hv.Dimension('amplitude', label='Amplitude',
-                                        unit='PE/ns'),
-                     group='PeakSumWaveform').opts(style=dict(color=color)))
+            hv.Curve(
+                dict(time=t_, amplitude=y_),
+                kdims=time_dim,
+                vdims=hv.Dimension("amplitude", label="Amplitude", unit="PE/ns"),
+                group="PeakSumWaveform",
+            ).opts(style=dict(color=color))
+        )
 
     return hv.Overlay(items=curves).opts(plot=dict(width=width))
 
@@ -200,62 +207,78 @@ def _range_plot(f, full_time_range, t_reference, **kwargs):
         if len(kwargzz):
             raise RuntimeError(f"Passed superfluous kwargs {kwargzz}")
         if x_range is None:
-            x_range = seconds_from(np.asarray(full_time_range),
-                                   t_reference)
+            x_range = seconds_from(np.asarray(full_time_range), t_reference)
 
         # Deal with strange time ranges -- not sure how these arise?
         x_range = np.nan_to_num(x_range)
         if x_range[1] == x_range[0]:
             x_range[1] += 1
 
-        return f(time_range=(t_reference + int(x_range[0] * 1e9),
-                             t_reference + int(x_range[1] * 1e9)),
-                 t_reference=t_reference,
-                 **kwargs)
+        return f(
+            time_range=(
+                t_reference + int(x_range[0] * 1e9),
+                t_reference + int(x_range[1] * 1e9),
+            ),
+            t_reference=t_reference,
+            **kwargs,
+        )
+
     return wrapped
 
 
-@straxen.mini_analysis(
-    requires=['records', 'peaks', 'peak_basics'],
-    hv_bokeh=True)
+@straxen.mini_analysis(requires=["records", "peaks", "peak_basics"], hv_bokeh=True)
 def waveform_display(
-        context, run_id, to_pe, time_range, t_reference, records, peaks,
-        config,
-        width=600, show_largest=None):
+    context,
+    run_id,
+    to_pe,
+    time_range,
+    t_reference,
+    records,
+    peaks,
+    config,
+    width=600,
+    show_largest=None,
+):
     """Plot a waveform overview display"
     :param width: Plot width in pixels
     """
     import holoviews as hv
 
-    records_points, time_stream = _records_to_points(records=records,
-                                                     to_pe=to_pe,
-                                                     t_reference=t_reference,
-                                                     config=config)
+    records_points, time_stream = _records_to_points(
+        records=records, to_pe=to_pe, t_reference=t_reference, config=config
+    )
 
     time_v_channel = context.hvdisp_plot_records_2d(
-        run_id=run_id, to_pe=to_pe,
+        run_id=run_id,
+        to_pe=to_pe,
         records=records_points,
         width=width,
         time_stream=time_stream,
-        time_range=time_range, t_reference=t_reference,
+        time_range=time_range,
+        t_reference=t_reference,
         # We don't need to cut these further, records we get are already cut
         # to the plot's maximum range by the mini_analysis logic
         # and datashader does the online cutting / rebinning / zooming.
         # This is fortunate, since we omitted 'endtime' from records_points!
-        time_selection='skip')
+        time_selection="skip",
+    )
 
     array_plot = {
         array: hv.DynamicMap(
             _range_plot(
                 context.hvdisp_plot_pmt_pattern,
-                run_id=run_id, to_pe=to_pe,
+                run_id=run_id,
+                to_pe=to_pe,
                 records=records,
                 full_time_range=time_range,
                 t_reference=t_reference,
-                time_selection='touching',
-                array=array),
-            streams=[time_stream])
-        for array in ('top', 'bottom')}
+                time_selection="touching",
+                array=array,
+            ),
+            streams=[time_stream],
+        )
+        for array in ("top", "bottom")
+    }
 
     peak_wvs = hv.DynamicMap(
         _range_plot(
@@ -264,36 +287,56 @@ def waveform_display(
             width=width,
             full_time_range=time_range,
             t_reference=t_reference,
-            time_selection='touching',
+            time_selection="touching",
             time_dim=records_points.kdims[0],
             peaks=peaks,
-            show_largest=show_largest),
-        streams=[time_stream])
+            show_largest=show_largest,
+        ),
+        streams=[time_stream],
+    )
 
-    layout = time_v_channel + peak_wvs + array_plot['top'].opts(width=600, height=600) + array_plot['bottom']
+    layout = (
+        time_v_channel
+        + peak_wvs
+        + array_plot["top"].opts(width=600, height=600)
+        + array_plot["bottom"]
+    )
     return layout.cols(2)
+
 
 ##### SERVICE
 
 # Bokeh backend setup
 hv.extension("bokeh")
-renderer = hv.renderer('bokeh') # Bokeh Server
-lock = threading.Lock() # A Lock to address race condition
+renderer = hv.renderer("bokeh")  # Bokeh Server
+lock = threading.Lock()  # A Lock to address race condition
 
 # Get the number of processors/cores available in the system
 cpu_count = os.cpu_count()
 print("Number of processors/cores available in the system: ", cpu_count)
 
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
-if (APP_DB_URI == None):
+if APP_DB_URI == None:
     print("MongoDB Connection String Not Set")
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_events = my_db["events"]
-dims = ["cs1", "cs2", "z", "r", "e_light", "e_charge", 
-        "e_light", "e_ces", "drift_time", "n_peaks", "event_number"]
+dims = [
+    "cs1",
+    "cs2",
+    "z",
+    "r",
+    "e_light",
+    "e_charge",
+    "e_light",
+    "e_ces",
+    "drift_time",
+    "n_peaks",
+    "event_number",
+]
 st = straxen.contexts.xenon1t_dali()
+
 
 def load_waveform(run_id, event_id):
     df = st.get_array(run_id, "event_info")
@@ -308,24 +351,28 @@ def load_waveform(run_id, event_id):
     waveform = bokeh.embed.json_item(waveform)
     return waveform
 
+
 def load_events(run_id):
-    events = st.get_df(run_id, 'event_info')
+    events = st.get_df(run_id, "event_info")
     new_events = pd.DataFrame()
     for dim in dims:
         new_events[dim] = events[dim]
     return Binary(pickle.dumps(new_events, protocol=4))
-    
+
+
 def cache_events(run_id, events, msg):
-    post = {"run_id" : run_id, "events": events, "msg": msg}
+    post = {"run_id": run_id, "events": events, "msg": msg}
     document = my_events.find_one(post)
-    if (document == None):
+    if document == None:
         my_events.insert_one(post)
 
+
 def cache_waveform(run_id, event_id, waveform, msg):
-    post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}
+    post = {"event_id": event_id, "run_id": run_id, "waveform": waveform, "msg": msg}
     document = my_waveform.find_one(post)
-    if (document == None):
+    if document == None:
         my_waveform.insert_one(post)
+
 
 def process_waveform(run_id, event_id):
     print("starts processing waveform for run ", run_id, " and ", event_id)
@@ -340,9 +387,12 @@ def process_waveform(run_id, event_id):
         else:
             cache_waveform(run_id, event_id, None, "Data Not Available")
     finally:
-        document = my_request.delete_one({"status": "use", "run_id": run_id, "event_id": event_id})
+        document = my_request.delete_one(
+            {"status": "use", "run_id": run_id, "event_id": event_id}
+        )
         print("Just cached the waveform for run ", run_id, "and event ", event_id)
-    
+
+
 def process_events(run_id):
     print("starts processing events for run ", run_id)
     try:
@@ -355,27 +405,31 @@ def process_events(run_id):
             cache_events(run_id, None, e.message)
         else:
             cache_events(run_id, None, "Data Not Available")
-    finally:  
+    finally:
         document = my_request.delete_one({"status": "use", "run_id": run_id})
         print("Just cached the events for run ", run_id)
-    
+
+
 def fetch_request():
     while True:
-        document = my_request.find_one_and_update({"status": "new"}, 
-                                                  {"$set" : {"status": "use"}})
-        while (document):
+        document = my_request.find_one_and_update(
+            {"status": "new"}, {"$set": {"status": "use"}}
+        )
+        while document:
             request = document["request"]
-            if (request == "waveform"):
+            if request == "waveform":
                 run_id = document["run_id"]
                 event_id = document["event_id"]
                 process_waveform(run_id, event_id)
             else:
                 run_id = document["run_id"]
                 process_events(run_id)
-            document = my_request.find_one_and_update({"status": "new"}, 
-                                            {"$set" : {"status": "use"}})
+            document = my_request.find_one_and_update(
+                {"status": "new"}, {"$set": {"status": "use"}}
+            )
         # Sleep the app if no new requests
         time.sleep(10)
+
 
 print("Service starts now: ", datetime.datetime.now())
 threads = []

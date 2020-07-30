@@ -20,23 +20,35 @@ from holoviews_waveform_display import waveform_display
 
 # Bokeh backend setup
 hv.extension("bokeh")
-renderer = hv.renderer('bokeh') # Bokeh Server
-lock = threading.Lock() # A Lock to address race condition
+renderer = hv.renderer("bokeh")  # Bokeh Server
+lock = threading.Lock()  # A Lock to address race condition
 
 # Get the number of processors/cores available in the system
 cpu_count = os.cpu_count()
 print("Number of processors/cores available in the system: ", cpu_count)
 
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
-if (APP_DB_URI == None):
+if APP_DB_URI == None:
     print("MongoDB Connection String Not Set")
 my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_events = my_db["events"]
-dims = ["cs1", "cs2", "z", "r", "e_light", "e_charge", 
-        "e_light", "e_ces", "drift_time", "n_peaks", "event_number"]
+dims = [
+    "cs1",
+    "cs2",
+    "z",
+    "r",
+    "e_light",
+    "e_charge",
+    "e_light",
+    "e_ces",
+    "drift_time",
+    "n_peaks",
+    "event_number",
+]
 st = straxen.contexts.xenon1t_dali()
+
 
 def load_waveform(run_id, event_id):
     """
@@ -61,6 +73,7 @@ def load_waveform(run_id, event_id):
     waveform = bokeh.embed.json_item(waveform)
     return waveform
 
+
 def load_events(run_id):
     """
     Loads the events for a run
@@ -71,12 +84,13 @@ def load_events(run_id):
     Returns:
         Binary: The binary data of the pickled dataframe
     """
-    events = st.get_df(run_id, 'event_info')
+    events = st.get_df(run_id, "event_info")
     new_events = pd.DataFrame()
     for dim in dims:
         new_events[dim] = events[dim]
     return Binary(pickle.dumps(new_events, protocol=4))
-    
+
+
 def cache_events(run_id, events, msg):
     """
     Caches the events into MongoDB
@@ -86,10 +100,11 @@ def cache_events(run_id, events, msg):
         events (Binary): Binary data of a pickled DataFrame
         msg (str): Error message, empty string if no error
     """
-    post = {"run_id" : run_id, "events": events, "msg": msg}
+    post = {"run_id": run_id, "events": events, "msg": msg}
     document = my_events.find_one(post)
-    if (document == None):
+    if document == None:
         my_events.insert_one(post)
+
 
 def cache_waveform(run_id, event_id, waveform, msg):
     """
@@ -101,10 +116,11 @@ def cache_waveform(run_id, event_id, waveform, msg):
         waveform (JSON-like str): The waveform
         msg (str): Error message, empty string if no error
     """
-    post = {"event_id" : event_id, "run_id" : run_id, "waveform": waveform, "msg": msg}
+    post = {"event_id": event_id, "run_id": run_id, "waveform": waveform, "msg": msg}
     document = my_waveform.find_one(post)
-    if (document == None):
+    if document == None:
         my_waveform.insert_one(post)
+
 
 def process_waveform(run_id, event_id):
     """
@@ -126,9 +142,12 @@ def process_waveform(run_id, event_id):
         else:
             cache_waveform(run_id, event_id, None, "Data Not Available")
     finally:
-        document = my_request.delete_one({"status": "use", "run_id": run_id, "event_id": event_id})
+        document = my_request.delete_one(
+            {"status": "use", "run_id": run_id, "event_id": event_id}
+        )
         print("Just cached the waveform for run ", run_id, "and event ", event_id)
-    
+
+
 def process_events(run_id):
     """
     Fetches/loads the events from a run
@@ -147,30 +166,34 @@ def process_events(run_id):
             cache_events(run_id, None, e.message)
         else:
             cache_events(run_id, None, "Data Not Available")
-    finally:  
+    finally:
         document = my_request.delete_one({"status": "use", "run_id": run_id})
         print("Just cached the events for run ", run_id)
-    
+
+
 def fetch_request():
     """
     Fetches and process requests
     """
     while True:
-        document = my_request.find_one_and_update({"status": "new"}, 
-                                                  {"$set" : {"status": "use"}})
-        while (document):
+        document = my_request.find_one_and_update(
+            {"status": "new"}, {"$set": {"status": "use"}}
+        )
+        while document:
             request = document["request"]
-            if (request == "waveform"):
+            if request == "waveform":
                 run_id = document["run_id"]
                 event_id = document["event_id"]
                 process_waveform(run_id, event_id)
             else:
                 run_id = document["run_id"]
                 process_events(run_id)
-            document = my_request.find_one_and_update({"status": "new"}, 
-                                            {"$set" : {"status": "use"}})
+            document = my_request.find_one_and_update(
+                {"status": "new"}, {"$set": {"status": "use"}}
+            )
         # Sleep the app if no new requests
         time.sleep(10)
+
 
 if __name__ == "__main__":
     print("Service starts now: ", datetime.datetime.now())
