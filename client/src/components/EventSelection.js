@@ -79,12 +79,12 @@ class EventSelection extends Component {
    * and append the node to the specified div tag
    */
   loadEventPlots() {
-    console.log("loading events...");
-    // const scriptStr = this.props.eventPlot;
-    // const parent = document.getElementById("graph");
-    // const scriptTag = ;
-    // parent.appendChild(scriptTag);
-    console.log("Events loaded at ", date);
+    // console.log("loading events...");
+    // // const scriptStr = this.props.eventPlot;
+    // // const parent = document.getElementById("graph");
+    // // const scriptTag = ;
+    // // parent.appendChild(scriptTag);
+    // console.log("Events loaded at ", date);
   }
 
   /**
