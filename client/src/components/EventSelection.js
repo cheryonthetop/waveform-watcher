@@ -75,7 +75,7 @@ class EventSelection extends Component {
       .createContextualFragment(scriptStr);
     parent.appendChild(scriptTag);
     // Reloading it to make sure it executes again after the tag is inserted
-    document.createRange().createContextualFragment(script);
+    document.createRange().createContextualFragment(scriptTag);
     var tempDate = new Date();
     var date =
       tempDate.getFullYear() +
