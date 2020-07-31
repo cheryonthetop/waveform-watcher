@@ -104,17 +104,18 @@ class WaveformURL extends Component {
       .post(url, body, config)
       .then(function (res) {
         console.log(res.data);
-        if (res.data.err_msg) {
-          const title = "Get Waveform Failure";
-          self.props.dispatch(errorReported(title, res.data.err_msg));
-          self.setState({ isLoading: false });
-        } else {
-          try {
-            embed.embed_item(res.data, "graph");
-          } catch {
-            self.handleShowModalRenderError();
+        self.setState({ isLoading: false }, () => {
+          if (res.data.err_msg) {
+            const title = "Get Waveform Failure";
+            self.props.dispatch(errorReported(title, res.data.err_msg));
+          } else {
+            try {
+              embed.embed_item(res.data, "graph");
+            } catch {
+              self.handleShowModalRenderError();
+            }
           }
-        }
+        });
       })
       .catch((err) => {
         console.log(err);
