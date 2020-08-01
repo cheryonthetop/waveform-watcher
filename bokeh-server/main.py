@@ -753,7 +753,7 @@ def blocking_task():
     events = wait_for_events(run_id)
     new_events = {}
     for dim in dims:
-        new_events[dim] = events[dim]
+        new_events[dim] = [1, 2, 3, 4, 5]
     # but update the document from callback
     doc.add_next_tick_callback(partial(update, events=new_events))
 
