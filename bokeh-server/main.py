@@ -358,7 +358,7 @@ def render_events(run_id, events):
         )
         print("Inserted layout")
 
-    doc.add_next_tick_callback(remove_layout)
+    # doc.add_next_tick_callback(remove_layout)
     doc.add_next_tick_callback(insert_layout)
 
 
@@ -400,16 +400,16 @@ def blocking_task():
     print("waiting")
     events = wait_for_events(run_id)
     print("done waiting")
-    if isinstance(events, str):
-        # An error string returned
-        div = Div(text=events)
-        div.align = "center"
-        div.sizing_mode = "stretch_both"
-        while len(doc.roots) != 0:
-            doc.remove_root(doc.roots[0])
-        doc.add_root(column(div))
-    else:
-        render_events(run_id, events)
+    # if isinstance(events, str):
+    #     # An error string returned
+    #     div = Div(text=events)
+    #     div.align = "center"
+    #     div.sizing_mode = "stretch_both"
+    #     while len(doc.roots) != 0:
+    #         doc.remove_root(doc.roots[0])
+    #     doc.add_root(column(div))
+    # else:
+    #     render_events(run_id, events)
 
 
 t = threading.Thread(target=blocking_task)
