@@ -559,7 +559,7 @@ def wait_for_events(run_id):
 
 # request.arguments is a dict that maps argument names to lists of strings,
 # e.g, the query string ?N=10 will result in {'N': [b'10']}
-args = curdoc().session_context.request.arguments
+args = doc.session_context.request.arguments
 
 try:
     run_id = str(args.get("run")[0].decode("utf-8")).split("/")[0]
@@ -567,9 +567,24 @@ try:
 except:
     print("no run id")
 
-events = wait_for_events(run_id)
-source = ColumnDataSource(events)
-
+dims = [
+    "cs1",
+    "cs2",
+    "z",
+    "r",
+    "e_light",
+    "e_charge",
+    "e_light",
+    "e_ces",
+    "drift_time",
+    "n_peaks",
+    "event_number",
+]
+default = {}
+for dim in dims:
+    default[dim] = []
+source = ColumnDataSource(data=default)
+    
 def callback_select(attr, old, new):
     """
     Callback invoked when a user selects data points from
@@ -721,7 +736,7 @@ for color, dim in zip(COLORS, DIMS):
 # make a grid
 grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
 
-curdoc().add_root(
+doc.add_root(
     column(
         text_input,
         row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform),),
@@ -729,3 +744,18 @@ curdoc().add_root(
     )
 )
 print("Inserted layout")
+
+@gen.coroutine
+def update(events):
+    source.stream(events)
+
+def blocking_task():
+    events = wait_for_events(run_id)
+    new_events = {}
+    for dim in dims:
+        new_events[dim] = events[dim]
+    # but update the document from callback
+    doc.add_next_tick_callback(partial(update, events=new_events))
+
+thread = threading.Thread(target=blocking_task)
+thread.start()
