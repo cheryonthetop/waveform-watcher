@@ -555,11 +555,14 @@ def wait_for_events(run_id):
         if datetime.datetime.now() >= endtime:
             return "Get Events Timeout. Please Try Again."
 
+
+events = wait_for_events(run_id)
+source = ColumnDataSource(events)
 ###### Appends model to document
 
 # request.arguments is a dict that maps argument names to lists of strings,
 # e.g, the query string ?N=10 will result in {'N': [b'10']}
-args = doc.session_context.request.arguments
+args = curdoc().session_context.request.arguments
 
 try:
     run_id = str(args.get("run")[0].decode("utf-8")).split("/")[0]
@@ -567,8 +570,6 @@ try:
 except:
     print("no run id")
 
-events = wait_for_events(run_id)
-source = ColumnDataSource(events)
 
 def callback_select(attr, old, new):
     """
@@ -721,7 +722,7 @@ for color, dim in zip(COLORS, DIMS):
 # make a grid
 grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
 
-doc.add_root(
+curdoc().add_root(
     column(
         text_input,
         row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform),),
