@@ -409,7 +409,7 @@ def blocking_task():
     #         doc.remove_root(doc.roots[0])
     #     doc.add_root(column(div))
     # else:
-    #     render_events(run_id, events)
+    render_events(run_id, events)
 
 
 t = threading.Thread(target=blocking_task)
