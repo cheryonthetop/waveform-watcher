@@ -555,9 +555,6 @@ def wait_for_events(run_id):
         if datetime.datetime.now() >= endtime:
             return "Get Events Timeout. Please Try Again."
 
-
-events = wait_for_events(run_id)
-source = ColumnDataSource(events)
 ###### Appends model to document
 
 # request.arguments is a dict that maps argument names to lists of strings,
@@ -570,6 +567,8 @@ try:
 except:
     print("no run id")
 
+events = wait_for_events(run_id)
+source = ColumnDataSource(events)
 
 def callback_select(attr, old, new):
     """
