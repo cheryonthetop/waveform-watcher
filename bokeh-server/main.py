@@ -582,7 +582,7 @@ dims = [
 ]
 default = {}
 for dim in dims:
-    default[dim] = []
+    default[dim] = [0]
 source = ColumnDataSource(data=default)
     
 def callback_select(attr, old, new):
