@@ -86,5 +86,6 @@ def wait_for_events(run_id):
             return "Get Events Timeout. Please Try Again."
         
 def get_run(session_id):
-    run_id = my_sesssion.find_one({session_id: {"exists": True}})[session_id]
+    print(session_id)
+    run_id = my_sesssion.find_one({session_id: {"$exists": True}})[session_id]
     return run_id

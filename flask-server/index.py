@@ -179,6 +179,7 @@ def get_event_plot():
         # ) as session:
         session_id = generate_session_id()
         my_sessions.insert_one({session_id: run_id})
+
         script = server_session(url=BOKEH_SERVER_URL, session_id=session_id)
         # use the script in the rendered page
         return script

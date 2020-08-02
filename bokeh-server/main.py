@@ -491,7 +491,7 @@ columns = [
 ]
 default = pd.DataFrame()
 for col in columns:
-    default[col] = [0]
+    default[col] = []
 source = ColumnDataSource(data=default)
     
 def callback_select(attr, old, new):
