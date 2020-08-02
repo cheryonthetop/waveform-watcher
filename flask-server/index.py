@@ -178,7 +178,7 @@ def get_event_plot():
         with pull_session(
             url=BOKEH_SERVER_URL, session_id=my_session_id, arguments={"run": run_id}
         ) as session:
-            script = server_session(url=BOKEH_SERVER_URL, session_id=session.id)
+            script = server_session(url=BOKEH_SERVER_URL+"run?="+run_id, session_id=session.id)
             # use the script in the rendered page
             return script
     else:
