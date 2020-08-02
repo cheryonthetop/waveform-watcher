@@ -14,6 +14,7 @@ my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_events = my_db["events"]
 my_waveform = my_db["waveform"]
+my_sesssion = my_db["sessions"]
 
 ##### DB routine helpers
 def cache_waveform_request(run_id, event_id):
@@ -83,3 +84,6 @@ def wait_for_events(run_id):
         time.sleep(10)
         if datetime.datetime.now() >= endtime:
             return "Get Events Timeout. Please Try Again."
+        
+def get_run():
+    my_events.find_one()

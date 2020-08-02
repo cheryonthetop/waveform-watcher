@@ -178,8 +178,8 @@ def get_event_plot():
         #     url=BOKEH_SERVER_URL, session_id=generate_session_id(), arguments={"run": run_id}
         # ) as session:
         session_id = generate_session_id()
-        script = server_session(url=BOKEH_SERVER_URL, session_id=session_id)
         my_sessions.insert_one({session_id: run_id})
+        script = server_session(url=BOKEH_SERVER_URL, session_id=session_id)
         # use the script in the rendered page
         return script
     else:
