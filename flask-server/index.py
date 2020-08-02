@@ -174,12 +174,12 @@ def get_event_plot():
         print("RUN ID IS: ", run_id)
         threading.Thread(target=cache_events_request, args=[run_id]).start()
         # pull a new session from a running Bokeh server
-        with pull_session(
-            url=BOKEH_SERVER_URL, session_id=generate_session_id(), arguments={"run": run_id}
-        ) as session:
-            script = server_session(url=BOKEH_SERVER_URL, session_id=session.id)
-            # use the script in the rendered page
-            return script
+        # with pull_session(
+        #     url=BOKEH_SERVER_URL, session_id=generate_session_id(), arguments={"run": run_id}
+        # ) as session:
+        script = server_session(url=BOKEH_SERVER_URL, session_id=generate_session_id)
+        # use the script in the rendered page
+        return script
     else:
         return make_response(jsonify({"error": "Bad Request"}), 400)
 
