@@ -491,7 +491,7 @@ columns = [
 ]
 default = pd.DataFrame()
 for col in columns:
-    default[col] = []
+    default[col] = [0]
 source = ColumnDataSource(data=default)
     
 def callback_select(attr, old, new):
@@ -510,13 +510,15 @@ def callback_select(attr, old, new):
         In our case, it is a list
     """
     print("selected data")
-    inds = new
-    print(inds)
-    if len(inds) != 0:
-        btn_cache_all.disabled = False
-    for i in range(0, len(inds)):
-        event = str(source.data["event_number"][inds[i]])
-        update_options(event)
+    threading.Thread(partial(update_selceted, new=new)).start()
+    def update_selected(new):
+        inds = new
+        print(inds)
+        if len(inds) != 0:
+            btn_cache_all.disabled = False
+        for i in range(0, len(inds)):
+            event = str(source.data["event_number"][inds[i]])
+            update_options(event)
 
 
 source.selected.on_change("indices", callback_select)
@@ -656,7 +658,7 @@ print("Inserted layout")
 
 @gen.coroutine
 def update(events):
-    source.stream(events)
+    source.update(data=events)
     # source = events
 
 def blocking_task():
