@@ -60,7 +60,7 @@ my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_run = my_db["run"]
 my_events = my_db["events"]
-
+my_sessions = my_db["sessions"]
 
 def get_runs():
     """
@@ -177,7 +177,9 @@ def get_event_plot():
         # with pull_session(
         #     url=BOKEH_SERVER_URL, session_id=generate_session_id(), arguments={"run": run_id}
         # ) as session:
-        script = server_session(url=BOKEH_SERVER_URL, session_id=generate_session_id)
+        session_id = generate_session_id()
+        script = server_session(url=BOKEH_SERVER_URL, session_id=session_id)
+        my_sessions.insert_one({session_id: run_id})
         # use the script in the rendered page
         return script
     else:
