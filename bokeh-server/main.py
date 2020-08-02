@@ -438,7 +438,7 @@ import pandas as pd
 import threading
 from tornado import gen
 from functools import partial
-from helpers import cache_waveform_request, get_events_from_cache, wait_for_events
+from helpers import cache_waveform_request, get_events_from_cache, wait_for_events, get_run
 
 hv.extension("bokeh")
 # Fixed Parameter in Plots for Event Selections
@@ -472,17 +472,9 @@ if APP_URL == None:
 
 ###### Appends model to document
 doc = curdoc()
-
-# request.arguments is a dict that maps argument names to lists of strings,
-# e.g, the query string ?N=10 will result in {'N': [b'10']}
-args = doc.session_context.request.arguments
-run_id =  args.get("run")
-
-if run_id != None:
-    run_id = str(run_id[0].decode("utf-8")).split("/")[0]
-    print("Received run " + run_id)
-else:
-    run_id = "170204_1710"
+session_id = doc.session_context.id
+print(session_id)
+run_id = get_run(session_id)
 
 columns = [
     "cs1",
