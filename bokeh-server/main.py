@@ -668,7 +668,7 @@ def update(events):
     # source = events
 
 def blocking_task():
-    events = wait_for_events(run_id)
+    events = wait_for_events(run_id).head(5)
     # new_events = {}
     # for dim in dims:
     #     new_events[dim] = [1, 2, 3, 4, 5]
