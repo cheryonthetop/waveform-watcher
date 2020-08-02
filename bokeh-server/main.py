@@ -472,17 +472,17 @@ if APP_URL == None:
 
 ###### Appends model to document
 doc = curdoc()
-run_id = None
 
 # request.arguments is a dict that maps argument names to lists of strings,
 # e.g, the query string ?N=10 will result in {'N': [b'10']}
 args = doc.session_context.request.arguments
+run_id =  args.get("run")
 
-try:
-    run_id = str(args.get("run")[0].decode("utf-8")).split("/")[0]
+if run_id == None:
+    run_id = str(run_id[0].decode("utf-8")).split("/")[0]
     print("Received run " + run_id)
-except:
-    print("no run id")
+else:
+    run_id = "170204_1810"
 
 columns = [
     "cs1",
@@ -668,7 +668,7 @@ def update(events):
     # source = events
 
 def blocking_task():
-    events = wait_for_events(run_id).head(5)
+    events = wait_for_events(run_id)
     # new_events = {}
     # for dim in dims:
     #     new_events[dim] = [1, 2, 3, 4, 5]
