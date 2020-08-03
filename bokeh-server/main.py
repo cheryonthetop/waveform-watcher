@@ -19,12 +19,16 @@ import holoviews as hv
 import pymongo
 import pandas as pd
 import threading
-from tornado import gen
 from functools import partial
 from helpers import (
     get_events_from_cache,
     wait_for_events,
     get_run,
+    enable_btn,
+    disable_btn,
+    clear_options,
+    update_options,
+    update_source,
 )
 
 hv.extension("bokeh")
@@ -87,24 +91,12 @@ for col in columns:
 source = ColumnDataSource(data=default)
 
 
-@gen.coroutine
-def update_source(events):
-    """
-    Updates the source data with real events once they are
-    retrieved from the database
-
-    Args:
-        events (DataFrame): The true data source
-    """
-    source.update(data=events)
-
-
 def retrieve_events():
     """
-    Retrieves the events from the database
+    Retrieves the events from the database and updates the source
     """
     events = wait_for_events(run_id)
-    doc.add_next_tick_callback(partial(update_source, events=events))
+    doc.add_next_tick_callback(partial(update_source, source=source, events=events))
 
 
 thread = threading.Thread(target=retrieve_events)
@@ -131,29 +123,20 @@ def callback_select(attr, old, new):
 
 def update_selected(new):
     """
-    Updates the options in the dropdown box with the user-selected
+    Updates the options in the multi select box with the user-selected
     data
 
     Args:
         new (list): The list selected values
     """
     inds = new
-    if (len(inds) != 0):
-        btn_clear.disabled = False
+    if len(inds) != 0:
+        doc.add_next_tick_callback(partial(enable_btn, btn=btn_clear))
     for i in range(0, len(inds)):
         event = str(source.data["event_number"][inds[i]])
-        doc.add_next_tick_callback(partial(update_options, event=event))
-
-
-def update_options(event):
-    """
-    Updates the options in the multi_select widget
-
-    Args:
-        event (str): Event ID of the event
-    """
-    if event not in multi_select.options:
-        multi_select.options.append(event)
+        doc.add_next_tick_callback(
+            partial(update_options, multi_select=multi_select, event=event)
+        )
 
 
 source.selected.on_change("indices", callback_select)
@@ -176,9 +159,9 @@ def callback_value_selected(attr, old, new):
     """
     value = new
     if len(value) != 0:
-        btn_waveform.disabled = False
+        doc.add_next_tick_callback(partial(enable_btn, btn=btn_waveform))
     else:
-        btn_waveform.disabled = True
+        doc.add_next_tick_callback(partial(disable_btn, btn=btn_waveform))
 
 
 # A multi select box to choose events from
@@ -212,21 +195,22 @@ btn_waveform.align = "center"
 btn_waveform.height = 30
 btn_waveform.margin = (20, 0, 0, 0)
 
-# add a btn to clear all options in dropdown
-def clear_options():
+# add a btn to clear all options in multi select
+def callback_btn_clear():
     """
-    Clears all optiosn in the dropdown
+    Clears all optiosn in the multi select and disables buttons
     """
-    multi_select.options = []
-    btn_clear.disabled = True
-    btn_waveform.disabled = True
-    
+    doc.add_next_tick_callback(partial(disable_btn, btn=btn_clear))
+    doc.add_next_tick_callback(partial(disable_btn, btn=btn_waveform))
+    doc.add_next_tick_callback(partial(clear_options, multi_select=multi_select))
+
+
 btn_clear = Button(label="Clear Options")
 btn_clear.disabled = True
 btn_clear.align = "center"
 btn_clear.height = 30
 btn_clear.margin = (10, 0, 0, 0)
-btn_clear.on_click(clear_options)
+btn_clear.on_click(callback_btn_clear)
 
 
 # Create the plots with a TapTool URL callback

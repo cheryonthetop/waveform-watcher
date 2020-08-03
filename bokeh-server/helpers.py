@@ -5,6 +5,7 @@ import pickle
 import pymongo
 import os
 import threading
+from tornado import gen
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
@@ -88,3 +89,62 @@ def delete_run(session_id):
         session_id (str): The session ID
     """
     my_session.delete_one({session_id: {"$exists": True}})
+
+
+@gen.coroutine
+def enable_btn(btn):
+    """
+    Enables button
+
+    Args:
+        btn (bokeh.Model): A button widget
+    """
+    btn.disabled = False
+
+
+@gen.coroutine
+def disable_btn(btn):
+    """
+    Disables button
+
+    Args:
+        btn (bokeh.Model): A button widget
+    """
+    btn.disabled = True
+
+
+@gen.coroutine
+def clear_options(multi_select):
+    """
+    Clears options in the multi select box
+
+    Args:
+        multi_select (bokeh.Model): A multi select box
+    """
+    multi_select.options = []
+
+
+@gen.coroutine
+def update_options(multi_select, event):
+    """
+    Updates the options in the multi_select widget
+
+    Args:
+        multi_select (bokeh.Model): A multi select box
+        event (str): Event ID of the event
+    """
+    if event not in multi_select.options:
+        multi_select.options.append(event)
+
+
+@gen.coroutine
+def update_source(source, events):
+    """
+    Updates the source data with real events once they are
+    retrieved from the database
+
+    Args:
+        source (bokeh.Model): A ColumnDataSource
+        events (DataFrame): The true data source
+    """
+    source.update(data=events)
