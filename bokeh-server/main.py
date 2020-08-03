@@ -183,7 +183,7 @@ def callback_value_selected(attr, old, new):
 
 # A multi select box to choose events from
 multi_select = MultiSelect(title="Selected Events:", value=[], options=[])
-multi_select.width = 600
+multi_select.width = 700
 multi_select.height = 100
 multi_select.on_change("value", callback_value_selected)
 
@@ -219,6 +219,7 @@ def clear_options():
     """
     multi_select.options = []
     btn_clear.disabled = True
+    btn_waveform.disabled = True
     
 btn_clear = Button(label="Clear Options")
 btn_clear.disabled = True
@@ -240,7 +241,7 @@ for color, dim in zip(COLORS, DIMS):
     taptool.callback = OpenURL(url=url)
     plots.append(p)
 # make a grid
-grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
+grid = gridplot([plots[:3], plots[3:]], plot_width=400, plot_height=300)
 
 doc.add_root(
     column(text_input, row(multi_select, column(btn_waveform, btn_clear)), grid,)
