@@ -21,10 +21,14 @@ import pandas as pd
 import threading
 from tornado import gen
 from functools import partial
-from helpers import cache_waveform_request, get_events_from_cache, wait_for_events, get_run
+from helpers import (
+    get_events_from_cache,
+    wait_for_events,
+    get_run,
+)
 
 hv.extension("bokeh")
-# Fixed Parameter in Plots for Event Selections
+# Fixed Parameter in Plots
 DIMS = [
     ["cs1", "cs2"],
     ["z", "r"],
@@ -53,12 +57,14 @@ else:
 if APP_URL == None:
     print("Env Variable APP_URL Is Not Set")
 
-###### Appends model to document
+###### Building the document
+
 doc = curdoc()
 session_id = doc.session_context.id
 print(session_id)
 run_id = get_run(session_id)
 
+# The columns for the data source
 columns = [
     "cs1",
     "cs2",
@@ -72,11 +78,39 @@ columns = [
     "n_peaks",
     "event_number",
 ]
+
+# Data source of all the events. Populate with a dummy source
+# before the real data is retrieved
 default = pd.DataFrame()
 for col in columns:
     default[col] = [0]
 source = ColumnDataSource(data=default)
-    
+
+
+@gen.coroutine
+def update_source(events):
+    """
+    Updates the source data with real events once they are
+    retrieved from the database
+
+    Args:
+        events (DataFrame): The true data source
+    """
+    source.update(data=events)
+
+
+def retrieve_events():
+    """
+    Retrieves the events from the database
+    """
+    events = wait_for_events(run_id)
+    doc.add_next_tick_callback(partial(update_source, events=events))
+
+
+thread = threading.Thread(target=retrieve_events)
+thread.start()
+
+
 def callback_select(attr, old, new):
     """
     Callback invoked when a user selects data points from
@@ -92,25 +126,23 @@ def callback_select(attr, old, new):
         new (type of the attribute): New value of the changed attributes. 
         In our case, it is a list
     """
-    print("selected data")
-    # threading.Thread(partial(update_selceted, new=new)).start()
-    # def update_selected(new):
+    threading.Thread(target=update_selected, args=[new]).start()
+
+
+def update_selected(new):
+    """
+    Updates the options in the dropdown box with the user-selected
+    data
+
+    Args:
+        new (list): The list selected values
+    """
     inds = new
-    print(inds)
-    if len(inds) != 0:
-        btn_cache_all.disabled = False
+    if (len(inds) != 0):
+        btn_clear.disabled = False
     for i in range(0, len(inds)):
         event = str(source.data["event_number"][inds[i]])
-        update_options(event)
-
-
-source.selected.on_change("indices", callback_select)
-
-# Other components (or models or widgets in Bokeh terms)
-text_input = TextInput(value=run_id, title="Events for Run: ")
-multi_select = MultiSelect(title="Selected Events:", value=[], options=[])
-multi_select.width = 600
-multi_select.height = 100
+        doc.add_next_tick_callback(partial(update_options, event=event))
 
 
 def update_options(event):
@@ -124,11 +156,14 @@ def update_options(event):
         multi_select.options.append(event)
 
 
+source.selected.on_change("indices", callback_select)
+
+
 def callback_value_selected(attr, old, new):
     """
     Callback invoked when an option in multi_select is selected (and
-    therefore becomes a value). This enables the buttons that cache
-    and view selected options (our events)
+    therefore becomes a value). This enables the buttons that view and delete
+    selected options (our events)
 
     Args:
         attr (str): Attributes that could be changed. In our case,
@@ -141,55 +176,21 @@ def callback_value_selected(attr, old, new):
     """
     value = new
     if len(value) != 0:
-        btn_cache_selected.disabled = False
         btn_waveform.disabled = False
     else:
-        btn_cache_selected.disabled = True
         btn_waveform.disabled = True
 
 
+# A multi select box to choose events from
+multi_select = MultiSelect(title="Selected Events:", value=[], options=[])
+multi_select.width = 600
+multi_select.height = 100
 multi_select.on_change("value", callback_value_selected)
 
-# create a callback that will cache waveform
-def callback_btn_cache_selected():
-    """
-    Callback invoked when a user clicks the button that
-    caches selected events.
-    """
-    events = multi_select.value
-    events = [int(event) for event in events]
-    for event in events:
-        cache_waveform_request(run_id, event)
+# Text box to indicate run
+text_input = TextInput(value=run_id, title="Events for Run: ")
 
-
-# add a btn_cache_selected widget and configure with the call back
-btn_cache_selected = Button(label="Cache Waveform for Chosen Events")
-btn_cache_selected.on_click(callback_btn_cache_selected)
-btn_cache_selected.disabled = len(multi_select.value) == 0
-btn_cache_selected.align = "center"
-btn_cache_selected.height = 30
-btn_cache_selected.margin = (10, 0, 0, 0)
-
-# create a callback that will cache all waveform
-def callback_btn_cache_all():
-    """
-    Callback invoked when a user clicks the button
-    to cache all events.
-    """
-    events = multi_select.options
-    events = [int(event) for event in events]
-    for event in events:
-        cache_waveform_request(run_id, event)
-
-
-# add a btn_cache_all widget and configure with the call back
-btn_cache_all = Button(label="Cache Waveform for All Events")
-btn_cache_all.on_click(callback_btn_cache_all)
-btn_cache_all.disabled = len(multi_select.value) == 0
-btn_cache_all.align = "center"
-btn_cache_all.height = 30
-btn_cache_all.margin = (10, 0, 0, 0)
-
+# add a btn to view waveform
 code = """
 var events = ms.value;
 console.log(events);
@@ -204,20 +205,31 @@ for (event of events) {
 callback_btn_waveform = CustomJS(
     args=dict(ms=multi_select, run=run_id, app=APP_URL), code=code
 )
-
-# add a btn_cache_all widget and configure the call back
 btn_waveform = Button(label="View Waveform for Chosen Events")
 btn_waveform.js_on_click(callback_btn_waveform)
 btn_waveform.disabled = True
 btn_waveform.align = "center"
 btn_waveform.height = 30
-btn_waveform.margin = (10, 0, 0, 0)
+btn_waveform.margin = (20, 0, 0, 0)
+
+# add a btn to clear all options in dropdown
+def clear_options():
+    """
+    Clears all optiosn in the dropdown
+    """
+    multi_select.options = []
+    btn_clear.disabled = True
+    
+btn_clear = Button(label="Clear Options")
+btn_clear.disabled = True
+btn_clear.align = "center"
+btn_clear.height = 30
+btn_clear.margin = (10, 0, 0, 0)
+btn_clear.on_click(clear_options)
+
 
 # Create the plots with a TapTool URL callback
 plots = []
-# use the "color" column of the Csource to complete the URL
-# e.g. if the glyph at index 10 is selected, then @color
-# will be replaced with source.data['color'][10]
 url = "{APP_URL}/waveform/{run_id}/@event_number/".format(
     APP_URL=APP_URL, run_id=run_id
 )
@@ -231,26 +243,6 @@ for color, dim in zip(COLORS, DIMS):
 grid = gridplot([plots[:3], plots[3:]], plot_width=300, plot_height=300)
 
 doc.add_root(
-    column(
-        text_input,
-        row(multi_select, column(btn_cache_selected, btn_cache_all, btn_waveform),),
-        grid,
-    )
+    column(text_input, row(multi_select, column(btn_waveform, btn_clear)), grid,)
 )
 print("Inserted layout")
-
-@gen.coroutine
-def update(events):
-    source.update(data=events)
-    # source = events
-
-def blocking_task():
-    events = wait_for_events(run_id)
-    # new_events = {}
-    # for dim in dims:
-    #     new_events[dim] = [1, 2, 3, 4, 5]
-    # but update the document from callback
-    doc.add_next_tick_callback(partial(update, events=events))
-
-thread = threading.Thread(target=blocking_task)
-thread.start()

@@ -4,6 +4,7 @@ import time
 import pickle
 import pymongo
 import os
+import threading
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
@@ -17,29 +18,6 @@ my_waveform = my_db["waveform"]
 my_sesssion = my_db["sessions"]
 
 ##### DB routine helpers
-def cache_waveform_request(run_id, event_id):
-    """
-    Inserts a request into the request collection that
-    asks for a waveform
-
-    Args:
-        run_id (str): Run ID of the run
-        event_id (str): Event ID of the event
-    """
-    print("cacheing waveform for run ", run_id, "and event ", event_id)
-    request = my_request.find_one({"run_id": run_id, "event_id": event_id})
-    waveform = my_waveform.find_one({"run_id": run_id, "event_id": event_id})
-    # cache to request if not already in it
-    if request == None and waveform == None:
-        post = {
-            "status": "new",
-            "run_id": run_id,
-            "event_id": event_id,
-            "request": "waveform",
-        }
-        my_request.insert_one(post)  # insert mongo document into 'fetch'
-
-
 def get_events_from_cache(run_id):
     """
     Gets events from the cache
@@ -84,8 +62,29 @@ def wait_for_events(run_id):
         time.sleep(10)
         if datetime.datetime.now() >= endtime:
             return "Get Events Timeout. Please Try Again."
-        
+
+
 def get_run(session_id):
-    print(session_id)
+    """
+    Gets the run the session is dealing with and removes it
+    from the database because this is single use.
+
+    Args:
+        session_id (str): The session ID
+
+    Returns:
+        str: The run ID
+    """
     run_id = my_sesssion.find_one({session_id: {"$exists": True}})[session_id]
+    threading.Thread(target=delete_run, args=[session_id])
     return run_id
+
+
+def delete_run(session_id):
+    """
+    Deletes the run stored in the sesssion.
+
+    Args:
+        session_id (str): The session ID
+    """
+    my_session.delete_one({session_id: {"$exists": True}})
