@@ -219,7 +219,7 @@ url = "{APP_URL}/waveform/{run_id}/@event_number/".format(
 )
 for color, dim in zip(COLORS, DIMS):
     p = figure(tools=TOOLS, x_axis_label=dim[0], y_axis_label=dim[1])
-    p.circle(dim[0], dim[1], source=source, alpha=0.6, color=color)
+    p.circle(dim[0], dim[1], source=source, alpha=0.6, color=color, selection_color="lightslategrey")
     taptool = p.select(type=TapTool)
     taptool.callback = OpenURL(url=url)
     plots.append(p)

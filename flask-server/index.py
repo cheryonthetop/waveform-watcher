@@ -101,6 +101,7 @@ def send_data():
             "event_id": "",
             "waveform": None,
             "tags_data": [],
+            "waveform_history": [],
         }
         my_app.insert_one(post)
         document = my_app.find_one({"user": user})

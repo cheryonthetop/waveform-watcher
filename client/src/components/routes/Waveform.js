@@ -13,6 +13,7 @@ import { Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
 import ErrorModal from "../ErrorModal";
 import Header from "../Header";
+import WaveformHistory from "../WaveformHistory";
 
 class Waveform extends Component {
   /**
@@ -143,10 +144,10 @@ class Waveform extends Component {
    * Renders the page
    */
   render() {
-    if (!this.props.isAuthenticated) {
-      window.localStorage.setItem("redirect", this.props.location.pathname);
-      return <Redirect to="/login" />;
-    }
+    // if (!this.props.isAuthenticated) {
+    //   window.localStorage.setItem("redirect", this.props.location.pathname);
+    //   return <Redirect to="/login" />;
+    // }
     const { runID, eventID, isLoading, renderError, paramsHidden } = this.state;
     return (
       <div>
@@ -164,6 +165,8 @@ class Waveform extends Component {
                 user={this.props.user}
                 handleLoading={this.handleLoading}
               />
+              <WaveformHistory></WaveformHistory>
+
               <Tags handleLoading={this.handleLoading} />
             </div>
             <Button

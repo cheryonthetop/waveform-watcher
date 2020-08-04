@@ -27,6 +27,7 @@ const initialState = {
   eventPlot: undefined,
   tagsData: [],
   availableRuns: [],
+  waveformHistory: [],
   isLoading: true,
 };
 
@@ -56,18 +57,25 @@ export default function (state = initialState, action) {
         runID: action.payload.run_id,
         eventID: action.payload.event_id,
         waveform: action.payload.waveform,
+        waveformHistory: action.payload.waveform_history,
         tagsData: action.payload.tags_data,
         availableRuns: availableRuns,
         isLoading: false,
       };
     }
-    case GET_WAVEFORM_SUCCESS:
+    case GET_WAVEFORM_SUCCESS: {
+      const { runID, eventID, waveform } = action.payload;
+      const record = { runID: runID, eventID: eventID };
+      const newHistory = state.waveformHistory.push(record);
       return {
         ...state,
-        runID: action.payload.runID,
-        eventID: action.payload.eventID,
-        waveform: action.payload.waveform,
+        runID: runID,
+        eventID: eventID,
+        waveform: waveform,
+        waveformHistory: newHistory,
       };
+    }
+
     case GET_EVENT_PLOT_SUCCESS:
       return {
         ...state,
