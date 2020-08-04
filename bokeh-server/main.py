@@ -87,9 +87,8 @@ columns = [
 # before the real data is retrieved
 default = pd.DataFrame()
 for col in columns:
-    default[col] = [0]
+    default[col] = []
 source = ColumnDataSource(data=default)
-
 
 def retrieve_events():
     """

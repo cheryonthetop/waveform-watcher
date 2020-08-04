@@ -58,6 +58,8 @@ def wait_for_events(run_id):
         if isinstance(events, pd.DataFrame):
             print("retrieved events")
             return events
+        if isinstance(events, str):
+            return events
         print("Still Getting Events...")
         # Wait for waveform to be loaded
         time.sleep(10)
