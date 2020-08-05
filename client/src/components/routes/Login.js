@@ -2,11 +2,18 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import "../stylesheets/login.css";
 import { Redirect } from "react-router-dom";
+import { authenticate } from "../../actions/userActions";
 
 /**
  * The Login page
  */
 class Login extends Component {
+  /**
+   * Remember user
+   */
+  componentDidMount() {
+    this.props.dispatch(authenticate());
+  }
   /**
    * Renders the page. Redirects to the URL the user asks for
    * if it is redirected to this page to login
