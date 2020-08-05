@@ -9,7 +9,7 @@ export default class Param extends Component {
    */
   render() {
     return (
-      <div id="param" style={{ paddingTop: "20px" }} hidden={this.props.hidden}>
+      <div id="param" hidden={this.props.hidden}>
         <strong>Run ID: </strong>
         <input defaultValue={this.props.runID} readOnly></input>
         <strong style={{ marginLeft: "10px" }}>Event: </strong>

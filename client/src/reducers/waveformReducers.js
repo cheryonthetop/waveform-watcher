@@ -7,6 +7,7 @@ import {
   GET_WAVEFORM_FAILURE,
   GET_EVENT_PLOT_SUCCESS,
   DELETE_WAVEFORM_FAILURE,
+  GETTING_WAVEFORM,
 } from "../actions/types";
 
 /**
@@ -65,8 +66,10 @@ export default function (state = initialState, action) {
     }
     case GET_WAVEFORM_SUCCESS: {
       const { runID, eventID, waveform } = action.payload;
-      const record = { runID: runID, eventID: eventID };
-      const newHistory = state.waveformHistory.push(record);
+      const record = { run_id: runID, event_id: eventID };
+      const newHistory = [];
+      newHistory.push(record);
+      state.waveformHistory.map((waveform) => newHistory.push(waveform));
       return {
         ...state,
         runID: runID,
@@ -75,11 +78,12 @@ export default function (state = initialState, action) {
         waveformHistory: newHistory,
       };
     }
-
-    case GET_EVENT_PLOT_SUCCESS:
+    case GETTING_WAVEFORM:
       return {
         ...state,
-        eventPlot: action.payload.eventPlot,
+        runID: action.payload.runID,
+        eventID: action.payload.eventID,
+        waveform: undefined,
       };
     case GET_WAVEFORM_FAILURE:
       return {
@@ -87,6 +91,11 @@ export default function (state = initialState, action) {
         runID: action.payload.runID,
         eventID: action.payload.eventID,
         waveform: null,
+      };
+    case GET_EVENT_PLOT_SUCCESS:
+      return {
+        ...state,
+        eventPlot: action.payload.eventPlot,
       };
     case LOAD_FAILURE:
     case DELETE_WAVEFORM_FAILURE:

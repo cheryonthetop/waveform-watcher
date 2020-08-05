@@ -36,6 +36,7 @@ class Tags extends Component {
    * @property {Boolean} noTag - if there is no tag supplied
    * @property {Boolean} noWaveform - if there is no waveform supplied
    * @property {Boolean} noAnything - if there is no tag or waveform supplied
+   * @property {Boolean} saveSuccess - if saving operation succeeded
    * @property {Array} options - tags
    * @property {Object} value - A selected option object from createOption
    * @property {String} comments - The displayed comments
@@ -46,6 +47,7 @@ class Tags extends Component {
     noTag: false,
     noWaveform: false,
     noAnything: false,
+    saveSuccess: false,
     options: defaultOptions,
     value: undefined,
     comments: " ",
@@ -101,9 +103,11 @@ class Tags extends Component {
       if (run_id === this.props.runID && event_id === this.props.eventID)
         console.log("Same waveform. No need to switch");
       else if (run_id && event_id) {
-        console.log("Switching Waveform...");
-        this.props.dispatch(getWaveform(this.props.user, run_id, event_id));
-        this.props.handleLoading();
+        if (this.props.handleLoading) {
+          console.log("Switching Waveform...");
+          this.props.dispatch(getWaveform(this.props.user, run_id, event_id));
+          this.props.handleLoading();
+        }
       }
     }
   };
@@ -141,7 +145,6 @@ class Tags extends Component {
   handleCreateOption = (inputValue) => {
     this.setState({ isLoading: true });
     console.group("Option created");
-    console.log("Wait a moment...");
     setTimeout(() => {
       const { options } = this.state;
       const newOption = createOption(inputValue, { comments: " " });
@@ -163,7 +166,7 @@ class Tags extends Component {
   handleSave = () => {
     const { value, options } = this.state;
     const { user, runID, eventID, waveform } = this.props;
-    if (value) {
+    if (value && waveform) {
       const tag = value.label;
       const comments = value.data.comments;
       this.props.dispatch(saveWaveform(user, tag, comments, runID, eventID));
@@ -177,7 +180,9 @@ class Tags extends Component {
           return option;
         }
       });
-      this.setState({ options: newOptions });
+      this.setState({ options: newOptions, saveSuccess: true }, () =>
+        setTimeout(() => this.setState({ saveSuccess: false }), 1000)
+      );
     } else {
       if (!value && !waveform) this.handleShowModalNoAnything();
       else if (!waveform) this.handleShowModalNoWaveform();
@@ -244,6 +249,7 @@ class Tags extends Component {
       noWaveform,
       noAnything,
       dataLoaded,
+      saveSuccess,
     } = this.state;
     return (
       <div id="comment-box">
@@ -278,6 +284,7 @@ class Tags extends Component {
         >
           Save Tag {value ? value.label : ""}
         </Button>
+        {saveSuccess ? <div style={{ color: "green" }}>Saved!</div> : null}
         <br />
         <Button
           style={{ marginTop: "10px", whiteSpace: "normal" }}

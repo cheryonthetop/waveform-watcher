@@ -9,6 +9,7 @@ import {
   DELETE_WAVEFORM_SUCCESS,
   GET_EVENT_PLOT_SUCCESS,
   GET_EVENT_PLOT_FAILURE,
+  GETTING_WAVEFORM,
 } from "./types";
 import axios from "axios";
 import { errorReported } from "./errorActions";
@@ -23,7 +24,8 @@ import { errorReported } from "./errorActions";
  */
 export const getWaveform = (user, runID, eventID) => (dispatch) => {
   console.log(runID);
-  // Make sure get waveform and switch waveform don't interfere
+  // Make sure get waveforms don't interfere with each other is user
+  // calls multiple times (return the latest)
   const requestID = (
     parseInt(window.localStorage.getItem("requestID")) + 1
   ).toString();
@@ -41,6 +43,14 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
     user: user,
     run_id: runID,
     event_id: eventID,
+  });
+
+  dispatch({
+    type: GETTING_WAVEFORM,
+    payload: {
+      runID: runID,
+      eventID: eventID,
+    },
   });
 
   const url = `${
@@ -164,7 +174,6 @@ export const getEventPlot = (user, runID) => (dispatch) => {
  * @param {String} user The username
  * @param {String} tag The tag
  * @param {String} comments The comments
- * @param {Object} waveform The waveform
  * @param {String} runID The run ID
  * @param {Number} eventID The event ID
  */

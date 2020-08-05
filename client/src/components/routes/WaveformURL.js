@@ -11,6 +11,7 @@ import Header from "../Header";
 import axios from "axios";
 import { errorReported } from "../../actions/errorActions";
 import ErrorModal from "../ErrorModal";
+import { GET_WAVEFORM_SUCCESS } from "../../actions/types";
 
 class WaveformURL extends Component {
   /**
@@ -111,6 +112,10 @@ class WaveformURL extends Component {
           } else {
             try {
               embed.embed_item(res.data, "graph");
+              self.props.dispatch({
+                type: GET_WAVEFORM_SUCCESS,
+                payload: { runID: run, eventID: event, waveform: res.data },
+              });
             } catch {
               self.handleShowModalRenderError();
             }

@@ -163,11 +163,12 @@ def update_db_new_waveform(user, run_id, event_id, waveform):
     print("updating waveform in the app db from get... ")
     if mongo_document:
         new_record = {"run_id": run_id, "event_id": event_id}
-        updated_history = mongo_document["waveform_history"].append(new_record)
+        history = mongo_document["waveform_history"]
+        history.insert(0, new_record)
         my_app.update_one(
             {"user": user},
-            {"$set": {"run_id": run_id, "event_id": event_id, "waveform": waveform, "waveform_history": updated_history}},
-        )
+                {"$set": {"run_id": run_id, "event_id": event_id, "waveform": waveform, "waveform_history": history }}, 
+        ),
     print("updating waveform in the app db from get completed!")
 
 

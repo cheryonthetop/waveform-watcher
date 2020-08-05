@@ -14,13 +14,14 @@ import { withRouter } from "react-router-dom";
 import ErrorModal from "../ErrorModal";
 import Header from "../Header";
 import WaveformHistory from "../WaveformHistory";
+import GetShareLink from "../GetShareLink";
 
 class Waveform extends Component {
   /**
    * @property {Number} runID - The run ID in the select box
    * @property {Object} waveform - the waveform on this page
    * @property {String} eventID - The event ID in the input box
-   * @property {Boolean} isLoading - if the waveform is loading
+   * @property {Boolean} isLoading - if the waveform is loading (spinning wheel)
    * @property {Boolean} waveformLoaded - if a waveform has been loaded
    * @property {Boolean} renderError - if there is a bokeh render error
    * @property {Boolean}  paramsHidden - if the parameters for the waveform
@@ -70,6 +71,9 @@ class Waveform extends Component {
         this.loadWaveform();
       });
     }
+    const hasErrorWaveform =
+      this.props.waveform === null && this.props.runID && this.props.eventID;
+    if (hasErrorWaveform && isLoading) this.setState({ isLoading: false });
   }
 
   /**
@@ -144,10 +148,10 @@ class Waveform extends Component {
    * Renders the page
    */
   render() {
-    // if (!this.props.isAuthenticated) {
-    //   window.localStorage.setItem("redirect", this.props.location.pathname);
-    //   return <Redirect to="/login" />;
-    // }
+    if (!this.props.isAuthenticated) {
+      window.localStorage.setItem("redirect", this.props.location.pathname);
+      return <Redirect to="/login" />;
+    }
     const { runID, eventID, isLoading, renderError, paramsHidden } = this.state;
     return (
       <div>
@@ -165,7 +169,7 @@ class Waveform extends Component {
                 user={this.props.user}
                 handleLoading={this.handleLoading}
               />
-              <WaveformHistory></WaveformHistory>
+              <WaveformHistory handleLoading={this.handleLoading} />
 
               <Tags handleLoading={this.handleLoading} />
             </div>
@@ -180,12 +184,16 @@ class Waveform extends Component {
 
           <div id="graph-box">
             <Loading isLoading={isLoading}>
-              <Param
-                runID={this.props.runID}
-                eventID={this.props.eventID}
-                waveform={this.props.waveform}
-                hidden={paramsHidden}
-              ></Param>
+              <span>
+                <Param
+                  runID={this.props.runID}
+                  eventID={this.props.eventID}
+                  waveform={this.props.waveform}
+                  hidden={paramsHidden}
+                ></Param>
+                <GetShareLink />
+              </span>
+
               <div id="graph" />
             </Loading>
           </div>

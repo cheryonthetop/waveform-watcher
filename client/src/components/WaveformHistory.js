@@ -32,6 +32,7 @@ class WaveformHistory extends Component {
     dataLoaded: false,
     options: defaultOptions,
     value: undefined,
+    waveformHistory: [],
   };
 
   /**
@@ -50,23 +51,28 @@ class WaveformHistory extends Component {
   componentDidUpdate() {
     if (!this.props.isLoading && !this.state.dataLoaded)
       this.setState({ dataLoaded: true }, () => this.loadOptions());
-    if (this.props.waveformHistory !== this.state.options) this.loadOptions();
+    if (this.props.waveformHistory !== this.state.waveformHistory)
+      this.loadOptions();
   }
   /**
    * Loads tags if there are any
    */
   loadOptions = () => {
     let newOptions = [];
+    console.log(this.props.waveformHistory);
     this.props.waveformHistory.map((waveform) =>
       newOptions.push(
         createOption(
-          waveform.runID + " , " + waveform.eventID.toString(),
+          waveform.run_id + " , " + waveform.event_id.toString(),
           waveform
         )
       )
     );
     console.log(newOptions);
-    this.setState({ options: newOptions });
+    this.setState({
+      options: newOptions,
+      waveformHistory: this.props.waveformHistory,
+    });
   };
   /**
    * Changes comments and switches waveform when a tag is selected

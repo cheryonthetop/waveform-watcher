@@ -17,6 +17,7 @@
     "query-string": "^6.13.1",
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
+    "react-copy-to-clipboard": "^5.0.2",
     "react-dom": "^16.13.1",
     "react-loading-animation": "^1.4.0",
     "react-plotly": "^1.0.0",
