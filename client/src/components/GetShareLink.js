@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { connect } from "react-redux";
 
-const app_url = "https://waveform-watcher.azurewebsites.net/waveform";
+const app_url = "https://waveform-watcher.azurewebsites.net/waveform/";
 
 class GetShareLink extends Component {
   /**
@@ -15,10 +15,14 @@ class GetShareLink extends Component {
 
   render() {
     return (
-      <div>
+      <div id="get-share-link">
         <CopyToClipboard
-          text={app_url + this.props.runID + this.props.eventID}
-          onCopy={() => this.setState({ copySuccess: true })}
+          text={app_url + this.props.runID + "/" + this.props.eventID}
+          onCopy={() =>
+            this.setState({ copySuccess: true }, () =>
+              setTimeout(() => this.setState({ copySuccess: false }), 1000)
+            )
+          }
         >
           <Button variant="dark" size="sm">
             Get Shareable Link

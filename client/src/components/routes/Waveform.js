@@ -184,7 +184,7 @@ class Waveform extends Component {
 
           <div id="graph-box">
             <Loading isLoading={isLoading}>
-              <span>
+              <div id="param-box">
                 <Param
                   runID={this.props.runID}
                   eventID={this.props.eventID}
@@ -192,7 +192,7 @@ class Waveform extends Component {
                   hidden={paramsHidden}
                 ></Param>
                 <GetShareLink />
-              </span>
+              </div>
 
               <div id="graph" />
             </Loading>

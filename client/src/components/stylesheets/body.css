@@ -54,3 +54,8 @@
 #btn-view-events {
   margin-top: 100%;
 }
+
+#param-box {
+  display: grid;
+  grid-template-columns: 60%, 40%;
+}
