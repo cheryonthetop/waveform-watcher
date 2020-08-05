@@ -56,6 +56,13 @@
 }
 
 #param-box {
-  display: grid;
-  grid-template-columns: 60%, 40%;
+  position: relative;
+}
+
+#param {
+  display: inline-block;
+}
+
+#get-share-link {
+  margin-left: 80%;
 }
