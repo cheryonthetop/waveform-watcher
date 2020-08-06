@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import queryString from "query-string";
+import { authenticate } from "../../actions/userActions";
 
 class Success extends Component {
   /**
@@ -12,7 +13,7 @@ class Success extends Component {
     var query = queryString.parse(this.props.location.search);
     if (query.token) {
       window.localStorage.setItem("token", query.token);
-      this.props.history.push("/");
+      this.props.dispatch(authenticate());
     }
   }
 
@@ -21,7 +22,9 @@ class Success extends Component {
    */
   render() {
     if (this.props.isAuthenticated) {
-      return <Redirect to="/" />;
+      const pathname = window.localStorage.getItem("redirect");
+      window.localStorage.removeItem("redirect");
+      return pathname ? <Redirect to={pathname} /> : <Redirect to="/" />;
     }
 
     return (
