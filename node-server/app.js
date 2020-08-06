@@ -22,7 +22,7 @@ var app = express();
  */
 app.use(
   cors({
-    origin: "https://waveform-watcher.azurewebsites.net/", // allow to server to accept request from different origin
+    origin: "https://waveform-watcher.azurewebsites.net", // allow to server to accept request from different origin
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true, // allow session cookie from browser to pass through
   })
@@ -95,7 +95,7 @@ app.use(passport.session());
 app.use(function (req, res, next) {
   res.header(
     "Access-Control-Allow-Origin",
-    "https://waveform-watcher.azurewebsites.net/"
+    "https://waveform-watcher.azurewebsites.net"
   );
   res.header(
     "Access-Control-Allow-Headers",
