@@ -81,7 +81,6 @@ router.get(
         httpOnly: true,
         maxAge: 604800000,
         secure: true,
-        sameSite: "none",
       });
       req.token = token;
       return next();
