@@ -24,7 +24,7 @@ const authCheck = (req, res, next) => {
     var token = req.token;
     if (!token) return next();
     // convert to mongo token
-    token = token.replace(/%20/g, "+");
+    token = token.replace(/\s/g, "+");
     console.log(token);
     const key = "tokens.".concat(token);
     model.findOne({ [key]: { $exists: true } }, (err, user) => {
