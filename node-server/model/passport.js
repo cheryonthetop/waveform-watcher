@@ -137,12 +137,11 @@ function consumeRememberMeToken(token, fn) {
   token = token.replace(/%20/g, "+");
   console.log(token);
   const key = "tokens.".concat(token);
-  model.findOne({ [key]: { $exists: true } }, (err, users) => {
+  model.findOne({ [key]: { $exists: true } }, (err, user) => {
     if (err) return fn(null, false);
-    if (!users) return fn(null, false);
-    console.log(users);
+    if (!user) return fn(null, false);
+    console.log(user);
     console.log("rememberMeToken is for real!!");
-    const user = users[0];
     const uid = user.id;
     return fn(null, uid);
   });

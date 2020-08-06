@@ -27,12 +27,11 @@ const authCheck = (req, res, next) => {
     token = token.replace(/%20/g, "+");
     console.log(token);
     const key = "tokens.".concat(token);
-    model.findOne({ [key]: { $exists: true } }, (err, users) => {
+    model.findOne({ [key]: { $exists: true } }, (err, user) => {
       if (err) return next();
-      if (!users) return next();
-      console.log(users);
+      if (!user) return next();
+      console.log(user);
       console.log("found client token!!");
-      const user = users[0];
       res.status(200).send({
         user: user.username,
         id: user.id,
