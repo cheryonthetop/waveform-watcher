@@ -23,15 +23,19 @@ const authCheck = (req, res, next) => {
     // if browser does not allow third party cookie
     var token = req.token;
     if (!token) return next();
-    model.find({}, (err, users) => {
-      users.map((user) => {
-        if (user.tokens.has(token)) {
-          console.log("found client token!!");
-          res.status(200).send({
-            user: user.username,
-            id: user.id,
-          });
-        }
+    // convert to mongo token
+    token = token.replace(/%20/g, "+");
+    console.log(token);
+    const key = "tokens.".concat(token);
+    model.findOne({ [key]: { $exists: true } }, (err, users) => {
+      if (err) return next();
+      if (!users) return next();
+      console.log(users);
+      console.log("found client token!!");
+      const user = users[0];
+      res.status(200).send({
+        user: user.username,
+        id: user.id,
       });
     });
   }

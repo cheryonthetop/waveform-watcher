@@ -131,25 +131,37 @@ passport.use(
  * @param {Function} fn Gets the user id for deserialization
  */
 function consumeRememberMeToken(token, fn) {
-  console.log("token is: " + token);
-  var uid;
+  console.log("cookie token is: " + token);
 
-  model.find({}, (err, users) => {
-    if (err) {
-      console.log(err);
-      return fn(null, false);
-    }
-
-    users.map((user) => {
-      if (user.tokens.has(token)) {
-        uid = user.tokens.get(token);
-        // invalidate the single-use token
-        user.tokens.delete(token);
-        console.log("found token!!");
-      }
-    });
+  // convert to mongo token
+  token = token.replace(/%20/g, "+");
+  console.log(token);
+  const key = "tokens.".concat(token);
+  model.findOne({ [key]: { $exists: true } }, (err, users) => {
+    if (err) return fn(null, false);
+    if (!users) return fn(null, false);
+    console.log(users);
+    console.log("rememberMeToken is for real!!");
+    const user = users[0];
+    const uid = user.id;
     return fn(null, uid);
   });
+
+  // model.findOne({}, (err, users) => {
+  //   if (err) {
+  //     console.log(err);
+  //     return fn(null, false);
+  //   }
+
+  //   users.map((user) => {
+  //     if (user.tokens.has(token)) {
+  //       uid = user.tokens.get(token);
+  //       // invalidate the single-use token
+  //       user.tokens.delete(token);
+  //       console.log("found token!!");
+  //     }
+  //   });
+  // });
 }
 
 /**
