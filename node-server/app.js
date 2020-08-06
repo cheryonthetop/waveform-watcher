@@ -22,7 +22,7 @@ var app = express();
  */
 app.use(
   cors({
-    origin: process.env.HOMEPAGE, // allow to server to accept request from different origin
+    origin: "*", // allow to server to accept request from different origin
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true, // allow session cookie from browser to pass through
   })
@@ -93,6 +93,11 @@ app.use(passport.session());
  * Make the db model and user token accessible to routers
  */
 app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   req.model = model;
   req.token = req.query.token;
   next();
