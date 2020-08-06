@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=yingfan_cron
 #SBATCH --output=/home/yingfan/waveform_caching_service/cron.log
-#SBATCH --account=yingfan
+#SBATCH --account=cron-account
 #SBATCH --open-mode=append
 #SBATCH --qos=cron
 #SBATCH --partition=cron
@@ -10,4 +10,4 @@
 # the Cron job run once per day at 7:00a.
 SCHEDULE='00 7 * * *'
 
-sbatch --quiet --begin=$(next-cron-time "$SCHEDULE") waveform-caching-service.sbatch
+sbatch --quiet --begin=$(next-cron-time "$SCHEDULE") waveform-caching-service.sh

@@ -6,7 +6,6 @@ from bson.binary import Binary
 import straxen
 import holoviews as hv
 import pymongo
-import datetime
 import time
 import bokeh
 import pandas as pd
@@ -431,9 +430,9 @@ def fetch_request():
         time.sleep(10)
 
 
-print("Service starts now: ", datetime.datetime.now())
+# print("Service starts now: ", datetime.datetime.now())
 threads = []
-start_time = datetime.datetime.now()
+# start_time = datetime.datetime.now()
 for i in range(0, min(8, cpu_count)):
     t = Thread(target=fetch_request, daemon=True)
     threads.append(t)

@@ -87,7 +87,7 @@ class WaveformHistory extends Component {
       const eventID = newValue.data.event_id;
       if (runID === this.props.runID && eventID === this.props.eventID)
         console.log("Same waveform. No need to switch");
-      else if (runID && eventID) {
+      else if (runID && Number.isInteger(eventID)) {
         console.log("Switching Waveform...");
         this.props.dispatch(getWaveform(this.props.user, runID, eventID));
         this.props.handleLoading();
