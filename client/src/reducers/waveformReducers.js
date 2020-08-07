@@ -9,6 +9,7 @@ import {
   DELETE_WAVEFORM_FAILURE,
   GETTING_WAVEFORM,
   SAVE_WAVEFORM_SUCCESS,
+  DELETE_WAVEFORM_SUCCESS,
 } from "../actions/types";
 
 /**
@@ -97,10 +98,20 @@ export default function (state = initialState, action) {
     case SAVE_WAVEFORM_SUCCESS: {
       const { tag, runID, eventID, comments } = action.payload;
       const newData = { run_id: runID, event_id: eventID, comments: comments };
-      const newTag = state.tagsData;
+      var newTag = state.tagsData;
       newTag[[tag]] = newData;
       return {
+        ...state,
         tagsData: newTag,
+      };
+    }
+    case DELETE_WAVEFORM_SUCCESS: {
+      const { tag } = action.payload;
+      var newTag = state.tagsData;
+      delete newTag[tag];
+      return {
+        ...state,
+        tagsData: newtag,
       };
     }
     case LOAD_FAILURE:
