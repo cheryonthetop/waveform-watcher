@@ -11,7 +11,11 @@ import Header from "../Header";
 import axios from "axios";
 import { errorReported } from "../../actions/errorActions";
 import ErrorModal from "../ErrorModal";
-import { GET_WAVEFORM_SUCCESS } from "../../actions/types";
+import {
+  GET_WAVEFORM_SUCCESS,
+  GETTING_WAVEFORM,
+  GET_WAVEFORM_FAILURE,
+} from "../../actions/types";
 
 class WaveformURL extends Component {
   /**
@@ -82,6 +86,10 @@ class WaveformURL extends Component {
    */
   loadWaveform = (user, run, event) => {
     const self = this;
+    self.props.dispatch({
+      type: GETTING_WAVEFORM,
+      payload: { runID: run, eventID: event },
+    });
     // Headers
     const config = {
       headers: {
@@ -114,16 +122,18 @@ class WaveformURL extends Component {
               embed.embed_item(res.data, "graph");
               self.props.dispatch({
                 type: GET_WAVEFORM_SUCCESS,
-                payload: { runID: run, eventID: event, waveform: res.data },
+                payload: { waveform: res.data },
               });
             } catch {
               self.handleShowModalRenderError();
+              self.props.dispatch({ type: GET_WAVEFORM_FAILURE });
             }
           }
         });
       })
       .catch((err) => {
         console.log(err);
+        self.props.dispatch({ type: GET_WAVEFORM_FAILURE });
       });
   };
 

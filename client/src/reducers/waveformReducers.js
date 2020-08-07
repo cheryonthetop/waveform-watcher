@@ -72,8 +72,6 @@ export default function (state = initialState, action) {
       state.waveformHistory.map((waveform) => newHistory.push(waveform));
       return {
         ...state,
-        runID: runID,
-        eventID: eventID,
         waveform: waveform,
         waveformHistory: newHistory,
       };
@@ -88,8 +86,6 @@ export default function (state = initialState, action) {
     case GET_WAVEFORM_FAILURE:
       return {
         ...state,
-        runID: action.payload.runID,
-        eventID: action.payload.eventID,
         waveform: null,
       };
     case GET_EVENT_PLOT_SUCCESS:

@@ -67,17 +67,11 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
         dispatch(errorReported(title, res.data.err_msg));
         dispatch({
           type: GET_WAVEFORM_FAILURE,
-          payload: {
-            runID: runID,
-            eventID: eventID,
-          },
         });
       } else
         dispatch({
           type: GET_WAVEFORM_SUCCESS,
           payload: {
-            runID: runID,
-            eventID: eventID,
             waveform: res.data,
           },
         });
@@ -86,10 +80,6 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
       console.log(err);
       dispatch({
         type: GET_WAVEFORM_FAILURE,
-        payload: {
-          runID: runID,
-          eventID: eventID,
-        },
       });
       const title = "Get Waveform Failure";
       if (err.response) {
