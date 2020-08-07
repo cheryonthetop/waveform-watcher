@@ -261,6 +261,9 @@ export const deleteWaveform = (user, tag) => (dispatch) => {
       if (res.status === 200) {
         dispatch({
           type: DELETE_WAVEFORM_SUCCESS,
+          payload: {
+            tag: tag,
+          },
         });
       }
     })
