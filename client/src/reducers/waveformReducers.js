@@ -96,7 +96,7 @@ export default function (state = initialState, action) {
       };
     case SAVE_WAVEFORM_SUCCESS: {
       const { tag, runID, eventID, comments } = action.payload;
-      const newData = { runID, eventID, comments };
+      const newData = { run_id: runID, event_id: eventID, comments: comments };
       const newTag = state.tagsData;
       newTag[[tag]] = newData;
       return {

@@ -198,6 +198,12 @@ export const saveWaveform = (user, tag, comments, runID, eventID) => (
       if (res.status === 200) {
         dispatch({
           type: SAVE_WAVEFORM_SUCCESS,
+          payload: {
+            tag: tag,
+            runID: runID,
+            eventID: eventID,
+            comments: comments,
+          },
         });
       }
     })
