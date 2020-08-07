@@ -18,7 +18,7 @@ class EventSelection extends Component {
    * @property {Boolean} If the script tag is being loaded
    */
   state = {
-    runID: this.props.runID,
+    runID: "",
     eventPlot: "",
     isLoading: false,
   };

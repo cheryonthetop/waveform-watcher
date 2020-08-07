@@ -72,6 +72,8 @@ export const getWaveform = (user, runID, eventID) => (dispatch) => {
         dispatch({
           type: GET_WAVEFORM_SUCCESS,
           payload: {
+            runID: runID,
+            eventID: eventID,
             waveform: res.data,
           },
         });

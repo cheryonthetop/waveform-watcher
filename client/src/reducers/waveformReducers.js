@@ -97,9 +97,11 @@ export default function (state = initialState, action) {
       };
     case SAVE_WAVEFORM_SUCCESS: {
       const { tag, runID, eventID, comments } = action.payload;
-      const newData = { run_id: runID, event_id: eventID, comments: comments };
+      const newData = {
+        [tag]: { run_id: runID, event_id: eventID, comments: comments },
+      };
       var newTag = state.tagsData;
-      newTag[[tag]] = newData;
+      newTag.push(newData);
       return {
         ...state,
         tagsData: newTag,
@@ -107,8 +109,10 @@ export default function (state = initialState, action) {
     }
     case DELETE_WAVEFORM_SUCCESS: {
       const { tag } = action.payload;
-      var newTag = state.tagsData;
-      delete newTag[tag];
+      const newTag = state.tagsData.filter(
+        (tagData) => Object.keys(tagData)[0] !== tag
+      );
+      console.log(newTag);
       return {
         ...state,
         tagsData: newTag,
