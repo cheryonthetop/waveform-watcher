@@ -8,6 +8,7 @@ import {
   GET_EVENT_PLOT_SUCCESS,
   DELETE_WAVEFORM_FAILURE,
   GETTING_WAVEFORM,
+  SAVE_WAVEFORM_SUCCESS,
 } from "../actions/types";
 
 /**
@@ -93,6 +94,15 @@ export default function (state = initialState, action) {
         ...state,
         eventPlot: action.payload.eventPlot,
       };
+    case SAVE_WAVEFORM_SUCCESS: {
+      const { tag, runID, eventID, comments } = action.payload;
+      const newData = { runID, eventID, comments };
+      const newTag = state.tagsData;
+      newTag[[tag]] = newData;
+      return {
+        tagsData: newTag,
+      };
+    }
     case LOAD_FAILURE:
     case DELETE_WAVEFORM_FAILURE:
     case GET_EVENT_PLOT_FAILURE:
