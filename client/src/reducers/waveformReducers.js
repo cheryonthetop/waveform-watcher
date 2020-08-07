@@ -111,7 +111,7 @@ export default function (state = initialState, action) {
       delete newTag[tag];
       return {
         ...state,
-        tagsData: newtag,
+        tagsData: newTag,
       };
     }
     case LOAD_FAILURE:
