@@ -191,7 +191,7 @@ class Waveform extends Component {
                   waveform={this.props.waveform}
                   hidden={paramsHidden}
                 ></Param>
-                <GetShareLink />
+                <GetShareLink hidden={paramsHidden} />
               </div>
 
               <div id="graph" />

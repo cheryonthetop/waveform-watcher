@@ -15,7 +15,7 @@ class GetShareLink extends Component {
 
   render() {
     return (
-      <div id="get-share-link">
+      <div id="get-share-link" hidden={this.props.hidden}>
         <CopyToClipboard
           text={app_url + this.props.runID + "/" + this.props.eventID}
           onCopy={() =>
