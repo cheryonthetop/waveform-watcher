@@ -183,7 +183,7 @@ class Waveform extends Component {
           </div>
 
           <div id="graph-box">
-            <Loading isLoading={isLoading}>
+            <Loading isLoading={isLoading} style={{ paddingTop: "50%" }}>
               <div id="param-box">
                 <Param
                   runID={this.props.runID}

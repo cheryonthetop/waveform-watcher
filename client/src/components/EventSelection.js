@@ -119,7 +119,7 @@ class EventSelection extends Component {
         </div>
 
         <div id="graph-box">
-          <Loading isLoading={isLoading}>
+          <Loading isLoading={isLoading} style={{ paddingTop: "50%" }}>
             <div id="graph"></div>
           </Loading>
         </div>
