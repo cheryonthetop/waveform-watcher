@@ -255,7 +255,6 @@ def waveform_display(
     layout = time_v_channel.opts(responsive=True) + peak_wvs.opts(responsive=True) + array_plot['top'].opts(responsive=True) + array_plot['bottom'].opts(responsive=True)
     return layout.cols(2)
 
-
 """
 Fetches run and waveform data and caches them into the DB
 according to the user requests
@@ -269,7 +268,6 @@ from bson.binary import Binary
 import straxen
 import holoviews as hv
 import pymongo
-import datetime
 import time
 import bokeh
 import pandas as pd
@@ -455,9 +453,8 @@ def fetch_request():
 
 
 if __name__ == "__main__":
-    print("Service starts now: ", datetime.datetime.now())
+    print("service starting")
     threads = []
-    start_time = datetime.datetime.now()
     for i in range(0, min(8, cpu_count)):
         t = Thread(target=fetch_request, daemon=True)
         threads.append(t)
@@ -465,4 +462,3 @@ if __name__ == "__main__":
     # Main thread sleeps for 1 hour and terminates
     # Daemonic threads are terminated automatically
     time.sleep(60 * 60)
-
