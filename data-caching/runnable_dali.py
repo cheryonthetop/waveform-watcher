@@ -272,7 +272,6 @@ import time
 import bokeh
 import pandas as pd
 import traceback
-from holoviews_waveform_display import waveform_display
 
 # Bokeh backend setup
 hv.extension("bokeh")
