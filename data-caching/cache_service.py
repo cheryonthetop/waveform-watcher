@@ -47,6 +47,7 @@ dims = [
     "n_peaks",
     "event_number",
 ]
+straxen.contexts.x1t_context_config['fuzzy_for'] = ('pulse_counts', 'lone_hits')
 st = straxen.contexts.xenon1t_dali()
 
 

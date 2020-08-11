@@ -6,8 +6,6 @@ free of holoviews.
 import numpy as np
 import pandas as pd
 
-import straxen
-
 def seconds_from(t, t_reference):
     return (t - t_reference) / int(1e9)
 
@@ -45,7 +43,7 @@ def hvdisp_plot_pmt_pattern(*, config, records, to_pe, array='bottom'):
                hv.Dimension('y',
                             unit='cm',
                             range=(-straxen.tpc_r * f, straxen.tpc_r * f)),
-               hv.Dimension('i', range=(0, 248), label='PMT number'),
+               hv.Dimension('i', range=(0, config['n_tpc_pmts']), label='PMT number'),
                hv.Dimension('area', label='Area', unit='PE')])
     pmts = pmts.to(
         hv.Points,
@@ -90,7 +88,7 @@ def _records_to_points(*, records, to_pe, t_reference, config):
 
 @straxen.mini_analysis(requires=['records'], hv_bokeh=True)
 def hvdisp_plot_records_2d(records, to_pe, config,
-                           t_reference, width=600, time_stream=None):
+                           t_reference, width=500, time_stream=None):
     """Plot records in a dynamic 2D histogram of (time, pmt)
     :param width: Plot width in pixels
     :param time_stream: holoviews rangex stream to use. If provided,
@@ -113,7 +111,7 @@ def hvdisp_plot_records_2d(records, to_pe, config,
                 records,
                 y_range=(0, config['n_tpc_pmts']),
                 streams=[time_stream])).opts(
-        plot=dict(width=width,
+        plot=dict(
                   tools=[x_zoom_wheel(), 'xpan'],
                   default_tools=['save', 'pan', 'box_zoom', 'save', 'reset'],
                   show_grid=False)).opts(title="Time vs. Channel")
@@ -126,7 +124,7 @@ def hvdisp_plot_peak_waveforms(
         t_reference,
         time_range,
         peaks,
-        width=600,
+        width=500,
         show_largest=None,
         time_dim=None):
     """Plot the sum waveforms of peaks
@@ -174,7 +172,7 @@ def hvdisp_plot_peak_waveforms(
                                         unit='PE/ns'),
                      group='PeakSumWaveform').opts(style=dict(color=color)))
 
-    return hv.Overlay(items=curves).opts(plot=dict(width=width))
+    return hv.Overlay(items=curves)
 
 
 def _range_plot(f, full_time_range, t_reference, **kwargs):
@@ -205,7 +203,7 @@ def _range_plot(f, full_time_range, t_reference, **kwargs):
 def waveform_display(
         context, run_id, to_pe, time_range, t_reference, records, peaks,
         config,
-        width=600, show_largest=None):
+        width=500, show_largest=None):
     """Plot a waveform overview display"
     :param width: Plot width in pixels
     """
@@ -219,7 +217,7 @@ def waveform_display(
     time_v_channel = context.hvdisp_plot_records_2d(
         run_id=run_id, to_pe=to_pe,
         records=records_points,
-        width=width,
+        
         time_stream=time_stream,
         time_range=time_range, t_reference=t_reference,
         # We don't need to cut these further, records we get are already cut
@@ -245,7 +243,7 @@ def waveform_display(
         _range_plot(
             context.hvdisp_plot_peak_waveforms,
             run_id=run_id,
-            width=width,
+
             full_time_range=time_range,
             t_reference=t_reference,
             time_selection='touching',
@@ -254,5 +252,5 @@ def waveform_display(
             show_largest=show_largest),
         streams=[time_stream])
 
-    layout = time_v_channel + peak_wvs + array_plot['top'].opts(width=600, height=600) + array_plot['bottom']
+    layout = time_v_channel.opts(responsive=True) + peak_wvs.opts(responsive=True) + array_plot['top'].opts(responsive=True) + array_plot['bottom'].opts(responsive=True)
     return layout.cols(2)
