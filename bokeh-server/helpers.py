@@ -6,6 +6,7 @@ import pymongo
 import os
 import threading
 from tornado import gen
+import json
 
 # Connect to MongoDB
 APP_DB_URI = os.environ.get("APP_DB_URI", None)
@@ -17,6 +18,20 @@ my_request = my_db["request"]
 my_events = my_db["events"]
 my_waveform = my_db["waveform"]
 my_sesssion = my_db["sessions"]
+
+# Dimension of th events dataframe
+dims = [
+    "cs1",
+    "cs2",
+    "z",
+    "r",
+    "e_light",
+    "e_charge",
+    "e_light",
+    "e_ces",
+    "drift_time",
+    "n_peaks"
+]
 
 ##### DB routine helpers
 def get_events_from_cache(run_id):
@@ -32,10 +47,13 @@ def get_events_from_cache(run_id):
     events = None
     document = my_events.find_one({"run_id": run_id})
     if document:
-        if document["events"]:
-            events = pd.DataFrame(pickle.loads(document["events"]))
-        else:
+        try:
             return document["msg"]
+        except KeyError:
+            events = pd.DataFrame()
+            for dim in dims:
+                events[dim] = document[dim]
+            events["event_number"] = [int(e) for e in document["event_number"]]
     return events
 
 
@@ -136,7 +154,7 @@ def update_options(multi_select, event):
         event (str): Event ID of the event
     """
     if event not in multi_select.options:
-        multi_select.options.append(event)
+        multi_select.options.append(int(event))
 
 
 @gen.coroutine
@@ -149,4 +167,4 @@ def update_source(source, events):
         source (bokeh.Model): A ColumnDataSource
         events (DataFrame): The true data source
     """
-    source.update(data=events)
+    source.stream(events)

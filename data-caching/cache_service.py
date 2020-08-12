@@ -15,7 +15,6 @@ import time
 import bokeh
 import pandas as pd
 import traceback
-from holoviews_waveform_display import waveform_display
 
 # Bokeh backend setup
 hv.extension("bokeh")
@@ -82,27 +81,32 @@ def load_events(run_id):
         run_id (str): Run ID of the run
 
     Returns:
-        Binary: The binary data of the pickled dataframe
+        pd.DataFrame: The events dataframe
     """
     events = st.get_df(run_id, "event_info")
-    new_events = pd.DataFrame()
-    for dim in dims:
-        new_events[dim] = events[dim]
-    return Binary(pickle.dumps(new_events, protocol=4))
+    return events
 
 
 def cache_events(run_id, events, msg):
     """
-    Caches the events into MongoDB
+    Caches the events into MongoDB by breaking down
+    all the columns to avoid document over size limit
+    of 16MB
 
     Args:
         run_id (str): Run ID of the run
-        events (Binary): Binary data of a pickled DataFrame
+        events (pd.DataFrame): The events dataframe
         msg (str): Error message, empty string if no error
     """
-    post = {"run_id": run_id, "events": events, "msg": msg}
-    document = my_events.find_one(post)
-    if document == None:
+    post = {"run_id": run_id}
+    if (events):
+        document = my_events.find_one(post)
+        if document == None:
+            for dim in dims:
+                post[dim] = list(events[dim])
+            my_events.insert_one(post)
+    else:
+        post["msg"] = msg
         my_events.insert_one(post)
 
 
@@ -202,6 +206,6 @@ if __name__ == "__main__":
         t = Thread(target=fetch_request, daemon=True)
         threads.append(t)
         t.start()
-    # Main thread sleeps for 1 hour and terminates
+    # Main thread sleeps for 1 day and terminates
     # Daemonic threads are terminated automatically
-    time.sleep(60 * 60)
+    time.sleep(60 * 60 * 24)

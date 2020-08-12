@@ -1,10 +1,8 @@
 import os
-import json
 import datetime
 from bson.son import SON
 import pymongo
 import numpy as np
-from bson.json_util import loads
 import pickle
 import time
 

@@ -90,18 +90,6 @@ for col in columns:
     default[col] = []
 source = ColumnDataSource(data=default)
 
-def retrieve_events():
-    """
-    Retrieves the events from the database and updates the source
-    """
-    events = wait_for_events(run_id)
-    doc.add_next_tick_callback(partial(update_source, source=source, events=events))
-
-
-thread = threading.Thread(target=retrieve_events)
-thread.start()
-
-
 def callback_select(attr, old, new):
     """
     Callback invoked when a user selects data points from
@@ -165,8 +153,8 @@ def callback_value_selected(attr, old, new):
 
 # A multi select box to choose events from
 multi_select = MultiSelect(title="Selected Events:", value=[], options=[])
-multi_select.width = 700
 multi_select.height = 100
+multi_select.sizing_mode = "scale_width"
 multi_select.on_change("value", callback_value_selected)
 
 # Text box to indicate run
@@ -230,3 +218,28 @@ doc.add_root(
     column(text_input, row(multi_select, column(btn_waveform, btn_clear)), grid,)
 )
 print("Inserted layout")
+
+def display_error():
+    """
+    Displays error message in the document after clearing it
+    """
+    doc.remove_root(doc.roots[0])
+    div = Div(text="Events Not Available")
+    div.margin = (200,0,0,300)
+    div.align = "center"
+    div.height = 100
+    div.sizing_mode = "scale_width"
+    doc.add_root(div)
+
+def retrieve_events():
+    """
+    Retrieves the events from the database and updates the source
+    """
+    events = wait_for_events(run_id)
+    if (isinstance(events,str)):
+        doc.add_next_tick_callback(display_error)
+    else:
+        doc.add_next_tick_callback(partial(update_source, source=source, events=events))              
+
+thread = threading.Thread(target=retrieve_events)
+thread.start()
