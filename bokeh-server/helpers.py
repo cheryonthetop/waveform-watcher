@@ -154,7 +154,7 @@ def update_options(multi_select, event):
         event (str): Event ID of the event
     """
     if event not in multi_select.options:
-        multi_select.options.append(int(float(event)))
+        multi_select.options.append(str(int(float(event))))
 
 
 @gen.coroutine

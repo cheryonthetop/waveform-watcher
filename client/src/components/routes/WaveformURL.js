@@ -232,7 +232,7 @@ class WaveformURL extends Component {
           </div>
 
           <div id="graph-box">
-            <Loading isLoading={isLoading}>
+            <Loading isLoading={isLoading} style={{ paddingTop: "50%" }}>
               <div id="graph" />
             </Loading>
           </div>
