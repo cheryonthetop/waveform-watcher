@@ -31,6 +31,7 @@ dims = [
     "e_ces",
     "drift_time",
     "n_peaks"
+    "event_number"
 ]
 
 ##### DB routine helpers
@@ -53,7 +54,6 @@ def get_events_from_cache(run_id):
             events = pd.DataFrame()
             for dim in dims:
                 events[dim] = document[dim]
-            events["event_number"] = [int(e) for e in document["event_number"]]
     return events
 
 
@@ -154,7 +154,7 @@ def update_options(multi_select, event):
         event (str): Event ID of the event
     """
     if event not in multi_select.options:
-        multi_select.options.append(int(event))
+        multi_select.options.append(int(float(event)))
 
 
 @gen.coroutine
