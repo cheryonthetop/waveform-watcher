@@ -30,7 +30,7 @@ dims = [
     "e_light",
     "e_ces",
     "drift_time",
-    "n_peaks"
+    "n_peaks",
     "event_number"
 ]
 
