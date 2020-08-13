@@ -19,12 +19,12 @@ class GetNewEventPlot extends Component {
    * Gets the event plot (a script string) with redux action
    */
   handleGetEventPlot = () => {
-    const { user, runID } = this.props;
+    const { user, inputRunID } = this.props;
 
-    if (runID) {
+    if (inputRunID) {
       this.props.handleLoading();
-      console.log(user, runID);
-      this.props.dispatch(getEventPlot(user, runID));
+      console.log(user, inputRunID);
+      this.props.dispatch(getEventPlot(user, inputRunID));
     } else {
       this.handleShow();
     }
@@ -67,8 +67,18 @@ class GetNewEventPlot extends Component {
 }
 
 /**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
+  inputRunID: state.waveform.inputRunIDEventPage,
+});
+
+/**
  * Connects the component to redux store. This allows
  * the action to be accessed in the component
  * @type {Component}
  */
-export default connect(null, null)(GetNewEventPlot);
+export default connect(mapStateToProps, null)(GetNewEventPlot);

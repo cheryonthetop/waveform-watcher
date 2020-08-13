@@ -123,13 +123,13 @@ class GetNewWaveform extends Component {
       eventIsNotInt,
       eventIsNeg,
     } = this.state;
-    const { runID, eventID, currRunID, currEventID } = this.props;
+    const { inputRunID, inputEventID, currRunID, currEventID } = this.props;
     return (
       <div id="gw-div-old" style={{ marginTop: "10px" }}>
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => this.handleGetWaveform(runID, eventID)}
+          onClick={() => this.handleGetWaveform(inputRunID, inputEventID)}
           active
         >
           Get New Waveform
@@ -211,9 +211,12 @@ class GetNewWaveform extends Component {
  * @type {Function}
  */
 const mapStateToProps = (state) => ({
+  user: state.auth.user,
   waveform: state.waveform.waveform,
   currRunID: state.waveform.runID,
   currEventID: state.waveform.eventID,
+  inputRunID: state.waveform.inputRunIDWaveformPage,
+  inputEventID: state.waveform.inputEventID,
 });
 
 /**

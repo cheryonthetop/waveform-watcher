@@ -10,22 +10,32 @@ import {
   GETTING_WAVEFORM,
   SAVE_WAVEFORM_SUCCESS,
   DELETE_WAVEFORM_SUCCESS,
+  CHANGE_EVENT_ID,
+  CHANGE_EVENT_INPUT_RUN,
+  CHANGE_WAVEFORM_INPUT_RUN,
 } from "../actions/types";
 
 /**
  * The redux initial state for user reducer
  * @property {String} - The run ID
  * @property {Number} - The event ID
+ * @property {String} - The input run ID on the waveform page
+ * @property {Number} - The input event ID
+ * @property {String} - The input run ID on the event page
  * @property {Object} - The waveform
  * @property {String} - A script tag string that embeds event plots
  * @property {Array<Object>} - The array of object {tag: comments, runID, waveform}
  * @property {Array<String>} - The array of runs
+ * @property {Array<String>} - The array of user history
  * @property {Boolean} - If the app data is loading
  * @type {Object}
  */
 const initialState = {
   runID: "",
-  eventID: "",
+  eventID: 0,
+  inputRunIDWaveformPage: "",
+  inputEventID: 0,
+  inputRunIDEventPage: "",
   waveform: undefined,
   eventPlot: undefined,
   tagsData: [],
@@ -56,6 +66,7 @@ export default function (state = initialState, action) {
         availableRuns.push(run)
       );
       return {
+        ...state,
         user: action.payload.user,
         runID: action.payload.run_id,
         eventID: action.payload.event_id,
@@ -116,6 +127,24 @@ export default function (state = initialState, action) {
       return {
         ...state,
         tagsData: newTag,
+      };
+    }
+    case CHANGE_EVENT_ID: {
+      return {
+        ...state,
+        inputEventID: action.payload.eventID,
+      };
+    }
+    case CHANGE_EVENT_INPUT_RUN: {
+      return {
+        ...state,
+        inputRunIDEventPage: action.payload.runID,
+      };
+    }
+    case CHANGE_WAVEFORM_INPUT_RUN: {
+      return {
+        ...state,
+        inputRunIDWaveformPage: action.payload.runID,
       };
     }
     case LOAD_FAILURE:

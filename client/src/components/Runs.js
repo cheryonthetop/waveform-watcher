@@ -23,6 +23,7 @@ class Runs extends Component {
   state = {
     options: [],
     dataLoaded: !this.props.isLoading,
+    value: undefined,
   };
 
   /**
@@ -47,7 +48,20 @@ class Runs extends Component {
     const { options } = this.state;
     if (availableRuns.length !== 0 && options.length === 0) {
       const runs = availableRuns.map((run) => createOption(run));
-      this.setState({ options: runs, dataLoaded: true });
+      this.setState(
+        {
+          options: runs,
+          dataLoaded: true,
+        },
+        () => {
+          if (this.props.runID)
+            this.setState({
+              value: this.state.options.find(
+                (option) => option.label === this.props.runID
+              ),
+            });
+        }
+      );
     }
   }
 
@@ -59,7 +73,12 @@ class Runs extends Component {
   handleStateChangeRunID = (value, { action, removedValue }) => {
     switch (action) {
       case "select-option":
-        this.props.handleStateChangeRunID(value);
+        this.setState(
+          {
+            value: value,
+          },
+          () => this.props.handleStateChangeRunID(value)
+        );
     }
   };
 
@@ -67,14 +86,16 @@ class Runs extends Component {
    * Renders the select box
    */
   render() {
+    const { options, dataLoaded, value } = this.state;
     return (
       <div>
         <strong>Run ID: </strong>
         <Select
-          options={this.state.options}
+          options={options}
           onChange={this.handleStateChangeRunID}
-          isDisabled={!this.state.dataLoaded}
-          isLoading={!this.state.dataLoaded}
+          isDisabled={!dataLoaded}
+          isLoading={!dataLoaded}
+          value={value}
         />
       </div>
     );

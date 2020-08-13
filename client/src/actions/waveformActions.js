@@ -10,6 +10,9 @@ import {
   GET_EVENT_PLOT_SUCCESS,
   GET_EVENT_PLOT_FAILURE,
   GETTING_WAVEFORM,
+  CHANGE_EVENT_ID,
+  CHANGE_EVENT_INPUT_RUN,
+  CHANGE_WAVEFORM_INPUT_RUN,
 } from "./types";
 import axios from "axios";
 import { errorReported } from "./errorActions";
@@ -327,4 +330,29 @@ export const loadAppData = (user) => (dispatch) => {
         }
       }
     });
+};
+
+/**
+ * Updates the newest user input of run ID
+ * @type {Function}
+ * @param {String} runID The new user input in the waveform page
+ */
+export const changeWaveformInputRunID = (runID) => (dispatch) => {
+  dispatch({ type: CHANGE_WAVEFORM_INPUT_RUN, payload: { runID: runID } });
+};
+/**
+ * Updates the newest user input of run ID
+ * @type {Function}
+ * @param {String} runID The new user input in the event page
+ */
+export const changeEventInputRunID = (runID) => (dispatch) => {
+  dispatch({ type: CHANGE_EVENT_INPUT_RUN, payload: { runID: runID } });
+};
+/**
+ * Updates the newest user input of run ID
+ * @type {Function}
+ * @param {Number} runID The new user input in the waveform page
+ */
+export const changeEventID = (eventID) => (dispatch) => {
+  dispatch({ type: CHANGE_EVENT_ID, payload: { eventID: eventID } });
 };
