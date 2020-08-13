@@ -163,6 +163,8 @@ def update_db_new_waveform(user, run_id, event_id, waveform):
         new_record = {"run_id": run_id, "event_id": event_id}
         history = mongo_document["waveform_history"]
         history.insert(0, new_record)
+        if (len(history) > 500):
+            history.pop(-1)
         my_app.update_one(
             {"user": user},
                 {"$set": {"run_id": run_id, "event_id": event_id, "waveform": waveform, "waveform_history": history }}, 
