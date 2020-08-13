@@ -72,7 +72,7 @@ class WaveformURL extends Component {
         this.handleShowModalRunNotAvailable();
       else if (isNaN(eventInt) || !Number.isInteger(eventInt))
         this.handleShowModalIsNotInt();
-      else if (event < 0) this.handleShowModalEventIsNeg();
+      else if (eventInt < 0) this.handleShowModalEventIsNeg();
       else this.loadWaveform(user, run, eventInt);
     });
   }
@@ -122,7 +122,7 @@ class WaveformURL extends Component {
               embed.embed_item(res.data, "graph");
               self.props.dispatch({
                 type: GET_WAVEFORM_SUCCESS,
-                payload: { waveform: res.data },
+                payload: { runID: run, eventID: event, waveform: res.data },
               });
             } catch {
               self.handleShowModalRenderError();
