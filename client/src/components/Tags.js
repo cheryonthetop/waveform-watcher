@@ -102,7 +102,7 @@ class Tags extends Component {
       const { run_id, event_id } = newValue.data;
       if (run_id === this.props.runID && event_id === this.props.eventID)
         console.log("Same waveform. No need to switch");
-      else if (run_id && event_id) {
+      else if (run_id && Number.isInteger(event_id)) {
         console.log("Switching Waveform...");
         this.props.dispatch(getWaveform(this.props.user, run_id, event_id));
         this.props.handleLoading();
