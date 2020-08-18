@@ -11,4 +11,4 @@
 #SBATCH --error=/home/yingfan/waveform_caching_service/data_caching.log
 source /home/yingfan/waveform_caching_service/env.sh
 module load singularity 
-singularity exec --bind /project2 --bind /dali /project2/lgrandi/xenonnt/singularity-images/xenonnt-development.simg /home/yingfan/waveform_caching_service/runnable_dali.py
+singularity exec --bind /project2 --bind /dali /project2/lgrandi/xenonnt/singularity-images/xenonnt-development.simg python /home/yingfan/waveform_caching_service/runnable_dali.py

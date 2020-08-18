@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 """Dynamic holoviews-based waveform display
 Note imports are inside function, to keep 'import straxen'
