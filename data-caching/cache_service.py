@@ -33,7 +33,7 @@ my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_events = my_db["events"]
-my_software = my_software["software"]
+my_software = my_db["software"]
 dims = [
     "cs1",
     "cs2",
