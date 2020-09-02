@@ -274,6 +274,7 @@ import time
 import bokeh
 import pandas as pd
 import traceback
+import strax
 
 # Bokeh backend setup
 hv.extension("bokeh")
@@ -291,6 +292,7 @@ my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_events = my_db["events"]
+my_software = my_software["software"]
 dims = [
     "cs1",
     "cs2",
@@ -306,7 +308,12 @@ dims = [
 ]
 straxen.contexts.x1t_context_config['fuzzy_for'] = ('pulse_counts', 'lone_hits')
 st = straxen.contexts.xenon1t_dali()
-
+xenon1t_runs = st.select_runs(available="event_info")['name'].values
+st_nt = straxen.contexts.xenonnt_online()
+st_nt.set_context_config({'check_available': ('event_info','peak_basics')})
+xenonnt_runs = st_nt.select_runs(available="peak_basics")['name'].values
+st_nt.set_config(dict(nn_architecture=straxen.aux_repo+ 'f0df03e1f45b5bdd9be364c5caefdaf3c74e044e/fax_files/mlp_model.json',
+                   nn_weights= straxen.aux_repo+'f0df03e1f45b5bdd9be364c5caefdaf3c74e044e/fax_files/mlp_model.h5'))
 
 def load_waveform(run_id, event_id):
     """
@@ -319,12 +326,19 @@ def load_waveform(run_id, event_id):
     Returns:
         JSON-like str: The waveform of the event
     """
-    df = st.get_array(run_id, "event_info")
-    event = df[int(event_id)]
-    waveform = waveform_display(context=st, run_id=run_id, time_within=event)
+    waveform = None
+    if run_id in xenon1t_runs:
+        events = st.get_array(run_id, "event_info")
+        event = events[int(event_id)]
+        waveform = waveform_display(context=st, run_id=run_id, time_within=event)
+    elif run_id in xenonnt_runs:
+        # Make events as XENONnT runs do not have events
+        st_nt.make(run_id, "event_info")
+        events = st_nt.get_array(run_id, "event_info")
+        event = events[int(event_id)]
+        waveform = waveform_display(context=st_nt, run_id=run_id, time_within=event)        
     lock.acquire()
     try:
-        print("Waveform is: ", waveform)
         waveform = renderer.server_doc(waveform).roots[-1]
     finally:
         lock.release()
@@ -342,7 +356,11 @@ def load_events(run_id):
     Returns:
         pd.DataFrame: The events dataframe
     """
-    events = st.get_df(run_id, "event_info")
+    if run_id in xenon1t_runs:
+        events = st.get_df(run_id, "event_info")
+    elif run_id in xenonnt_runs:
+        st_nt.make(run_id, "event_info")
+        events = st_nt.get_df(run_id, "event_info")
     return events
 
 
@@ -460,6 +478,8 @@ def fetch_request():
 
 if __name__ == "__main__":
     print("service starting")
+    my_software.delete_one({})
+    my_software.insert_one({"strax": strax.__version__, "straxen": straxen.__version__})
     threads = []
     for i in range(0, min(8, cpu_count)):
         t = Thread(target=fetch_request, daemon=True)
