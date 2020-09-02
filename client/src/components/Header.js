@@ -22,8 +22,13 @@ class Header extends Component {
     return (
       <div id="header">
         <div style={{ textAlign: "center" }}>
-          <div style={{ marginRight: "25%" }}>
-            <h2 id="title">Waveform watcher</h2>
+          <div id="title" style={{ marginRight: "25%" }}>
+            Waveform Watcher
+            <span id="software">
+              strax: {this.props.strax ? this.props.strax : "Still Loading ..."}{" "}
+              <br /> straxen:{" "}
+              {this.props.straxen ? this.props.straxen : "Still Loading ..."}
+            </span>
           </div>
         </div>
         <div id="logout">
@@ -41,8 +46,18 @@ class Header extends Component {
 }
 
 /**
+ * Maps the central state to props in this page
+ * @param {Object} state The central state in redux store
+ * @type {Function}
+ */
+const mapStateToProps = (state) => ({
+  strax: state.waveform.strax,
+  straxen: state.waveform.straxen,
+});
+
+/**
  * Connects the component to redux store. This allows
  * the action to be accessed in the component
  * @type {Component}
  */
-export default connect(null, null)(Header);
+export default connect(mapStateToProps, null)(Header);

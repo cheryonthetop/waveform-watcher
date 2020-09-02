@@ -42,6 +42,8 @@ const initialState = {
   availableRuns: [],
   waveformHistory: [],
   isLoading: true,
+  strax: "",
+  straxen: "",
 };
 
 /**
@@ -73,6 +75,8 @@ export default function (state = initialState, action) {
         waveform: action.payload.waveform,
         waveformHistory: action.payload.waveform_history,
         tagsData: action.payload.tags_data,
+        strax: action.payload.strax,
+        straxen: action.payload.straxen,
         availableRuns: availableRuns,
         isLoading: false,
       };

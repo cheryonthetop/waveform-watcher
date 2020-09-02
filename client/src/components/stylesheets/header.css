@@ -8,12 +8,30 @@
 #title {
   text-align: start;
   margin-left: 10px;
-  font-size: large;
   color: white;
+  font-weight: 600;
+  font-size: large;
 }
 
 #logout {
   text-align: end;
   height: 100%;
   margin-right: 10px;
+}
+
+#software {
+  visibility: hidden;
+  width: fit-content;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  font-size: small;
+  position: absolute;
+  z-index: 1;
+}
+
+#title:hover #software {
+  visibility: visible;
 }
