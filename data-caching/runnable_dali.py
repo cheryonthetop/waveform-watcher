@@ -293,6 +293,7 @@ my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_events = my_db["events"]
 my_software = my_db["software"]
+my_run = my_db["run"]
 dims = [
     "cs1",
     "cs2",
@@ -314,7 +315,6 @@ st_nt.set_context_config({'check_available': ('event_info','peak_basics')})
 xenonnt_runs = st_nt.select_runs(available="peak_basics")['name'].values
 st_nt.set_config(dict(nn_architecture=straxen.aux_repo+ 'f0df03e1f45b5bdd9be364c5caefdaf3c74e044e/fax_files/mlp_model.json',
                    nn_weights= straxen.aux_repo+'f0df03e1f45b5bdd9be364c5caefdaf3c74e044e/fax_files/mlp_model.h5'))
-
 def load_waveform(run_id, event_id):
     """
     Renders a waveform
@@ -478,6 +478,8 @@ def fetch_request():
 
 if __name__ == "__main__":
     print("service starting")
+    my_run.delete_one({})
+    my_run.insert_one({"runs": [*xenon1t_runs, *xenonnt_runs]})
     my_software.delete_one({})
     my_software.insert_one({"strax": strax.__version__, "straxen": straxen.__version__})
     threads = []
