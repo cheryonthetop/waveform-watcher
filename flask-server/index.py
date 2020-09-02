@@ -58,10 +58,6 @@ my_sessions = my_db["sessions"]
 my_run = my_db["run"]
 my_software = my_db["software"]
 
-available_runs = my_run.find_one({})["runs"]
-print("Available runs are: ", available_runs[:5])
-
-
 @app.errorhandler(404)
 def not_found(error):
     """
@@ -105,6 +101,7 @@ def send_data():
         }
         my_app.insert_one(post)
         document = my_app.find_one({"user": user})
+    available_runs = my_run.find_one({})["runs"]
     document["available_runs"] = available_runs
     software_version = my_software.find_one({})
     document["strax"] = software_version["strax"]
