@@ -56,9 +56,9 @@ my_db = pymongo.MongoClient(APP_DB_URI)["waveform"]
 my_app = my_db["app"]
 my_sessions = my_db["sessions"]
 my_run = my_db["run"]
+my_software = my_db["software"]
 
 available_runs = my_run.find_one({})["runs"]
-# available_runs = get_runs()
 print("Available runs are: ", available_runs[:5])
 
 
@@ -106,6 +106,9 @@ def send_data():
         my_app.insert_one(post)
         document = my_app.find_one({"user": user})
     document["available_runs"] = available_runs
+    software_version = my_software.find_one({})
+    document["strax"] = software_version["strax"]
+    document["straxen"] = software_version["straxen"]
     json_str = dumps(document)
     return make_response(json_str, 200)
 
