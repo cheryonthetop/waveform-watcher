@@ -24,7 +24,6 @@ import logger
 from app import app
 from app import (
     authenticate,
-    get_runs,
     get_waveform_from_cache,
     cache_waveform_request,
     wait_for_waveform,

@@ -1,0 +1,115 @@
+[
+  {
+    "name": "APP_DB_URI",
+    "value": "mongodb+srv://char_dev:2Qz2o5Kh8agcVrXB@cluster0-oumsb.mongodb.net/waveform?retryWrites=true&w=majority",
+    "slotSetting": false
+  },
+  {
+    "name": "BOKEH_SECRET_KEY",
+    "value": "ouB6IJSCi0LYvjbaQkDFiTScVDGscW0ZDatPRjJsddF3",
+    "slotSetting": false
+  },
+  {
+    "name": "BOKEH_SERVER_URL",
+    "value": "https://waveform-watcher-bokeh-server.azurewebsites.net/tmp",
+    "slotSetting": false
+  },
+]
+
+[
+  {
+    "name": "APP_DB_URI",
+    "value": "mongodb+srv://char_dev:2Qz2o5Kh8agcVrXB@cluster0-oumsb.mongodb.net/waveform?retryWrites=true&w=majority",
+    "slotSetting": false
+  },
+  {
+    "name": "APP_URL",
+    "value": "https://waveform-watcher.azurewebsites.net",
+    "slotSetting": false
+  },
+  {
+    "name": "BOKEH_SECRET_KEY",
+    "value": "ouB6IJSCi0LYvjbaQkDFiTScVDGscW0ZDatPRjJsddF3",
+    "slotSetting": false
+  },
+  {
+    "name": "BOKEH_SIGNED_SESSIONS",
+    "value": "yes",
+    "slotSetting": false
+  },
+]
+
+
+[
+  {
+    "name": "AUTH_DB_URI",
+    "value": "mongodb+srv://char_dev:2Qz2o5Kh8agcVrXB@cluster0-oumsb.mongodb.net/waveform?retryWrites=true&w=majority",
+    "slotSetting": false
+  },
+  {
+    "name": "CALLBACK_URL",
+    "value": "https://waveform-watcher-node-backend.azurewebsites.net/auth/github/callback",
+    "slotSetting": false
+  },
+  {
+    "name": "COOKIE_SECRET_KEY",
+    "value": "ThisIsAbsolutelyNotASecret",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_ENABLE_CI",
+    "value": "true",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+    "value": "Pxjrtjm0fv/REn1FUm0RirrFsG30bJXT",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_REGISTRY_SERVER_URL",
+    "value": "https://mywaveform.azurecr.io",
+    "slotSetting": false
+  },
+  {
+    "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+    "value": "mywaveform",
+    "slotSetting": false
+  },
+  {
+    "name": "GITHUB_CLIENT_ID",
+    "value": "b0a283cb57d1a2e7732e",
+    "slotSetting": false
+  },
+  {
+    "name": "GITHUB_CLIENT_SECRET",
+    "value": "3a64964f7b6f985e91b39318c63937cfd7fab214",
+    "slotSetting": false
+  },
+  {
+    "name": "GITHUB_PERSONAL_TOKEN",
+    "value": "888f2a15815867e495d314c0a4f165606827e06b",
+    "slotSetting": false
+  },
+  {
+    "name": "HOMEPAGE",
+    "value": "https://waveform-watcher.azurewebsites.net",
+    "slotSetting": false
+  },
+  {
+    "name": "PASSPORT_SESSION_SECRET",
+    "value": "PassportIsSpelledPASSPORT",
+    "slotSetting": false
+  },
+  {
+    "name": "USERS_DB_URI",
+    "value": "mongodb://recode:ThisIsMeantToStayHiddenLol@fried.rice.edu:27017/admin?readPreference=secondary",
+    "slotSetting": false
+  },
+  {
+    "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+    "value": "10",
+    "slotSetting": false
+  }
+]
+

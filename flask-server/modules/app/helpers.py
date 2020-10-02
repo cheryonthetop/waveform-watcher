@@ -18,12 +18,6 @@ my_waveform = my_db["waveform"]
 my_run = my_db["run"]
 my_events = my_db["events"]
 
-RECODE_DB_URI = os.environ.get("RECODE_DB_URI", None)
-recode_db = pymongo.MongoClient(RECODE_DB_URI)["run"]
-
-if RECODE_DB_URI == None:
-    print("Recode DB Connection String Not Set")
-
 def authenticate(user, token):
     """
     Authenticates an API request with a token
@@ -40,24 +34,7 @@ def authenticate(user, token):
     match = my_auth.count_documents({"username": user, key: {"$exists": True}}, limit=1)
     return True if match == 1 else False
 
-def get_runs():
-    """
-    Gets the available runs
-    """
-    pipeline = [
-        {"$match": {"tags.name": "_sciencerun1"}},
-        {"$match": {"detector": "tpc"}},
-        {"$project": {"name": 1, "number": 1, "trigger.events_built": 1, "time": 1}},
-        {"$sort": SON([("time", -1)])},
-    ]
-    return [
-        x['name']
-        for x in recode_db["runs_new"].aggregate(
-            pipeline
-        )
-    ]
-
-def get_waveform_from_cache(run_id, event_id):
+def get_waveform_from_cache(run_id, event_id, n):
     """
     Gets waveform from the cache, and insert a request for
     the waveform if it does not exist
@@ -65,16 +42,23 @@ def get_waveform_from_cache(run_id, event_id):
     Args:
         run_id (str): Run ID of the run
         event_id (str): Event ID of the event
+        n (int) : The nth time trying to get waveform
 
     Returns:
         dict/str: A dict from the MongoDB Object representing the waveform,
         or a string with the error message if the waveform is somehow not rendered
     """
     waveform = None
-    document = my_waveform.find_one({"run_id": run_id, "event_id": event_id})
+    post = {"run_id": run_id, "event_id": event_id}
+    document = my_waveform.find_one(post)
     if document:
         if document["waveform"]:
             waveform = document["waveform"]
+        elif n == 0:
+            # We want to reprocess the event for one more time 
+            # if it is null in the cache
+            my_waveform.delete_one(post)
+            cache_waveform_request(run_id, event_id)
         else:
             return document["msg"]
     else:
@@ -116,10 +100,11 @@ def wait_for_waveform(run_id, event_id):
         an error message if the waveform is not rendered, or a timeout message
         to indicate the waveform has not yet been found in the cache for 5 minutes
     """
-    # only wait for 1 minute
+    # only wait for 3 minutes
     endtime = datetime.datetime.now() + datetime.timedelta(0, 180)
+    n = 0
     while True:
-        waveform = get_waveform_from_cache(run_id, event_id)
+        waveform = get_waveform_from_cache(run_id, event_id, n)
         if waveform != None:
             print("Retrieved Waveform")
             return waveform
@@ -128,6 +113,7 @@ def wait_for_waveform(run_id, event_id):
         time.sleep(5)
         if datetime.datetime.now() >= endtime:
             return "Get Waveform Timeout. Please Try Again."
+        n = n + 1
 
 
 def cache_events_request(run_id):
@@ -139,11 +125,17 @@ def cache_events_request(run_id):
         run_id (str): Run ID for the events
     """
     ongoing_request = my_request.find_one({"run_id": run_id})
-    events = my_events.find_one({"run_id": run_id, "events": {"$exists": True}})
+    document = my_events.find_one({"run_id": run_id, "events": {"$exists": True}})
+    post = {"status": "new", "run_id": run_id, "request": "events"}
     # cache to request if not already in it
-    if ongoing_request == None and events == None:
-        post = {"status": "new", "run_id": run_id, "request": "events"}
-        my_request.insert_one(post)  # insert mongo document into 'fetch'
+    if document:        
+        events = document["events"]
+        if ongoing_request == None and events == None:
+            # Reprocess events if it is null in the cache
+            my_events.delete_one({"run_id": run_id})
+            my_request.insert_one(post)
+    else:
+        my_request.insert_one(post)
 
 
 def update_db_new_waveform(user, run_id, event_id, waveform):
