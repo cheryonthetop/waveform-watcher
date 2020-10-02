@@ -4,11 +4,11 @@ A web app developed to visualize and analyze waveform data collected from XENON1
 
 ## The Login Page
 
-![](.gitbook/assets/login.png)
+![](readme-images/login.png)
 
 ## The Main Page
 
-![](.gitbook/assets/home.png)
+![](readme-images/home.png)
 
 ## Main Features
 
@@ -56,7 +56,7 @@ You will need key environmental variables. Ask the repo owner for them before yo
 
 ## The structure and workflow of the app
 
-![Workflow-1](.gitbook/assets/workflow-1.jpg) ![Workflow-2](.gitbook/assets/workflow-2.jpg) ![Workflow-3](.gitbook/assets/workflow-3.jpg) ![Workflow-4](.gitbook/assets/workflow-4.jpg)
+![Workflow-1](readme-images/workflow-1.jpg) ![Workflow-2](readme-images/workflow-2.jpg) ![Workflow-3](readme-images/workflow-3.jpg) ![Workflow-4](readme-images//workflow-4.jpg)
 
 ## Documentation
 
