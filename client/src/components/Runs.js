@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import Select from "react-select";
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import Select from 'react-select'
 
 /**
  * Creates an option object. The label property is
@@ -10,7 +10,7 @@ import Select from "react-select";
  */
 const createOption = (label) => ({
   label,
-});
+})
 
 /**
  * The select box with all the available runs
@@ -24,30 +24,30 @@ class Runs extends Component {
     options: [],
     dataLoaded: !this.props.isLoading,
     value: undefined,
-  };
+  }
 
   /**
    * Tries loading available runs
    */
   componentDidMount() {
-    this.tryLoadAvailableRuns();
+    this.tryLoadAvailableRuns()
   }
 
   /**
    * Tries loading available runs
    */
   componentDidUpdate() {
-    this.tryLoadAvailableRuns();
+    this.tryLoadAvailableRuns()
   }
 
   /**
    * Loads available runs if there are any and not yet loaded
    */
   tryLoadAvailableRuns() {
-    const { availableRuns } = this.props;
-    const { options } = this.state;
+    const { availableRuns } = this.props
+    const { options } = this.state
     if (availableRuns.length !== 0 && options.length === 0) {
-      const runs = availableRuns.map((run) => createOption(run));
+      const runs = availableRuns.map((run) => createOption(run))
       this.setState(
         {
           options: runs,
@@ -57,11 +57,11 @@ class Runs extends Component {
           if (this.props.runID)
             this.setState({
               value: this.state.options.find(
-                (option) => option.label === this.props.runID
+                (option) => option.label === this.props.runID,
               ),
-            });
-        }
-      );
+            })
+        },
+      )
     }
   }
 
@@ -72,23 +72,23 @@ class Runs extends Component {
    */
   handleStateChangeRunID = (value, { action, removedValue }) => {
     switch (action) {
-      case "select-option":
+      case 'select-option':
         this.setState(
           {
             value: value,
           },
-          () => this.props.handleStateChangeRunID(value)
-        );
+          () => this.props.handleStateChangeRunID(value),
+        )
     }
-  };
+  }
 
   /**
    * Renders the select box
    */
   render() {
-    const { options, dataLoaded, value } = this.state;
+    const { options, dataLoaded, value } = this.state
     return (
-      <div>
+      <div className="control-element">
         <strong>Run ID: </strong>
         <Select
           options={options}
@@ -98,7 +98,7 @@ class Runs extends Component {
           value={value}
         />
       </div>
-    );
+    )
   }
 }
 
@@ -110,10 +110,10 @@ class Runs extends Component {
 const mapStateToProps = (state) => ({
   availableRuns: state.waveform.availableRuns,
   isLoading: state.waveform.isLoading,
-});
+})
 
 /**
  * Connects the component to redux store.
  * @type {Component}
  */
-export default connect(mapStateToProps, null)(Runs);
+export default connect(mapStateToProps, null)(Runs)

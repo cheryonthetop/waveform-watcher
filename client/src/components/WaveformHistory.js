@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import { getWaveform } from "../actions/waveformActions";
-import { connect } from "react-redux";
-import Select from "react-select";
+import React, { Component } from 'react'
+import { getWaveform } from '../actions/waveformActions'
+import { connect } from 'react-redux'
+import Select from 'react-select'
 
 /**
  * Creates a tag option
@@ -12,13 +12,13 @@ import Select from "react-select";
 const createOption = (label, data) => ({
   label,
   data: data,
-});
+})
 
 /**
  * Empty array of options as default
  * @type {Array}
  */
-const defaultOptions = [];
+const defaultOptions = []
 
 class WaveformHistory extends Component {
   /**
@@ -33,7 +33,7 @@ class WaveformHistory extends Component {
     options: defaultOptions,
     value: undefined,
     waveformHistory: [],
-  };
+  }
 
   /**
    * Tries load options if the app data finishes loading
@@ -41,7 +41,12 @@ class WaveformHistory extends Component {
    */
   componentDidMount() {
     if (!this.props.isLoading && !this.state.dataLoaded)
-      this.setState({ dataLoaded: true }, () => this.loadOptions());
+      this.setState(
+        {
+          dataLoaded: true,
+        },
+        () => this.loadOptions(),
+      )
   }
 
   /**
@@ -50,64 +55,70 @@ class WaveformHistory extends Component {
    */
   componentDidUpdate() {
     if (!this.props.isLoading && !this.state.dataLoaded)
-      this.setState({ dataLoaded: true }, () => this.loadOptions());
+      this.setState(
+        {
+          dataLoaded: true,
+        },
+        () => this.loadOptions(),
+      )
     if (this.props.waveformHistory !== this.state.waveformHistory)
-      this.loadOptions();
+      this.loadOptions()
   }
   /**
    * Loads tags if there are any
    */
   loadOptions = () => {
-    let newOptions = [];
-    console.log(this.props.waveformHistory);
+    let newOptions = []
+    console.log(this.props.waveformHistory)
     this.props.waveformHistory.map((waveform) =>
       newOptions.push(
         createOption(
-          waveform.run_id + " , " + waveform.event_id.toString(),
-          waveform
-        )
-      )
-    );
-    console.log(newOptions);
+          waveform.run_id + ' , ' + waveform.event_id.toString(),
+          waveform,
+        ),
+      ),
+    )
+    console.log(newOptions)
     this.setState({
       options: newOptions,
       waveformHistory: this.props.waveformHistory,
-    });
-  };
+    })
+  }
   /**
    * Changes comments and switches waveform when a tag is selected
    * @param {Object} newValue new tag option from creatOption
    * @param {Object} actionMeta metadata of action
    */
   handleChangeSelect = (newValue, actionMeta) => {
-    this.setState({ value: newValue });
-    if (actionMeta.action === "select-option") {
+    this.setState({
+      value: newValue,
+    })
+    if (actionMeta.action === 'select-option') {
       // Data comes from Mongo DB, hence the _ in variable name below
-      const runID = newValue.data.run_id;
-      const eventID = newValue.data.event_id;
+      const runID = newValue.data.run_id
+      const eventID = newValue.data.event_id
       if (runID === this.props.runID && eventID === this.props.eventID)
-        console.log("Same waveform. No need to switch");
+        console.log('Same waveform. No need to switch')
       else if (runID && Number.isInteger(eventID)) {
-        console.log("Switching Waveform...");
-        this.props.dispatch(getWaveform(this.props.user, runID, eventID));
-        this.props.handleLoading();
+        console.log('Switching Waveform...')
+        this.props.dispatch(getWaveform(this.props.user, runID, eventID))
+        this.props.handleLoading()
       }
     }
-  };
+  }
 
   render() {
     return (
-      <div id="waveform-history">
+      <div id="waveform-history" className="control-element">
         <strong> History </strong>
-
         <Select
           options={this.state.options}
           onChange={this.handleChangeSelect}
           isDisabled={!this.state.dataLoaded}
           isLoading={!this.state.dataLoaded}
-        />
+        />{' '}
       </div>
-    );
+    )
   }
 }
 
@@ -124,10 +135,10 @@ const mapStateToProps = (state) => ({
   eventID: state.waveform.eventID,
   isLoading: state.waveform.isLoading,
   waveformHistory: state.waveform.waveformHistory,
-});
+})
 
 /**
  * Connects the component to redux store.
  * @type {Component}
  */
-export default connect(mapStateToProps, null)(WaveformHistory);
+export default connect(mapStateToProps, null)(WaveformHistory)

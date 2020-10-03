@@ -1,31 +1,31 @@
-import React, { Component } from "react";
-import { Form } from "react-bootstrap";
-import { changeEventID } from "../actions/waveformActions";
-import { connect } from "react-redux";
+import React, { Component } from 'react'
+import { Form } from 'react-bootstrap'
+import { changeEventID } from '../actions/waveformActions'
+import { connect } from 'react-redux'
 
 /**
  * The input box for event ID
  */
 class Events extends Component {
   handleStateChangeEvent = (event) => {
-    this.props.dispatch(changeEventID(event));
-  };
+    this.props.dispatch(changeEventID(event))
+  }
 
   /**
    * Renders the events input box
    */
   render() {
     return (
-      <div>
-        <strong>Event: </strong>
+      <div className="control-element">
+        <strong> Event: </strong>{' '}
         <Form.Control
           type="string"
           placeholder="Enter an Integer Event ID"
           onChange={(event) => this.handleStateChangeEvent(event.target.value)}
           value={this.props.inputEventID}
-        />
+        />{' '}
       </div>
-    );
+    )
   }
 }
 
@@ -36,10 +36,10 @@ class Events extends Component {
  */
 const mapStateToProps = (state) => ({
   inputEventID: state.waveform.inputEventID,
-});
+})
 
 /**
  * Connects the component to redux store.
  * @type {Component}
  */
-export default connect(mapStateToProps, null)(Events);
+export default connect(mapStateToProps, null)(Events)

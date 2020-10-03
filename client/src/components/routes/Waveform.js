@@ -1,21 +1,21 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import "../stylesheets/body.css";
-import { connect } from "react-redux";
-import { embed } from "@bokeh/bokehjs";
+import {connect} from "react-redux";
+import {embed} from "@bokeh/bokehjs";
 import Loading from "react-loading-animation";
 import Tags from "../Tags";
 import Runs from "../Runs";
 import GetNewWaveform from "../GetNewWaveform";
 import Param from "../Param";
 import Events from "../Events";
-import { Redirect } from "react-router-dom";
-import { Button } from "react-bootstrap";
-import { withRouter } from "react-router-dom";
+import {Redirect} from "react-router-dom";
+import {Button} from "react-bootstrap";
+import {withRouter} from "react-router-dom";
 import ErrorModal from "../ErrorModal";
 import Header from "../Header";
 import WaveformHistory from "../WaveformHistory";
 import GetShareLink from "../GetShareLink";
-import { changeWaveformInputRunID } from "../../actions/waveformActions";
+import {changeWaveformInputRunID} from "../../actions/waveformActions";
 
 class Waveform extends Component {
   /**
@@ -57,20 +57,29 @@ class Waveform extends Component {
    * browsed waveform last time it uses this app
    */
   tryLoadWaveform() {
-    const { waveform, waveformLoaded, isLoading } = this.state;
+    const {waveform, waveformLoaded, isLoading} = this.state;
     const hasOldWaveform = waveform && waveform !== undefined;
     const hasNewWaveform =
       this.props.waveform && waveform !== this.props.waveform;
     if ((hasNewWaveform && isLoading) || (!waveformLoaded && hasOldWaveform)) {
       console.log("Tries loading...");
-      this.setState({ isLoading: false, waveformLoaded: true }, () => {
-        this.deleteWaveform();
-        this.loadWaveform();
-      });
+      this.setState(
+        {
+          isLoading: false,
+          waveformLoaded: true,
+        },
+        () => {
+          this.deleteWaveform();
+          this.loadWaveform();
+        }
+      );
     }
     const hasErrorWaveform =
       this.props.waveform === null && this.props.runID && this.props.eventID;
-    if (hasErrorWaveform && isLoading) this.setState({ isLoading: false });
+    if (hasErrorWaveform && isLoading)
+      this.setState({
+        isLoading: false,
+      });
   }
 
   /**
@@ -89,10 +98,15 @@ class Waveform extends Component {
     console.log("Loading Waveform...");
     try {
       embed.embed_item(this.props.waveform, "graph");
-      this.setState({ waveform: this.props.waveform, paramsHidden: false });
+      this.setState({
+        waveform: this.props.waveform,
+        paramsHidden: false,
+      });
     } catch {
       this.handleCloseModalRenderError();
-      this.setState({ waveform: this.props.waveform });
+      this.setState({
+        waveform: this.props.waveform,
+      });
     }
   }
 
@@ -114,76 +128,84 @@ class Waveform extends Component {
    * Triggers the spinning wheel and hides the parameters
    */
   handleLoading = () => {
-    this.setState({ isLoading: true, paramsHidden: true });
+    this.setState({
+      isLoading: true,
+      paramsHidden: true,
+    });
   };
 
   /**
    * Shows the modal of waveform render error
    */
   handleShowModalRenderError = () => {
-    this.setState({ renderError: true });
+    this.setState({
+      renderError: true,
+    });
   };
 
   /**
    * Closes the modal of waveform render error
    */
   handleCloseModalRenderError = () => {
-    this.setState({ renderError: false });
+    this.setState({
+      renderError: false,
+    });
   };
 
   /**
    * Renders the page
    */
   render() {
-    if (!this.props.isAuthenticated) {
-      window.localStorage.setItem("redirect", this.props.location.pathname);
-      return <Redirect to="/login" />;
-    }
-    const { isLoading, renderError, paramsHidden } = this.state;
+    // if (!this.props.isAuthenticated) {
+    //   window.localStorage.setItem("redirect", this.props.location.pathname);
+    //   return <Redirect to="/login" />;
+    // }
+    const {isLoading, renderError, paramsHidden} = this.state;
     return (
       <div>
         <Header />
         <div id="graph-container">
           <div id="control-box">
             <div id="control">
-              <h3> Control </h3>
+              <h3> Control </h3>{" "}
               <Runs
                 runID={this.props.inputRunID}
                 handleStateChangeRunID={this.handleStateChangeRunID}
-              />
+              />{" "}
               <br />
               <Events />
-              <GetNewWaveform handleLoading={this.handleLoading} />
+              <GetNewWaveform handleLoading={this.handleLoading} />{" "}
               <WaveformHistory handleLoading={this.handleLoading} />
-
-              <Tags handleLoading={this.handleLoading} />
-            </div>
+              <Tags handleLoading={this.handleLoading} />{" "}
+            </div>{" "}
             <Button
               id="btn-view-events"
               size="sm"
-              onClick={this.handleViewEvents}
-            >
-              Go Back to View Events
-            </Button>
+              onClick={this.handleViewEvents}>
+              Go Back to View Events{" "}
+            </Button>{" "}
           </div>
-
           <div id="graph-box">
-            <Loading isLoading={isLoading} style={{ paddingTop: "50%" }}>
+            <Loading
+              isLoading={isLoading}
+              style={{
+                paddingTop: "50%",
+              }}>
               <div id="param-box">
-                <Param hidden={paramsHidden}></Param>
-                <GetShareLink hidden={paramsHidden} />
+                <Param hidden={paramsHidden}> </Param>{" "}
+                <GetShareLink hidden={paramsHidden} />{" "}
               </div>
 
               <div id="graph" />
-            </Loading>
-          </div>
-        </div>
+            </Loading>{" "}
+          </div>{" "}
+        </div>{" "}
         <ErrorModal
           title="Render Waveform Error"
           body={"An Error Occured While Rendering the Waveform"}
           show={renderError}
           handleClose={this.handleCloseModalRenderError}
-        />
+        />{" "}
       </div>
     );
   }

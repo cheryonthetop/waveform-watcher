@@ -1,13 +1,13 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
+import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import {
   saveWaveform,
   deleteWaveform,
   getWaveform,
-} from "../actions/waveformActions";
-import { Button } from "react-bootstrap";
-import CreatableSelect from "react-select/creatable";
-import ErrorModal from "./ErrorModal";
+} from '../actions/waveformActions'
+import { Button } from 'react-bootstrap'
+import CreatableSelect from 'react-select/creatable'
+import ErrorModal from './ErrorModal'
 
 /**
  * Creates a tag option
@@ -18,13 +18,13 @@ import ErrorModal from "./ErrorModal";
 const createOption = (label, data) => ({
   label,
   data: data,
-});
+})
 
 /**
  * Empty array of options as default
  * @type {Array}
  */
-const defaultOptions = [];
+const defaultOptions = []
 
 /**
  * The tag and comment box
@@ -50,8 +50,8 @@ class Tags extends Component {
     saveSuccess: false,
     options: defaultOptions,
     value: undefined,
-    comments: " ",
-  };
+    comments: ' ',
+  }
 
   /**
    * Tries load options if the app data finishes loading
@@ -59,7 +59,7 @@ class Tags extends Component {
    */
   componentDidMount() {
     if (!this.props.isLoading && !this.state.dataLoaded)
-      this.setState({ dataLoaded: true }, () => this.loadOptions());
+      this.setState({ dataLoaded: true }, () => this.loadOptions())
   }
 
   /**
@@ -68,57 +68,57 @@ class Tags extends Component {
    */
   componentDidUpdate() {
     if (!this.props.isLoading && !this.state.dataLoaded)
-      this.setState({ dataLoaded: true }, () => this.loadOptions());
+      this.setState({ dataLoaded: true }, () => this.loadOptions())
   }
   /**
    * Loads tags if there are any
    */
   loadOptions = () => {
-    let newOptions = [];
+    let newOptions = []
     this.props.tagsData.map((tag_data) =>
       Object.entries(tag_data).map(([tag, data]) =>
-        newOptions.push(createOption(tag, data))
-      )
-    );
-    console.log(newOptions);
+        newOptions.push(createOption(tag, data)),
+      ),
+    )
+    console.log(newOptions)
     this.setState({ options: newOptions }, () => {
-      console.log("state is now:", this.state.options);
-    });
-  };
+      console.log('state is now:', this.state.options)
+    })
+  }
   /**
    * Changes comments and switches waveform when a tag is selected
    * @param {Object} newValue new tag option from creatOption
    * @param {Object} actionMeta metadata of action
    */
   handleChangeSelect = (newValue, actionMeta) => {
-    console.group("Value Changed");
-    console.log(newValue);
-    console.log(`action: ${actionMeta.action}`);
-    console.groupEnd();
-    this.setState({ value: newValue });
-    if (actionMeta.action === "select-option") {
-      this.setState({ comments: newValue.data.comments });
+    console.group('Value Changed')
+    console.log(newValue)
+    console.log(`action: ${actionMeta.action}`)
+    console.groupEnd()
+    this.setState({ value: newValue })
+    if (actionMeta.action === 'select-option') {
+      this.setState({ comments: newValue.data.comments })
       // Data comes from Mongo DB, hence the _ in variable name below
-      const { run_id, event_id } = newValue.data;
+      const { run_id, event_id } = newValue.data
       if (run_id === this.props.runID && event_id === this.props.eventID)
-        console.log("Same waveform. No need to switch");
+        console.log('Same waveform. No need to switch')
       else if (run_id && Number.isInteger(event_id)) {
-        console.log("Switching Waveform...");
-        this.props.dispatch(getWaveform(this.props.user, run_id, event_id));
-        this.props.handleLoading();
+        console.log('Switching Waveform...')
+        this.props.dispatch(getWaveform(this.props.user, run_id, event_id))
+        this.props.handleLoading()
       }
     }
-  };
+  }
 
   /**
    * Updates the comments and options state
    * @param {Object} event The event triggered with user input
    */
   handleChangeTextArea = (event) => {
-    const { value, options } = this.state;
+    const { value, options } = this.state
     if (value) {
-      const newComments = event.target.value;
-      const data = value.data;
+      const newComments = event.target.value
+      const data = value.data
       this.setState({
         comments: newComments,
         value: value
@@ -127,113 +127,113 @@ class Tags extends Component {
         options: options.map((option) =>
           value && option.label === value.label
             ? { ...option, data: { ...data, comments: newComments } }
-            : option
+            : option,
         ),
-      });
-      console.log("onchange comments");
+      })
+      console.log('onchange comments')
     } else {
-      this.setState({ comments: event.target.value });
+      this.setState({ comments: event.target.value })
     }
-  };
+  }
 
   /**
    * Creates a new tag option
    * @param {String} inputValue new tag
    */
   handleCreateOption = (inputValue) => {
-    this.setState({ isLoading: true });
-    console.group("Option created");
+    this.setState({ isLoading: true })
+    console.group('Option created')
     setTimeout(() => {
-      const { options } = this.state;
-      const newOption = createOption(inputValue, { comments: " " });
-      console.log(newOption);
-      console.groupEnd();
+      const { options } = this.state
+      const newOption = createOption(inputValue, { comments: ' ' })
+      console.log(newOption)
+      console.groupEnd()
       this.setState({
         isLoading: false,
         options: [...options, newOption],
         value: newOption,
-        comments: " ",
-      });
-    }, 1000);
-  };
+        comments: ' ',
+      })
+    }, 1000)
+  }
 
   /**
    * Saves a tag with the comments and waveform by
    * dispatching to a redux action
    */
   handleSave = () => {
-    const { value, options } = this.state;
-    const { user, runID, eventID, waveform } = this.props;
+    const { value, options } = this.state
+    const { user, runID, eventID, waveform } = this.props
     if (value && waveform) {
-      const tag = value.label;
-      const comments = value.data.comments;
-      this.props.dispatch(saveWaveform(user, tag, comments, runID, eventID));
+      const tag = value.label
+      const comments = value.data.comments
+      this.props.dispatch(saveWaveform(user, tag, comments, runID, eventID))
       const newOptions = options.map((option) => {
         if (option.label === value.label) {
           return {
             ...value,
             data: { ...value.data, run_id: runID, event_id: eventID },
-          };
+          }
         } else {
-          return option;
+          return option
         }
-      });
+      })
       this.setState({ options: newOptions, saveSuccess: true }, () =>
-        setTimeout(() => this.setState({ saveSuccess: false }), 1000)
-      );
+        setTimeout(() => this.setState({ saveSuccess: false }), 1000),
+      )
     } else {
-      if (!value && !waveform) this.handleShowModalNoAnything();
-      else if (!waveform) this.handleShowModalNoWaveform();
-      else this.handleShowModalNoTag();
+      if (!value && !waveform) this.handleShowModalNoAnything()
+      else if (!waveform) this.handleShowModalNoWaveform()
+      else this.handleShowModalNoTag()
     }
-  };
+  }
 
   /**
    * Deletes a tag by dispatching to a redux action
    */
   handleDelete = () => {
-    const { value, options } = this.state;
-    const { user } = this.props;
+    const { value, options } = this.state
+    const { user } = this.props
 
-    const tag = value.label;
-    const newOptions = options.filter((option) => option.label !== value.label);
-    console.log(value);
-    console.log(newOptions);
+    const tag = value.label
+    const newOptions = options.filter((option) => option.label !== value.label)
+    console.log(value)
+    console.log(newOptions)
     this.setState({ options: newOptions, value: undefined }, () =>
-      console.log(this.state.value)
-    );
-    this.props.dispatch(deleteWaveform(user, tag));
-  };
+      console.log(this.state.value),
+    )
+    this.props.dispatch(deleteWaveform(user, tag))
+  }
 
   /**
    * Closes the no tag error
    */
-  handleCloseModalNoTag = () => this.setState({ noTag: false });
+  handleCloseModalNoTag = () => this.setState({ noTag: false })
 
   /**
    * Shows the no tag error
    */
-  handleShowModalNoTag = () => this.setState({ noTag: true });
+  handleShowModalNoTag = () => this.setState({ noTag: true })
 
   /**
    * Closes the no waveform error
    */
-  handleCloseModalNoWaveform = () => this.setState({ noWaveform: false });
+  handleCloseModalNoWaveform = () => this.setState({ noWaveform: false })
 
   /**
    * Shows the no waveform error
    */
-  handleShowModalNoWaveform = () => this.setState({ noWaveform: true });
+  handleShowModalNoWaveform = () => this.setState({ noWaveform: true })
 
   /**
    * Closes the no waveform or tag error
    */
-  handleCloseModalNoAnything = () => this.setState({ noAnything: false });
+  handleCloseModalNoAnything = () => this.setState({ noAnything: false })
 
   /**
    * Shows the no waveform or tag error
    */
-  handleShowModalNoAnything = () => this.setState({ noAnything: true });
+  handleShowModalNoAnything = () => this.setState({ noAnything: true })
 
   /**
    * Renders the create-select box of tags
@@ -248,9 +248,9 @@ class Tags extends Component {
       noAnything,
       dataLoaded,
       saveSuccess,
-    } = this.state;
+    } = this.state
     return (
-      <div id="comment-box">
+      <div id="comment-box" className="control-element">
         <strong> Tags & Comments </strong>
         <br></br>
         <CreatableSelect
@@ -267,7 +267,7 @@ class Tags extends Component {
             className="form-control"
             id="comments"
             rows="5"
-            style={{ lineHeight: "100%", height: "200px" }}
+            style={{ lineHeight: '100%', height: '200px' }}
             onChange={this.handleChangeTextArea}
             value={comments}
           ></textarea>
@@ -278,20 +278,20 @@ class Tags extends Component {
           onClick={this.handleSave}
           type="submit"
           active
-          style={{ whiteSpace: "normal" }}
+          style={{ whiteSpace: 'normal' }}
         >
-          Save Tag {value ? value.label : ""}
+          Save Tag {value ? value.label : ''}
         </Button>
-        {saveSuccess ? <div style={{ color: "green" }}>Saved!</div> : null}
+        {saveSuccess ? <div style={{ color: 'green' }}>Saved!</div> : null}
         <br />
         <Button
-          style={{ marginTop: "10px", whiteSpace: "normal" }}
+          style={{ marginTop: '10px', whiteSpace: 'normal' }}
           variant="danger"
           size="sm"
           onClick={this.handleDelete}
           disabled={!value}
         >
-          Delete Tag {value ? value.label : ""}
+          Delete Tag {value ? value.label : ''}
         </Button>
         <ErrorModal
           title="Save Error"
@@ -312,7 +312,7 @@ class Tags extends Component {
           handleClose={this.handleCloseModalNoAnything}
         />
       </div>
-    );
+    )
   }
 }
 
@@ -328,10 +328,10 @@ const mapStateToProps = (state) => ({
   runID: state.waveform.runID,
   eventID: state.waveform.eventID,
   isLoading: state.waveform.isLoading,
-});
+})
 
 /**
  * Connects the component to redux store.
  * @type {Component}
  */
-export default connect(mapStateToProps, null)(Tags);
+export default connect(mapStateToProps, null)(Tags)
