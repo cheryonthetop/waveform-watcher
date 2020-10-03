@@ -23,7 +23,7 @@ class Events extends Component {
           placeholder="Enter an Integer Event ID"
           onChange={(event) => this.handleStateChangeEvent(event.target.value)}
           value={this.props.inputEventID}
-        />{' '}
+        />
       </div>
     )
   }

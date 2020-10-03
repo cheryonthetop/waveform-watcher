@@ -116,7 +116,7 @@ class WaveformHistory extends Component {
           onChange={this.handleChangeSelect}
           isDisabled={!this.state.dataLoaded}
           isLoading={!this.state.dataLoaded}
-        />{' '}
+        />
       </div>
     )
   }
