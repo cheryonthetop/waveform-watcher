@@ -5,8 +5,6 @@
   min-height: 100vh;
   height: 100%;
   width: 100%;
-  /* background-color: gainsboro; */
-  /* transform: scale(1, 0.5); */
 }
 
 #control-box {
@@ -21,32 +19,22 @@
 }
 
 #gw-div-new {
-  /* margin-top: 5px; */
   background-color: transparent;
 }
 
 #graph-box {
-  /* align-self: center; */
-  /* display: grid;
-  grid-template-rows: 80%, 20%; */
-  /* background-color: teal; */
   margin-top: 3%;
 }
 
 #graph {
-  /* display: grid; */
-  /* grid-template-rows: 50%, 50%; */
   overflow-x: scroll;
   min-height: 500px;
-  /* width: 100%;
-  height: 100%; */
   resize: horizontal;
 }
 
 #comment-box {
   text-align: left;
   padding-top: 50px;
-  /* padding-left: 100px; */
 }
 
 .ct {

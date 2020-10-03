@@ -2,7 +2,6 @@
   display: grid;
   grid-template-columns: 20% 80%;
   background-color: #1a237e;
-  /* border-bottom: 10%; */
 }
 
 #title {
