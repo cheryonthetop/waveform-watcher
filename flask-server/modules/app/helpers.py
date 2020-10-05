@@ -17,7 +17,6 @@ my_request = my_db["request"]
 my_waveform = my_db["waveform"]
 my_run = my_db["run"]
 my_events = my_db["events"]
-
 def authenticate(user, token):
     """
     Authenticates an API request with a token

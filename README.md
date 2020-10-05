@@ -56,7 +56,7 @@ You will need key environmental variables. Ask the repo owner for them before yo
 
 ## The structure and workflow of the app
 
-![Workflow-1](readme-images/workflow-1.jpg) ![Workflow-2](readme-images/workflow-2.jpg) ![Workflow-3](readme-images/workflow-3.jpg) ![Workflow-4](readme-images//workflow-4.jpg)
+![Workflow-1](readme-images/workflow-overview.jpg)
 
 ## Documentation
 

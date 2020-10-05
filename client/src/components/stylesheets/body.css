@@ -30,6 +30,15 @@
   overflow-x: scroll;
   min-height: 500px;
   resize: horizontal;
+  /* Hide Scrollbar on IE and Edge */
+  -ms-overflow-style: none;
+  /* Firefox */
+  scrollbar-width: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+#graph::-webkit-scrollbar {
+  display: none;
 }
 
 #comment-box {

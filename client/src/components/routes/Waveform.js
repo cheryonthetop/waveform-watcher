@@ -156,10 +156,10 @@ class Waveform extends Component {
    * Renders the page
    */
   render() {
-    // if (!this.props.isAuthenticated) {
-    //   window.localStorage.setItem("redirect", this.props.location.pathname);
-    //   return <Redirect to="/login" />;
-    // }
+    if (!this.props.isAuthenticated) {
+      window.localStorage.setItem('redirect', this.props.location.pathname)
+      return <Redirect to="/login" />
+    }
     const { isLoading, renderError, paramsHidden } = this.state
     return (
       <div>

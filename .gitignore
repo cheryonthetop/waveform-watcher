@@ -4,3 +4,5 @@ docker-compose.yml
 .idea
 node_modules
 all-env-vars
+start-app.bat
+.vscode
