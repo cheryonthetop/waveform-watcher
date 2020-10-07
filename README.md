@@ -2,14 +2,6 @@
 
 A web app developed to visualize and analyze waveform data collected from XENON1T and XENONnT experiment. You can [view the website here](https://waveform-watcher.azurewebsites.net/). Access restricted to only [XENON1T](https://github.com/XENON1T) and [XENONnT](https://github.com/XENONnT) organization.
 
-## The Login Page
-
-![](readme-images/login.png)
-
-## The Main Page
-
-![](readme-images/home.png)
-
 ## Main Features
 
 - Get new waveform based on run ID and build level
